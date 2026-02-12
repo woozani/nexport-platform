@@ -1,0 +1,160 @@
+// /api/hunter.js - Vercel Serverless Function
+// Hunter.io Domain Search & Email Finder API
+
+export default async function handler(req, res) {
+  // CORS headers
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+
+  if (req.method === 'OPTIONS') {
+    return res.status(200).end();
+  }
+
+  const HUNTER_API_KEY = process.env.HUNTER_API_KEY;
+
+  if (!HUNTER_API_KEY) {
+    return res.status(500).json({ error: 'Hunter.io API key not configured' });
+  }
+
+  const { action, domain, first_name, last_name, company } = req.query;
+
+  try {
+    let url;
+
+    switch (action) {
+      // Domain Search: Find all emails for a company domain
+      case 'domain-search':
+        if (!domain) return res.status(400).json({ error: 'domain is required' });
+        url = `https://api.hunter.io/v2/domain-search?domain=${encodeURIComponent(domain)}&api_key=${HUNTER_API_KEY}&limit=10`;
+        break;
+
+      // Email Finder: Find specific person's email
+      case 'email-finder':
+        if (!domain) return res.status(400).json({ error: 'domain is required' });
+        if (!first_name || !last_name) return res.status(400).json({ error: 'first_name and last_name are required' });
+        url = `https://api.hunter.io/v2/email-finder?domain=${encodeURIComponent(domain)}&first_name=${encodeURIComponent(first_name)}&last_name=${encodeURIComponent(last_name)}&api_key=${HUNTER_API_KEY}`;
+        break;
+
+      // Email Verifier: Verify if an email is valid
+      case 'email-verify':
+        const { email } = req.query;
+        if (!email) return res.status(400).json({ error: 'email is required' });
+        url = `https://api.hunter.io/v2/email-verifier?email=${encodeURIComponent(email)}&api_key=${HUNTER_API_KEY}`;
+        break;
+
+      // Company Search: Find domain from company name
+      case 'company-search':
+        if (!company) return res.status(400).json({ error: 'company is required' });
+        url = `https://api.hunter.io/v2/domain-search?company=${encodeURIComponent(company)}&api_key=${HUNTER_API_KEY}&limit=10`;
+        break;
+
+      // Account info: Check remaining API credits
+      case 'account':
+        url = `https://api.hunter.io/v2/account?api_key=${HUNTER_API_KEY}`;
+        break;
+
+      default:
+        return res.status(400).json({
+          error: 'Invalid action',
+          valid_actions: ['domain-search', 'email-finder', 'email-verify', 'company-search', 'account']
+        });
+    }
+
+    const response = await fetch(url);
+    const data = await response.json();
+
+    if (!response.ok) {
+      return res.status(response.status).json({
+        error: data.errors?.[0]?.details || 'Hunter.io API error',
+        ...data
+      });
+    }
+
+    return res.status(200).json(data);
+
+  } catch (error) {
+    console.error('Hunter API error:', error);
+    return res.status(500).json({ error: 'Internal server error' });
+  }
+}
+// /api/hunter.js - Vercel Serverless Function
+// Hunter.io Domain Search & Email Finder API
+
+export default async function handler(req, res) {
+  // CORS headers
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+
+  if (req.method === 'OPTIONS') {
+    return res.status(200).end();
+  }
+
+  const HUNTER_API_KEY = process.env.HUNTER_API_KEY;
+
+  if (!HUNTER_API_KEY) {
+    return res.status(500).json({ error: 'Hunter.io API key not configured' });
+  }
+
+  const { action, domain, first_name, last_name, company } = req.query;
+
+  try {
+    let url;
+
+    switch (action) {
+      // Domain Search: Find all emails for a company domain
+      case 'domain-search':
+        if (!domain) return res.status(400).json({ error: 'domain is required' });
+        url = `https://api.hunter.io/v2/domain-search?domain=${encodeURIComponent(domain)}&api_key=${HUNTER_API_KEY}&limit=10`;
+        break;
+
+      // Email Finder: Find specific person's email
+      case 'email-finder':
+        if (!domain) return res.status(400).json({ error: 'domain is required' });
+        if (!first_name || !last_name) return res.status(400).json({ error: 'first_name and last_name are required' });
+        url = `https://api.hunter.io/v2/email-finder?domain=${encodeURIComponent(domain)}&first_name=${encodeURIComponent(first_name)}&last_name=${encodeURIComponent(last_name)}&api_key=${HUNTER_API_KEY}`;
+        break;
+
+      // Email Verifier: Verify if an email is valid
+      case 'email-verify':
+        const { email } = req.query;
+        if (!email) return res.status(400).json({ error: 'email is required' });
+        url = `https://api.hunter.io/v2/email-verifier?email=${encodeURIComponent(email)}&api_key=${HUNTER_API_KEY}`;
+        break;
+
+      // Company Search: Find domain from company name
+      case 'company-search':
+        if (!company) return res.status(400).json({ error: 'company is required' });
+        url = `https://api.hunter.io/v2/domain-search?company=${encodeURIComponent(company)}&api_key=${HUNTER_API_KEY}&limit=10`;
+        break;
+
+      // Account info: Check remaining API credits
+      case 'account':
+        url = `https://api.hunter.io/v2/account?api_key=${HUNTER_API_KEY}`;
+        break;
+
+      default:
+        return res.status(400).json({
+          error: 'Invalid action',
+          valid_actions: ['domain-search', 'email-finder', 'email-verify', 'company-search', 'account']
+        });
+    }
+
+    const response = await fetch(url);
+    const data = await response.json();
+
+    if (!response.ok) {
+      return res.status(response.status).json({
+        error: data.errors?.[0]?.details || 'Hunter.io API error',
+        ...data
+      });
+    }
+
+    return res.status(200).json(data);
+
+  } catch (error) {
+    console.error('Hunter API error:', error);
+    return res.status(500).json({ error: 'Internal server error' });
+  }
+}
