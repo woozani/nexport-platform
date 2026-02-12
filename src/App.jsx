@@ -344,6 +344,182 @@ function DetailPanel({ buyer, onClose }) {
 }
 
 // ─────────── MAIN TABLE ───────────
+
+// ─────────── EMAIL FINDER ───────────
+function EmailFinderView() {
+  const [searchType, setSearchType] = useState("domain");
+  const [domain, setDomain] = useState("");
+  const [company, setCompany] = useState("");
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [results, setResults] = useState(null);
+  const [error, setError] = useState(null);
+  const [copiedId, setCopiedId] = useState(null);
+  const [savedEmails, setSavedEmails] = useState([]);
+  const [accountInfo, setAccountInfo] = useState(null);
+
+  useEffect(() => {
+    fetch("/api/hunter?action=account").then(r=>r.json()).then(d=>{if(d.data)setAccountInfo(d.data)}).catch(()=>{});
+  }, []);
+
+  const doSearch = async () => {
+    setLoading(true); setError(null); setResults(null);
+    try {
+      let url;
+      if (searchType==="domain") {
+        if (!domain.trim()) { setError("도메인을 입력하세요"); setLoading(false); return; }
+        url = `/api/hunter?action=domain-search&domain=${encodeURIComponent(domain.trim())}`;
+      } else if (searchType==="company") {
+        if (!company.trim()) { setError("회사명을 입력하세요"); setLoading(false); return; }
+        url = `/api/hunter?action=company-search&company=${encodeURIComponent(company.trim())}`;
+      } else {
+        if (!domain.trim()||!firstName.trim()||!lastName.trim()) { setError("도메인, 이름, 성을 모두 입력하세요"); setLoading(false); return; }
+        url = `/api/hunter?action=email-finder&domain=${encodeURIComponent(domain.trim())}&first_name=${encodeURIComponent(firstName.trim())}&last_name=${encodeURIComponent(lastName.trim())}`;
+      }
+      const res = await fetch(url); const data = await res.json();
+      if (data.error) setError(data.error); else setResults(data.data);
+    } catch(e) { setError("API 요청 실패"); }
+    setLoading(false);
+  };
+
+  const copyEmail = (email, id) => { navigator.clipboard.writeText(email); setCopiedId(id); setTimeout(()=>setCopiedId(null),2000); };
+  const saveEmail = (em) => { if (!savedEmails.find(e=>e.value===em.value)) setSavedEmails(p=>[...p,em]); };
+  const cColor = (s) => s>=80?"var(--green)":s>=50?"var(--amber)":"var(--red)";
+
+  const exportCSV = () => {
+    if (!savedEmails.length) return;
+    const csv = "Email,Name,Position,Confidence\n" + savedEmails.map(e=>`${e.value},${e.first_name||""} ${e.last_name||""},${e.position||""},${e.confidence||""}`).join("\n");
+    const a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([csv],{type:"text/csv"}));
+    a.download = `nexport-emails-${new Date().toISOString().slice(0,10)}.csv`; a.click();
+  };
+
+  const inputStyle = {flex:1,padding:"8px 12px",borderRadius:6,background:"var(--bg-3)",border:"1px solid var(--border)",color:"var(--t1)",fontSize:12,outline:"none"};
+  const btnStyle = {padding:"8px 16px",borderRadius:6,background:"var(--blue)",color:"#fff",border:"none",fontSize:12,fontWeight:600,cursor:"pointer",display:"flex",alignItems:"center",gap:6};
+  const tabStyle = (active) => ({padding:"6px 14px",borderRadius:5,fontSize:12,fontWeight:active?600:400,background:active?"var(--bg-1)":"transparent",color:active?"var(--t1)":"var(--t3)",cursor:"pointer",transition:"all .15s"});
+  const cardStyle = {padding:16,borderRadius:10,background:"var(--bg-2)",border:"1px solid var(--border)",marginBottom:8};
+
+  return (
+    <div style={{flex:1,overflow:"auto",padding:20}}>
+      <div className="fi fi1" style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:20}}>
+        <div>
+          <h2 style={{fontSize:18,fontWeight:700}}>이메일 파인더</h2>
+          <p style={{fontSize:12,color:"var(--t3)",marginTop:4}}>
+            Hunter.io 기반 바이어 이메일 검색
+            {accountInfo && <span style={{marginLeft:10,padding:"2px 8px",borderRadius:12,background:"var(--green-dim)",color:"var(--green)",fontSize:10,fontWeight:600}}>잔여 {accountInfo.requests?.searches?.available||0}건</span>}
+          </p>
+        </div>
+        {savedEmails.length>0 && <button onClick={exportCSV} style={{...btnStyle,background:"var(--bg-3)",color:"var(--t2)"}}><Ic.Download s={12}/>CSV ({savedEmails.length})</button>}
+      </div>
+
+      {/* Search Type Tabs */}
+      <div className="fi fi2" style={{...cardStyle,marginBottom:16}}>
+        <div style={{display:"flex",gap:2,padding:2,background:"var(--bg-3)",borderRadius:7,marginBottom:14,width:"fit-content"}}>
+          {[["domain","도메인 검색"],["company","회사명 검색"],["person","개인 이메일 찾기"]].map(([k,v])=>(
+            <div key={k} onClick={()=>{setSearchType(k);setResults(null);setError(null);}} style={tabStyle(searchType===k)}>{v}</div>
+          ))}
+        </div>
+
+        {searchType==="domain" && <div style={{display:"flex",gap:8}}>
+          <input style={inputStyle} placeholder="예: techparts.de, pacifictrade.com" value={domain} onChange={e=>setDomain(e.target.value)} onKeyDown={e=>e.key==="Enter"&&doSearch()} />
+          <button onClick={doSearch} style={btnStyle} disabled={loading}>{loading?"검색 중...":"검색"}</button>
+        </div>}
+
+        {searchType==="company" && <div style={{display:"flex",gap:8}}>
+          <input style={inputStyle} placeholder="예: TechParts GmbH, Pacific Trade" value={company} onChange={e=>setCompany(e.target.value)} onKeyDown={e=>e.key==="Enter"&&doSearch()} />
+          <button onClick={doSearch} style={btnStyle} disabled={loading}>{loading?"검색 중...":"검색"}</button>
+        </div>}
+
+        {searchType==="person" && <div style={{display:"grid",gap:10}}>
+          <input style={inputStyle} placeholder="회사 도메인 (예: techparts.de)" value={domain} onChange={e=>setDomain(e.target.value)} />
+          <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8}}>
+            <input style={inputStyle} placeholder="First Name" value={firstName} onChange={e=>setFirstName(e.target.value)} />
+            <input style={inputStyle} placeholder="Last Name" value={lastName} onChange={e=>setLastName(e.target.value)} onKeyDown={e=>e.key==="Enter"&&doSearch()} />
+          </div>
+          <button onClick={doSearch} style={{...btnStyle,justifyContent:"center"}} disabled={loading}>{loading?"검색 중...":"이메일 찾기"}</button>
+        </div>}
+      </div>
+
+      {/* Error */}
+      {error && <div className="fi fi3" style={{...cardStyle,borderColor:"var(--red)",background:"var(--red-dim)",marginBottom:16}}><span style={{color:"var(--red)",fontSize:12}}>{error}</span></div>}
+
+      {/* Domain/Company Results */}
+      {results && (searchType==="domain"||searchType==="company") && <div className="fi fi3">
+        {results.organization && <div style={{...cardStyle,background:"linear-gradient(135deg,var(--blue-dim),var(--violet-dim))",borderColor:"rgba(59,107,245,.2)"}}>
+          <div style={{fontSize:15,fontWeight:700}}>{results.organization||results.domain}</div>
+          <div style={{fontSize:11,color:"var(--t2)",marginTop:4}}>{results.domain} · 발견: <span style={{color:"var(--green)",fontWeight:700,fontFamily:"var(--mono)"}}>{results.emails?.length||0}건</span>{results.pattern&&<span style={{marginLeft:8,color:"var(--t3)"}}>패턴: {results.pattern}</span>}</div>
+        </div>}
+
+        {results.emails?.length>0 ? <div style={{display:"grid",gap:6}}>
+          {results.emails.map((em,i)=>(
+            <div key={i} style={{...cardStyle,padding:14,display:"flex",alignItems:"center",gap:12,transition:"all .2s",cursor:"default"}}
+              onMouseEnter={e=>{e.currentTarget.style.borderColor="var(--border-h)"}}
+              onMouseLeave={e=>{e.currentTarget.style.borderColor="var(--border)"}}>
+              {/* Score */}
+              <div style={{width:38,height:38,borderRadius:"50%",border:`2px solid ${cColor(em.confidence||0)}`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:11,fontWeight:700,fontFamily:"var(--mono)",color:cColor(em.confidence||0),flexShrink:0}}>{em.confidence||0}</div>
+              {/* Info */}
+              <div style={{flex:1,minWidth:0}}>
+                <div style={{display:"flex",alignItems:"center",gap:6}}>
+                  <span style={{fontSize:13,fontWeight:600,fontFamily:"var(--mono)",color:"var(--blue-light)"}}>{em.value}</span>
+                  {em.verification?.status==="valid"&&<span style={{color:"var(--green)",fontSize:10}}>✓</span>}
+                </div>
+                <div style={{fontSize:11,color:"var(--t3)",marginTop:2}}>
+                  {em.first_name&&`${em.first_name} ${em.last_name||""}`}{em.position&&<span> · {em.position}</span>}{em.department&&<span> · {em.department}</span>}
+                </div>
+              </div>
+              {/* Actions */}
+              <div style={{display:"flex",gap:4,flexShrink:0}}>
+                <div onClick={()=>copyEmail(em.value,i)} style={{padding:"4px 10px",borderRadius:5,border:"1px solid var(--border)",color:copiedId===i?"var(--green)":"var(--t3)",fontSize:11,cursor:"pointer",display:"flex",alignItems:"center",gap:4}}>
+                  {copiedId===i?<><Ic.Check s={11}/>복사됨</>:<><Ic.Mail s={11}/>복사</>}
+                </div>
+                <div onClick={()=>saveEmail(em)} style={{padding:"4px 10px",borderRadius:5,border:"1px solid var(--border)",color:savedEmails.find(e=>e.value===em.value)?"var(--green)":"var(--t3)",fontSize:11,cursor:"pointer",background:savedEmails.find(e=>e.value===em.value)?"var(--green-dim)":"transparent",display:"flex",alignItems:"center",gap:4}}>
+                  {savedEmails.find(e=>e.value===em.value)?<><Ic.Check s={11}/>저장됨</>:<><Ic.Plus s={11}/>저장</>}
+                </div>
+              </div>
+            </div>
+          ))}
+        </div> : <div style={{...cardStyle,textAlign:"center",padding:40,color:"var(--t4)"}}>검색 결과가 없습니다.</div>}
+      </div>}
+
+      {/* Person Result */}
+      {results && searchType==="person" && <div className="fi fi3" style={{...cardStyle,background:results.email?"linear-gradient(135deg,var(--green-dim),var(--blue-dim))":"var(--bg-2)",borderColor:results.email?"rgba(16,185,129,.2)":"var(--border)"}}>
+        {results.email ? <div style={{display:"flex",alignItems:"center",gap:16}}>
+          <div style={{width:56,height:56,borderRadius:"50%",border:`3px solid ${cColor(results.score||0)}`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:16,fontWeight:700,fontFamily:"var(--mono)",color:cColor(results.score||0)}}>{results.score||0}</div>
+          <div style={{flex:1}}>
+            <div style={{fontSize:10,color:"var(--t3)",textTransform:"uppercase",letterSpacing:".08em",marginBottom:4}}>발견된 이메일</div>
+            <div style={{fontSize:16,fontWeight:700,fontFamily:"var(--mono)",color:"var(--blue-light)"}}>{results.email}</div>
+            <div style={{fontSize:12,color:"var(--t2)",marginTop:2}}>{results.first_name} {results.last_name}{results.position&&` · ${results.position}`}</div>
+          </div>
+          <div style={{display:"flex",flexDirection:"column",gap:6}}>
+            <button onClick={()=>copyEmail(results.email,"p")} style={{...btnStyle,background:"var(--bg-3)",color:"var(--t2)",padding:"6px 12px",fontSize:11}}>{copiedId==="p"?"복사됨":"복사"}</button>
+            <button onClick={()=>saveEmail({value:results.email,first_name:results.first_name,last_name:results.last_name,position:results.position,confidence:results.score})} style={{...btnStyle,background:"var(--bg-3)",color:"var(--t2)",padding:"6px 12px",fontSize:11}}>저장</button>
+          </div>
+        </div> : <div style={{textAlign:"center",padding:20,color:"var(--t4)"}}>이메일을 찾을 수 없습니다.</div>}
+      </div>}
+
+      {/* Saved List */}
+      {savedEmails.length>0 && <div className="fi fi4" style={{...cardStyle,marginTop:20}}>
+        <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:12}}>
+          <span style={{fontSize:14,fontWeight:700}}>저장된 이메일 ({savedEmails.length})</span>
+          <button onClick={exportCSV} style={{...btnStyle,background:"var(--bg-3)",color:"var(--t2)",padding:"5px 10px",fontSize:11}}><Ic.Download s={11}/>CSV</button>
+        </div>
+        <table style={{width:"100%",borderCollapse:"collapse"}}>
+          <thead><tr style={{borderBottom:"1px solid var(--border)"}}>
+            {["이메일","이름","직책","신뢰도",""].map(h=><th key={h} style={{padding:"6px 10px",fontSize:10,color:"var(--t4)",textTransform:"uppercase",letterSpacing:".08em",fontWeight:600,textAlign:"left"}}>{h}</th>)}
+          </tr></thead>
+          <tbody>{savedEmails.map((e,i)=><tr key={i} style={{borderBottom:"1px solid var(--border)"}}>
+            <td style={{padding:"8px 10px",fontFamily:"var(--mono)",fontSize:11,color:"var(--blue-light)"}}>{e.value}</td>
+            <td style={{padding:"8px 10px",fontSize:11}}>{e.first_name} {e.last_name}</td>
+            <td style={{padding:"8px 10px",fontSize:11,color:"var(--t3)"}}>{e.position||"—"}</td>
+            <td style={{padding:"8px 10px"}}><span style={{fontFamily:"var(--mono)",fontSize:11,fontWeight:600,color:cColor(e.confidence||0)}}>{e.confidence||0}%</span></td>
+            <td style={{padding:"8px 10px"}}><div onClick={()=>setSavedEmails(p=>p.filter((_,j)=>j!==i))} style={{cursor:"pointer",color:"var(--t4)"}}><Ic.Trash s={12}/></div></td>
+          </tr>)}</tbody>
+        </table>
+      </div>}
+    </div>
+  );
+}
+
 export default function App() {
   const [filters, setFilters] = useState({industries:[],regions:[],sizes:[],certs:[],intents:[],scoreMin:0,scoreMax:100});
   const [sideCollapsed, setSideCollapsed] = useState(false);
@@ -357,6 +533,7 @@ export default function App() {
   const [savedSet, setSavedSet] = useState(new Set(ALL_BUYERS.filter(b=>b.saved).map(b=>b.id)));
   const [viewSaved, setViewSaved] = useState(null);
   const [showExport, setShowExport] = useState(false);
+  const [view, setView] = useState("buyers");
   const perPage = 15;
 
   // Filtering
@@ -447,10 +624,12 @@ export default function App() {
             </div>
             <div style={{marginLeft:"auto",display:"flex",alignItems:"center",gap:8}}>
               <Tooltip text="검색 저장"><div style={{padding:"6px 10px",borderRadius:6,border:"1px solid var(--border)",cursor:"pointer",color:"var(--t3)",display:"flex",alignItems:"center",gap:5,fontSize:11,fontWeight:500}}><Ic.Bookmark s={12}/>저장된 검색</div></Tooltip>
+              <Tooltip text="이메일 파인더"><div onClick={()=>setView(v=>v==="buyers"?"emailfinder":"buyers")} style={{padding:"6px 10px",borderRadius:6,border:view==="emailfinder"?"1px solid var(--blue)":"1px solid var(--border)",cursor:"pointer",color:view==="emailfinder"?"var(--blue)":"var(--t3)",background:view==="emailfinder"?"var(--blue-dim)":"transparent",display:"flex",alignItems:"center",gap:5,fontSize:11,fontWeight:500,transition:"all .2s"}}><Ic.Mail s={12}/>이메일 파인더</div></Tooltip>
               <Tooltip text="컬럼 설정"><div style={{padding:6,borderRadius:6,border:"1px solid var(--border)",cursor:"pointer",color:"var(--t3)"}}><Ic.Columns s={14}/></div></Tooltip>
             </div>
           </div>
 
+          {view==="emailfinder" ? <EmailFinderView /> : <>
           {/* Tabs + Meta */}
           <div style={{padding:"8px 20px",borderBottom:"1px solid var(--border)",background:"var(--bg-1)",display:"flex",alignItems:"center",gap:16,flexShrink:0}}>
             <div style={{display:"flex",gap:2,padding:2,background:"var(--bg-3)",borderRadius:7}}>
@@ -617,6 +796,8 @@ export default function App() {
         </div>
 
         {/* Detail Panel */}
+        </>
+}
         {detail && <DetailPanel buyer={detail} onClose={()=>setDetail(null)} />}
       </div>
 
