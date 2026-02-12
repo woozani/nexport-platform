@@ -793,11 +793,10 @@ export default function App() {
               <div onClick={()=>setSelected(new Set())} style={{cursor:"pointer",color:"var(--t4)",padding:4}}><Ic.X s={14}/></div>
             </div>
           )}
+        </>}
         </div>
 
         {/* Detail Panel */}
-        </>
-}
         {detail && <DetailPanel buyer={detail} onClose={()=>setDetail(null)} />}
       </div>
 
