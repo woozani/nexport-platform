@@ -346,6 +346,247 @@ function DetailPanel({ buyer, onClose }) {
 // ─────────── MAIN TABLE ───────────
 
 // ─────────── EMAIL FINDER ───────────
+
+// ─────────── DASHBOARD ───────────
+function DashboardView({ buyers, savedSet, starred }) {
+  const saved = buyers.filter(b => savedSet.has(b.id));
+  const totalBuyers = buyers.length;
+  const savedCount = savedSet.size;
+  const starredCount = starred.size;
+
+  // Pipeline stats from status field
+  const pipeline = {};
+  const pipelineOrder = ["신규","검토중","협상중","LOI","계약완료"];
+  const pipelineColors = {"신규":"var(--blue)","검토중":"var(--violet)","협상중":"var(--amber)","LOI":"var(--cyan)","계약완료":"var(--green)"};
+  pipelineOrder.forEach(s => pipeline[s] = 0);
+  buyers.forEach(b => { if (pipeline[b.status] !== undefined) pipeline[b.status]++; });
+  const maxPipeline = Math.max(...Object.values(pipeline), 1);
+
+  // Region stats
+  const regionStats = {};
+  buyers.forEach(b => { regionStats[b.region] = (regionStats[b.region]||0) + 1; });
+  const regionEntries = Object.entries(regionStats).sort((a,b) => b[1]-a[1]);
+  const maxRegion = Math.max(...Object.values(regionStats), 1);
+  const regionColors = ["var(--blue)","var(--cyan)","var(--green)","var(--amber)","var(--violet)","var(--red)"];
+
+  // Industry stats
+  const industryStats = {};
+  buyers.forEach(b => { industryStats[b.industry] = (industryStats[b.industry]||0) + 1; });
+  const industryEntries = Object.entries(industryStats).sort((a,b) => b[1]-a[1]).slice(0, 8);
+  const maxIndustry = Math.max(...industryEntries.map(e=>e[1]), 1);
+
+  // Score distribution
+  const scoreRanges = [
+    {label:"90-100",min:90,max:100,color:"var(--green)"},
+    {label:"80-89",min:80,max:89,color:"var(--cyan)"},
+    {label:"70-79",min:70,max:79,color:"var(--blue)"},
+    {label:"60-69",min:60,max:69,color:"var(--amber)"},
+    {label:"50-59",min:50,max:59,color:"var(--red)"},
+    {label:"<50",min:0,max:49,color:"var(--t4)"},
+  ];
+  scoreRanges.forEach(r => { r.count = buyers.filter(b => b.score >= r.min && b.score <= r.max).length; });
+  const maxScore = Math.max(...scoreRanges.map(r=>r.count), 1);
+
+  // Intent stats
+  const intentStats = {};
+  buyers.forEach(b => { intentStats[b.buyingIntent] = (intentStats[b.buyingIntent]||0) + 1; });
+
+  // Top buyers
+  const topBuyers = [...buyers].sort((a,b) => b.score - a.score).slice(0, 5);
+
+  // Conversion funnel percentages
+  const funnelTotal = totalBuyers;
+  const funnelData = pipelineOrder.map(s => ({status: s, count: pipeline[s], pct: Math.round((pipeline[s]/funnelTotal)*100)}));
+
+  // Recent activity (simulated)
+  const recentActivity = topBuyers.slice(0,4).map((b,i) => ({
+    buyer: b, action: ["매칭 완료","이메일 발송","LOI 접수","미팅 예정"][i%4],
+    time: [`${i+1}시간 전`,`${i+3}시간 전`,`${i+5}시간 전`,`어제`][i%4]
+  }));
+
+  // Avg match score
+  const avgScore = Math.round(buyers.reduce((s,b) => s+b.score, 0) / totalBuyers);
+
+  // Estimated pipeline value
+  const pipelineValue = buyers.reduce((s,b) => {
+    const v = b.volume || "$0";
+    const match = v.match(/\$(\d+)/);
+    return s + (match ? parseInt(match[1]) * 1000 : 0);
+  }, 0);
+
+  const cardStyle = {padding:20,borderRadius:12,background:"var(--bg-2)",border:"1px solid var(--border)"};
+  const kpiCardStyle = {...cardStyle, position:"relative",overflow:"hidden"};
+
+  return (
+    <div style={{flex:1,overflow:"auto",padding:24}}>
+      {/* KPI Cards */}
+      <div className="fi fi1" style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:16,marginBottom:24}}>
+        {[
+          {label:"전체 바이어",value:totalBuyers.toLocaleString(),sub:`저장됨 ${savedCount}건`,color:"var(--blue)",icon:"Users"},
+          {label:"평균 매칭점수",value:`${avgScore}점`,sub:"AI 매칭 기반",color:"var(--green)",icon:"Target"},
+          {label:"파이프라인 가치",value:`$${(pipelineValue/1000000).toFixed(1)}M`,sub:"예상 거래규모",color:"var(--cyan)",icon:"Zap"},
+          {label:"전환율",value:`${Math.round((pipeline["계약완료"]||0)/totalBuyers*100)}%`,sub:`${pipeline["계약완료"]||0}건 계약완료`,color:"var(--amber)",icon:"Bar"},
+        ].map((kpi,i) => (
+          <div key={i} style={kpiCardStyle}>
+            <div style={{position:"absolute",top:12,right:14,opacity:.08,color:kpi.color}}>{kpi.icon==="Users"?<Ic.Users s={48}/>:kpi.icon==="Target"?<Ic.Target s={48}/>:kpi.icon==="Zap"?<Ic.Zap s={48}/>:<Ic.Bar s={48}/>}</div>
+            <div style={{fontSize:10,color:"var(--t3)",textTransform:"uppercase",letterSpacing:".08em",fontWeight:600,marginBottom:8}}>{kpi.label}</div>
+            <div style={{fontSize:28,fontWeight:800,fontFamily:"var(--mono)",color:kpi.color,letterSpacing:"-.02em"}}>{kpi.value}</div>
+            <div style={{fontSize:11,color:"var(--t3)",marginTop:4}}>{kpi.sub}</div>
+          </div>
+        ))}
+      </div>
+
+      <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:16,marginBottom:24}}>
+        {/* Pipeline Funnel */}
+        <div className="fi fi2" style={cardStyle}>
+          <div style={{fontSize:14,fontWeight:700,marginBottom:16,display:"flex",alignItems:"center",gap:8}}><Ic.Layers s={16}/>세일즈 파이프라인</div>
+          <div style={{display:"grid",gap:10}}>
+            {funnelData.map((f,i) => (
+              <div key={i}>
+                <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:4}}>
+                  <div style={{display:"flex",alignItems:"center",gap:8}}>
+                    <div style={{width:8,height:8,borderRadius:"50%",background:pipelineColors[f.status]}} />
+                    <span style={{fontSize:12,fontWeight:500}}>{f.status}</span>
+                  </div>
+                  <div style={{display:"flex",alignItems:"center",gap:8}}>
+                    <span style={{fontFamily:"var(--mono)",fontSize:13,fontWeight:700,color:pipelineColors[f.status]}}>{f.count}</span>
+                    <span style={{fontSize:10,color:"var(--t4)",fontFamily:"var(--mono)",width:32,textAlign:"right"}}>{f.pct}%</span>
+                  </div>
+                </div>
+                <div style={{height:6,borderRadius:3,background:"var(--bg-4)",overflow:"hidden"}}>
+                  <div style={{height:"100%",borderRadius:3,background:pipelineColors[f.status],width:`${(f.count/maxPipeline)*100}%`,transition:"width .6s ease",animation:"barGrow .8s ease"}} />
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Region Distribution */}
+        <div className="fi fi2" style={cardStyle}>
+          <div style={{fontSize:14,fontWeight:700,marginBottom:16,display:"flex",alignItems:"center",gap:8}}><Ic.Globe s={16}/>지역별 분포</div>
+          <div style={{display:"grid",gap:10}}>
+            {regionEntries.map(([region,count],i) => (
+              <div key={region}>
+                <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:4}}>
+                  <span style={{fontSize:12,fontWeight:500}}>{region}</span>
+                  <span style={{fontFamily:"var(--mono)",fontSize:13,fontWeight:700,color:regionColors[i%regionColors.length]}}>{count}</span>
+                </div>
+                <div style={{height:6,borderRadius:3,background:"var(--bg-4)",overflow:"hidden"}}>
+                  <div style={{height:"100%",borderRadius:3,background:regionColors[i%regionColors.length],width:`${(count/maxRegion)*100}%`,animation:"barGrow .8s ease",animationDelay:`${i*.08}s`,animationFillMode:"backwards"}} />
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:16,marginBottom:24}}>
+        {/* Industry Breakdown */}
+        <div className="fi fi3" style={cardStyle}>
+          <div style={{fontSize:14,fontWeight:700,marginBottom:16,display:"flex",alignItems:"center",gap:8}}><Ic.Building s={16}/>산업별 분포</div>
+          <div style={{display:"grid",gap:8}}>
+            {industryEntries.map(([ind,count],i) => (
+              <div key={ind} style={{display:"flex",alignItems:"center",gap:10}}>
+                <span style={{fontSize:11,width:90,color:"var(--t2)",flexShrink:0,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{ind}</span>
+                <div style={{flex:1,height:18,borderRadius:4,background:"var(--bg-4)",overflow:"hidden",position:"relative"}}>
+                  <div style={{height:"100%",borderRadius:4,background:`linear-gradient(90deg,${regionColors[i%regionColors.length]},${regionColors[(i+1)%regionColors.length]})`,width:`${(count/maxIndustry)*100}%`,animation:"barGrow .6s ease",animationDelay:`${i*.06}s`,animationFillMode:"backwards"}} />
+                  <span style={{position:"absolute",right:6,top:"50%",transform:"translateY(-50%)",fontSize:10,fontFamily:"var(--mono)",fontWeight:600,color:"var(--t1)"}}>{count}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Score Distribution */}
+        <div className="fi fi3" style={cardStyle}>
+          <div style={{fontSize:14,fontWeight:700,marginBottom:16,display:"flex",alignItems:"center",gap:8}}><Ic.Target s={16}/>매칭점수 분포</div>
+          <div style={{display:"flex",alignItems:"flex-end",gap:8,height:140,paddingTop:10}}>
+            {scoreRanges.map((r,i) => (
+              <div key={i} style={{flex:1,display:"flex",flexDirection:"column",alignItems:"center",gap:4}}>
+                <span style={{fontFamily:"var(--mono)",fontSize:10,fontWeight:600,color:r.color}}>{r.count}</span>
+                <div style={{width:"100%",borderRadius:4,background:r.color,height:`${Math.max((r.count/maxScore)*110, 4)}px`,animation:"barGrow .6s ease",animationDelay:`${i*.08}s`,animationFillMode:"backwards",transformOrigin:"bottom"}} />
+                <span style={{fontSize:9,color:"var(--t4)",fontFamily:"var(--mono)"}}>{r.label}</span>
+              </div>
+            ))}
+          </div>
+          <div style={{marginTop:14,padding:"10px 12px",borderRadius:8,background:"var(--bg-3)",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+            <span style={{fontSize:11,color:"var(--t3)"}}>평균 매칭점수</span>
+            <span style={{fontFamily:"var(--mono)",fontSize:16,fontWeight:800,color:avgScore>=80?"var(--green)":avgScore>=60?"var(--amber)":"var(--red)"}}>{avgScore}</span>
+          </div>
+        </div>
+      </div>
+
+      <div style={{display:"grid",gridTemplateColumns:"1.2fr .8fr",gap:16}}>
+        {/* Top Matched Buyers */}
+        <div className="fi fi4" style={cardStyle}>
+          <div style={{fontSize:14,fontWeight:700,marginBottom:16,display:"flex",alignItems:"center",gap:8}}><Ic.Star s={16}/>TOP 매칭 바이어</div>
+          <div style={{display:"grid",gap:6}}>
+            {topBuyers.map((b,i) => (
+              <div key={b.id} style={{display:"flex",alignItems:"center",gap:12,padding:"10px 12px",borderRadius:8,background:"var(--bg-3)",border:"1px solid var(--border)",transition:"all .2s"}}
+                onMouseEnter={e=>{e.currentTarget.style.borderColor="var(--border-h)";e.currentTarget.style.transform="translateX(2px)"}}
+                onMouseLeave={e=>{e.currentTarget.style.borderColor="var(--border)";e.currentTarget.style.transform="none"}}>
+                <div style={{width:32,height:32,borderRadius:"50%",background:`linear-gradient(135deg,${regionColors[i%regionColors.length]},${regionColors[(i+2)%regionColors.length]})`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:13,fontWeight:800,color:"#fff",fontFamily:"var(--mono)",flexShrink:0}}>{i+1}</div>
+                <div style={{flex:1,minWidth:0}}>
+                  <div style={{display:"flex",alignItems:"center",gap:6}}>
+                    <span style={{fontSize:12,fontWeight:600}}>{b.name}</span>
+                    <span style={{fontSize:10,color:"var(--t4)"}}>{b.flag}</span>
+                  </div>
+                  <div style={{fontSize:11,color:"var(--t3)",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{b.company} · {b.demand}</div>
+                </div>
+                <div style={{textAlign:"right",flexShrink:0}}>
+                  <div style={{fontFamily:"var(--mono)",fontSize:16,fontWeight:800,color:b.score>=80?"var(--green)":b.score>=60?"var(--amber)":"var(--red)"}}>{b.score}</div>
+                  <div style={{fontSize:9,color:"var(--t4)",textTransform:"uppercase",letterSpacing:".06em"}}>SCORE</div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Right Column */}
+        <div style={{display:"grid",gap:16}}>
+          {/* Buying Intent */}
+          <div className="fi fi4" style={cardStyle}>
+            <div style={{fontSize:14,fontWeight:700,marginBottom:14,display:"flex",alignItems:"center",gap:8}}><Ic.Zap s={16}/>구매 의향 분석</div>
+            <div style={{display:"grid",gap:10}}>
+              {[["높음","var(--green)"],["중간","var(--amber)"],["낮음","var(--t4)"]].map(([intent,color]) => {
+                const count = intentStats[intent] || 0;
+                const pct = Math.round((count/totalBuyers)*100);
+                return (
+                  <div key={intent}>
+                    <div style={{display:"flex",justifyContent:"space-between",marginBottom:4}}>
+                      <span style={{fontSize:12,fontWeight:500,display:"flex",alignItems:"center",gap:6}}><div style={{width:6,height:6,borderRadius:"50%",background:color}}/>{intent}</span>
+                      <span style={{fontFamily:"var(--mono)",fontSize:12,fontWeight:600}}>{count} <span style={{color:"var(--t4)",fontSize:10}}>({pct}%)</span></span>
+                    </div>
+                    <div style={{height:5,borderRadius:3,background:"var(--bg-4)",overflow:"hidden"}}>
+                      <div style={{height:"100%",borderRadius:3,background:color,width:`${pct}%`,animation:"barGrow .6s ease"}} />
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Recent Activity */}
+          <div className="fi fi5" style={cardStyle}>
+            <div style={{fontSize:14,fontWeight:700,marginBottom:14,display:"flex",alignItems:"center",gap:8}}><Ic.Sparkle s={14}/>최근 활동</div>
+            <div style={{display:"grid",gap:8}}>
+              {recentActivity.map((a,i) => (
+                <div key={i} style={{display:"flex",alignItems:"center",gap:10,padding:"8px 10px",borderRadius:6,background:"var(--bg-3)"}}>
+                  <div style={{width:6,height:6,borderRadius:"50%",background:["var(--green)","var(--blue)","var(--cyan)","var(--amber)"][i%4],flexShrink:0}} />
+                  <div style={{flex:1,minWidth:0}}>
+                    <div style={{fontSize:11,fontWeight:500}}><span style={{color:"var(--blue-light)"}}>{a.buyer.company}</span> {a.action}</div>
+                  </div>
+                  <span style={{fontSize:10,color:"var(--t4)",flexShrink:0}}>{a.time}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function EmailFinderView() {
   const [searchType, setSearchType] = useState("domain");
   const [domain, setDomain] = useState("");
@@ -624,12 +865,13 @@ export default function App() {
             </div>
             <div style={{marginLeft:"auto",display:"flex",alignItems:"center",gap:8}}>
               <Tooltip text="검색 저장"><div style={{padding:"6px 10px",borderRadius:6,border:"1px solid var(--border)",cursor:"pointer",color:"var(--t3)",display:"flex",alignItems:"center",gap:5,fontSize:11,fontWeight:500}}><Ic.Bookmark s={12}/>저장된 검색</div></Tooltip>
+              <Tooltip text="대시보드"><div onClick={()=>setView(v=>v==="dashboard"?"buyers":"dashboard")} style={{padding:"6px 10px",borderRadius:6,border:view==="dashboard"?"1px solid var(--cyan)":"1px solid var(--border)",cursor:"pointer",color:view==="dashboard"?"var(--cyan)":"var(--t3)",background:view==="dashboard"?"var(--cyan-dim)":"transparent",display:"flex",alignItems:"center",gap:5,fontSize:11,fontWeight:500,transition:"all .2s"}}><Ic.Bar s={12}/>대시보드</div></Tooltip>
               <Tooltip text="이메일 파인더"><div onClick={()=>setView(v=>v==="buyers"?"emailfinder":"buyers")} style={{padding:"6px 10px",borderRadius:6,border:view==="emailfinder"?"1px solid var(--blue)":"1px solid var(--border)",cursor:"pointer",color:view==="emailfinder"?"var(--blue)":"var(--t3)",background:view==="emailfinder"?"var(--blue-dim)":"transparent",display:"flex",alignItems:"center",gap:5,fontSize:11,fontWeight:500,transition:"all .2s"}}><Ic.Mail s={12}/>이메일 파인더</div></Tooltip>
               <Tooltip text="컬럼 설정"><div style={{padding:6,borderRadius:6,border:"1px solid var(--border)",cursor:"pointer",color:"var(--t3)"}}><Ic.Columns s={14}/></div></Tooltip>
             </div>
           </div>
 
-          {view==="emailfinder" ? <EmailFinderView /> : <>
+          {view==="dashboard" ? <DashboardView buyers={ALL_BUYERS} savedSet={savedSet} starred={starred} /> : view==="emailfinder" ? <EmailFinderView /> : <>
           {/* Tabs + Meta */}
           <div style={{padding:"8px 20px",borderBottom:"1px solid var(--border)",background:"var(--bg-1)",display:"flex",alignItems:"center",gap:16,flexShrink:0}}>
             <div style={{display:"flex",gap:2,padding:2,background:"var(--bg-3)",borderRadius:7}}>
