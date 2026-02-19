@@ -856,7 +856,7 @@ function EmailFinderView() {
             <td style={{padding:"8px 10px"}}><span style={{fontFamily:"var(--mono)",fontSize:11,fontWeight:600,color:cColor(e.confidence||0)}}>{e.confidence||0}%</span></td>
             <td style={{padding:"8px 10px"}}><div onClick={()=>setSavedEmails(p=>p.filter((_,j)=>j!==i))} style={{cursor:"pointer",color:"var(--t4)"}}><Ic.Trash s={12}/></div></td>
           </tr>)}</tbody>
-        </table>
+        </table></div>
       </div>}
     </div>
   );
@@ -1035,7 +1035,55 @@ export default function App() {
                   const isSel = selected.has(b.id);
                   const isSaved = savedSet.has(b.id);
                   return (
-                    <tr key={b.id} className={`fi fi${Math.min(i+1,5)}`}
+                    <tr key={b.id} className={`
+/* ─── RESPONSIVE BREAKPOINTS ─── */
+@media (max-width: 1024px) {
+  .nx-sidebar { width: 200px !important; min-width: 200px !important; }
+  .nx-sidebar.collapsed { width: 0px !important; min-width: 0px !important; padding: 0 !important; overflow: hidden !important; }
+  .nx-main-table th, .nx-main-table td { padding: 6px 8px !important; font-size: 11px !important; }
+  .nx-header-actions { gap: 4px !important; }
+  .nx-header-actions > div { font-size: 10px !important; padding: 4px 8px !important; }
+  .nx-kpi-grid { grid-template-columns: repeat(2, 1fr) !important; }
+  .nx-dashboard-grid { grid-template-columns: 1fr !important; }
+  .nx-email-modes { grid-template-columns: 1fr !important; }
+}
+
+@media (max-width: 768px) {
+  .nx-sidebar { display: none !important; }
+  .nx-header { flex-wrap: wrap !important; gap: 8px !important; padding: 8px 12px !important; }
+  .nx-header-brand { font-size: 14px !important; }
+  .nx-header-search { width: 100% !important; order: 10 !important; min-width: unset !important; }
+  .nx-header-actions { width: 100% !important; justify-content: flex-start !important; overflow-x: auto !important; gap: 4px !important; flex-wrap: nowrap !important; }
+  .nx-header-actions > div { white-space: nowrap !important; font-size: 10px !important; }
+  .nx-main-content { padding: 8px !important; }
+  .nx-table-wrap { overflow-x: auto !important; -webkit-overflow-scrolling: touch !important; }
+  .nx-main-table { min-width: 800px !important; }
+  .nx-main-table th:nth-child(n+6), .nx-main-table td:nth-child(n+6) { display: none !important; }
+  .nx-kpi-grid { grid-template-columns: repeat(2, 1fr) !important; gap: 8px !important; }
+  .nx-dashboard-grid { grid-template-columns: 1fr !important; gap: 12px !important; }
+  .nx-dashboard-section { padding: 14px !important; }
+  .nx-email-modes { grid-template-columns: 1fr !important; }
+  .nx-email-results td { font-size: 11px !important; padding: 6px !important; }
+  .nx-ai-input-grid { grid-template-columns: 1fr !important; }
+  .nx-ai-results-card { flex-direction: column !important; align-items: flex-start !important; gap: 8px !important; }
+  .nx-ai-reasons { max-width: 100% !important; }
+  .nx-ai-summary-grid { grid-template-columns: 1fr !important; }
+}
+
+@media (max-width: 480px) {
+  .nx-header-actions > div > span.nx-btn-label { display: none !important; }
+  .nx-kpi-grid { grid-template-columns: 1fr !important; }
+  .nx-table-wrap { margin: 0 -8px !important; }
+}
+
+/* Utility classes for responsive */
+.nx-table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+.nx-scroll-hint { display: none; }
+@media (max-width: 768px) {
+  .nx-scroll-hint { display: block; text-align: center; padding: 6px; font-size: 10px; color: var(--t4); }
+}
+
+fi fi${Math.min(i+1,5)}`}
                       onClick={()=>setDetail(b)}
                       style={{cursor:"pointer",borderBottom:"1px solid var(--border)",background:isSel?"var(--blue-dim)":"transparent",transition:"background .12s"}}
                       onMouseEnter={e=>{if(!isSel)e.currentTarget.style.background="var(--bg-hover)"}}
