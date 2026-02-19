@@ -856,7 +856,7 @@ function EmailFinderView() {
             <td style={{padding:"8px 10px"}}><span style={{fontFamily:"var(--mono)",fontSize:11,fontWeight:600,color:cColor(e.confidence||0)}}>{e.confidence||0}%</span></td>
             <td style={{padding:"8px 10px"}}><div onClick={()=>setSavedEmails(p=>p.filter((_,j)=>j!==i))} style={{cursor:"pointer",color:"var(--t4)"}}><Ic.Trash s={12}/></div></td>
           </tr>)}</tbody>
-        </table></div>
+        </table>
       </div>}
     </div>
   );
@@ -950,21 +950,21 @@ export default function App() {
         {/* Main Content */}
         <div style={{flex:1,display:"flex",flexDirection:"column",overflow:"hidden"}}>
           {/* Top Header */}
-          <div style={{padding:"12px 20px",borderBottom:"1px solid var(--border)",background:"var(--bg-1)",display:"flex",alignItems:"center",gap:16,flexShrink:0}}>
+          <div className="nx-header" style={{padding:"12px 20px",borderBottom:"1px solid var(--border)",background:"var(--bg-1)",display:"flex",alignItems:"center",gap:16,flexShrink:0}}>
             <div style={{display:"flex",alignItems:"center",gap:10}}>
               <div style={{width:28,height:28,borderRadius:7,background:"linear-gradient(135deg,var(--blue),var(--violet))",display:"flex",alignItems:"center",justifyContent:"center"}}><Ic.Users s={14}/></div>
               <div>
-                <h1 style={{fontSize:16,fontWeight:800,letterSpacing:"-.02em",fontFamily:"var(--font)"}}>바이어 탐색</h1>
+                <h1 className="nx-header-brand" style={{fontSize:16,fontWeight:800,letterSpacing:"-.02em",fontFamily:"var(--font)"}}>바이어 탐색</h1>
               </div>
             </div>
-            <div style={{flex:1,maxWidth:420}}>
+            <div className="nx-header-search" style={{flex:1,maxWidth:420}}>
               <div style={{display:"flex",alignItems:"center",gap:8,padding:"7px 12px",borderRadius:8,background:"var(--bg-3)",border:"1px solid var(--border)"}}>
                 <Ic.Search s={14}/>
                 <input value={search} onChange={e=>setSearch(e.target.value)} placeholder="바이어, 기업명, 품목, 국가 검색..." style={{flex:1,background:"transparent",border:"none",outline:"none",color:"var(--t1)",fontSize:12}} />
                 {search && <div onClick={()=>setSearch("")} style={{cursor:"pointer",color:"var(--t4)"}}><Ic.X s={12}/></div>}
               </div>
             </div>
-            <div style={{marginLeft:"auto",display:"flex",alignItems:"center",gap:8}}>
+            <div className="nx-header-actions" style={{marginLeft:"auto",display:"flex",alignItems:"center",gap:8}}>
               <Tooltip text="검색 저장"><div style={{padding:"6px 10px",borderRadius:6,border:"1px solid var(--border)",cursor:"pointer",color:"var(--t3)",display:"flex",alignItems:"center",gap:5,fontSize:11,fontWeight:500}}><Ic.Bookmark s={12}/>저장된 검색</div></Tooltip>
               <Tooltip text="대시보드"><div onClick={()=>setView(v=>v==="dashboard"?"buyers":"dashboard")} style={{padding:"6px 10px",borderRadius:6,border:view==="dashboard"?"1px solid var(--cyan)":"1px solid var(--border)",cursor:"pointer",color:view==="dashboard"?"var(--cyan)":"var(--t3)",background:view==="dashboard"?"var(--cyan-dim)":"transparent",display:"flex",alignItems:"center",gap:5,fontSize:11,fontWeight:500,transition:"all .2s"}}><Ic.Bar s={12}/>대시보드</div></Tooltip>
               <Tooltip text="이메일 파인더"><div onClick={()=>setView(v=>v==="buyers"?"emailfinder":"buyers")} style={{padding:"6px 10px",borderRadius:6,border:view==="emailfinder"?"1px solid var(--blue)":"1px solid var(--border)",cursor:"pointer",color:view==="emailfinder"?"var(--blue)":"var(--t3)",background:view==="emailfinder"?"var(--blue-dim)":"transparent",display:"flex",alignItems:"center",gap:5,fontSize:11,fontWeight:500,transition:"all .2s"}}><Ic.Mail s={12}/>이메일 파인더</div></Tooltip>
@@ -1007,7 +1007,7 @@ export default function App() {
 
           {/* Table */}
           <div style={{flex:1,overflow:"auto",position:"relative"}}>
-            <table style={{width:"100%",borderCollapse:"collapse",minWidth:1100}}>
+            <div className="nx-table-wrap"><table className="nx-main-table" style={{width:"100%",borderCollapse:"collapse",minWidth:1100}}>
               <thead>
                 <tr style={{position:"sticky",top:0,zIndex:10,background:"var(--bg-2)"}}>
                   <th style={{width:40,padding:"8px 12px"}}><Checkbox checked={allOnPageSelected} indeterminate={selected.size>0&&!allOnPageSelected} onChange={toggleAll}/></th>
@@ -1120,7 +1120,7 @@ fi fi${Math.min(i+1,5)}`}
                   );
                 })}
               </tbody>
-            </table>
+            </table></div>
             {paged.length === 0 && (
               <div style={{textAlign:"center",padding:"60px 20px",color:"var(--t3)"}}>
                 <Ic.Search s={24}/><p style={{marginTop:8,fontSize:14}}>검색 결과가 없습니다</p>
