@@ -387,6 +387,220 @@ function LandingHero({ onEnter }) {
   );
 }
 
+
+// ─────────── AI MATCH VIEW ───────────
+function AIMatchView({ buyers }) {
+  const [step, setStep] = useState("input");
+  const [profile, setProfile] = useState({ company:"", product:"", industry:"", certs:[], regions:[] });
+  const [progress, setProgress] = useState(0);
+  const [results, setResults] = useState(null);
+
+  const industries = ["자동차 부품","전자부품","의료기기","화학/소재","기계/장비","섬유/의류","식품/농산물","건축자재","플라스틱/고무","에너지/환경"];
+  const certList = ["ISO 9001","ISO 14001","IATF 16949","UL","CE","FDA","KS","ROHS","REACH","GMP"];
+  const regionList = ["유럽","북미","아시아","동남아","오세아니아","남미","중동","아프리카"];
+
+  const toggleArr = (arr, setFn, key, val) => {
+    const cur = profile[key];
+    setProfile(p=>({...p,[key]:cur.includes(val)?cur.filter(v=>v!==val):[...cur,val]}));
+  };
+
+  const runAnalysis = () => {
+    setStep("analyzing");
+    setProgress(0);
+    const steps = ["데이터 로딩","산업 매칭","인증 체크","지역 수요","AI 점수"];
+    let i = 0;
+    const timer = setInterval(()=>{
+      i++;
+      setProgress(i);
+      if (i >= steps.length) {
+        clearInterval(timer);
+        setTimeout(()=>{
+          const scored = buyers.map(b => {
+            let s = b.score || 50;
+            if (profile.industry && b.industry && b.industry.includes(profile.industry.slice(0,2))) s += 15;
+            if (profile.regions.some(r => {
+              if (r==="유럽") return ["독일","프랑스","영국","스웨덴","네덜란드","이탈리아","스페인","폴란드"].includes(b.country);
+              if (r==="북미") return ["미국","캐나다","멕시코"].includes(b.country);
+              if (r==="아시아") return ["일본","중국","대만","한국"].includes(b.country);
+              if (r==="동남아") return ["베트남","태국","인도네시아","말레이시아","싱가포르","필리핀"].includes(b.country);
+              return false;
+            })) s += 10;
+            if (profile.certs.length > 0 && b.certifications) {
+              const matched = profile.certs.filter(c => b.certifications.includes(c));
+              s += matched.length * 5;
+            }
+            if (profile.product && b.demand && b.demand.toLowerCase().includes(profile.product.toLowerCase().slice(0,3))) s += 8;
+            if (b.buyingIntent === "높음") s += 10;
+            else if (b.buyingIntent === "중간") s += 5;
+            const matchPct = Math.min(99, Math.round(s * 1.1));
+            const reasons = [];
+            if (profile.industry && b.industry) reasons.push("산업 매칭");
+            if (profile.regions.length > 0) reasons.push("타겟 지역");
+            if (profile.certs.length > 0 && b.certifications && b.certifications.some(c=>profile.certs.includes(c))) reasons.push("인증 일치");
+            if (b.buyingIntent === "높음") reasons.push("구매의향 높음");
+            return { ...b, aiScore: s, matchPct, reasons: reasons.slice(0,3) };
+          }).sort((a,b) => b.aiScore - a.aiScore).slice(0, 15);
+          setResults(scored);
+          setStep("results");
+        }, 500);
+      }
+    }, 600);
+  };
+
+  const exportCSV = () => {
+    if (!results) return;
+    const csv = "순위,바이어,회사,국가,산업,매칭률,추천사유\n" + results.map((r,i) => `${i+1},${r.name},${r.company},${r.country},${r.industry},${r.matchPct}%,"${r.reasons.join(", ")}"`).join("\n");
+    const a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([csv],{type:"text/csv"}));
+    a.download = `nexport-ai-match-${new Date().toISOString().slice(0,10)}.csv`; a.click();
+  };
+
+  const cColor = (s) => s>=85?"var(--green)":s>=70?"var(--cyan)":s>=55?"var(--amber)":"var(--red)";
+  const tagStyle = (active) => ({padding:"5px 12px",borderRadius:6,fontSize:11,fontWeight:600,cursor:"pointer",transition:"all .15s",background:active?"var(--blue)":"var(--bg-3)",color:active?"#fff":"var(--t3)",border:`1px solid ${active?"var(--blue)":"var(--border)"}`});
+
+  const cardStyle = {padding:20,borderRadius:12,background:"var(--bg-2)",border:"1px solid var(--border)"};
+
+  if (step === "input") return (
+    <div style={{flex:1,overflow:"auto",padding:24}}>
+      <div style={{maxWidth:680,margin:"0 auto"}}>
+        <div style={{textAlign:"center",marginBottom:32,animation:"fadeIn .4s ease"}}>
+          <div style={{width:48,height:48,borderRadius:12,background:"var(--green-dim)",display:"flex",alignItems:"center",justifyContent:"center",margin:"0 auto 12px"}}><Ic.Sparkle s={22}/></div>
+          <h2 style={{fontSize:22,fontWeight:800,marginBottom:6}}>AI 매칭 추천</h2>
+          <p style={{fontSize:13,color:"var(--t3)"}}>제조사 프로필을 입력하면 AI가 최적의 바이어를 추천합니다</p>
+        </div>
+
+        <div style={{...cardStyle,marginBottom:16,animation:"fadeIn .4s ease .1s",animationFillMode:"both"}}>
+          <div style={{fontSize:13,fontWeight:700,marginBottom:14,display:"flex",alignItems:"center",gap:6}}><Ic.Users s={14}/>기본 정보</div>
+          <div style={{display:"grid",gap:12}}>
+            <div>
+              <label style={{fontSize:11,color:"var(--t3)",fontWeight:600,marginBottom:4,display:"block"}}>회사명</label>
+              <input value={profile.company} onChange={e=>setProfile(p=>({...p,company:e.target.value}))} placeholder="예: 한국정밀부품(주)" style={{width:"100%",padding:"9px 12px",borderRadius:8,background:"var(--bg-3)",border:"1px solid var(--border)",color:"var(--t1)",fontSize:12,outline:"none"}} />
+            </div>
+            <div>
+              <label style={{fontSize:11,color:"var(--t3)",fontWeight:600,marginBottom:4,display:"block"}}>주력 제품</label>
+              <input value={profile.product} onChange={e=>setProfile(p=>({...p,product:e.target.value}))} placeholder="예: CNC 정밀가공 부품, 자동차 브레이크 패드" style={{width:"100%",padding:"9px 12px",borderRadius:8,background:"var(--bg-3)",border:"1px solid var(--border)",color:"var(--t1)",fontSize:12,outline:"none"}} />
+            </div>
+          </div>
+        </div>
+
+        <div style={{...cardStyle,marginBottom:16,animation:"fadeIn .4s ease .2s",animationFillMode:"both"}}>
+          <div style={{fontSize:13,fontWeight:700,marginBottom:14,display:"flex",alignItems:"center",gap:6}}><Ic.Grid s={14}/>산업 분야</div>
+          <div style={{display:"flex",flexWrap:"wrap",gap:8}}>
+            {industries.map(ind=>(
+              <div key={ind} onClick={()=>setProfile(p=>({...p,industry:p.industry===ind?"":ind}))} style={tagStyle(profile.industry===ind)}>{ind}</div>
+            ))}
+          </div>
+        </div>
+
+        <div style={{...cardStyle,marginBottom:16,animation:"fadeIn .4s ease .3s",animationFillMode:"both"}}>
+          <div style={{fontSize:13,fontWeight:700,marginBottom:14,display:"flex",alignItems:"center",gap:6}}><Ic.Shield s={14}/>보유 인증</div>
+          <div style={{display:"flex",flexWrap:"wrap",gap:8}}>
+            {certList.map(c=>(
+              <div key={c} onClick={()=>toggleArr(null,null,"certs",c)} style={tagStyle(profile.certs.includes(c))}>{c}</div>
+            ))}
+          </div>
+        </div>
+
+        <div style={{...cardStyle,marginBottom:24,animation:"fadeIn .4s ease .4s",animationFillMode:"both"}}>
+          <div style={{fontSize:13,fontWeight:700,marginBottom:14,display:"flex",alignItems:"center",gap:6}}><Ic.Globe s={14}/>타겟 수출 지역</div>
+          <div style={{display:"flex",flexWrap:"wrap",gap:8}}>
+            {regionList.map(r=>(
+              <div key={r} onClick={()=>toggleArr(null,null,"regions",r)} style={tagStyle(profile.regions.includes(r))}>{r}</div>
+            ))}
+          </div>
+        </div>
+
+        <div onClick={runAnalysis} style={{width:"100%",padding:"14px 0",borderRadius:10,background:"linear-gradient(135deg,var(--green),#0d9488)",color:"#fff",textAlign:"center",fontSize:14,fontWeight:700,cursor:"pointer",transition:"all .2s",boxShadow:"0 4px 16px rgba(16,185,129,.3)",animation:"fadeIn .4s ease .5s",animationFillMode:"both"}}
+          onMouseEnter={e=>{e.currentTarget.style.transform="translateY(-2px)";e.currentTarget.style.boxShadow="0 6px 20px rgba(16,185,129,.4)"}}
+          onMouseLeave={e=>{e.currentTarget.style.transform="none";e.currentTarget.style.boxShadow="0 4px 16px rgba(16,185,129,.3)"}}>
+          <span style={{display:"flex",alignItems:"center",justifyContent:"center",gap:8}}><Ic.Sparkle s={16}/>AI 매칭 분석 시작</span>
+        </div>
+      </div>
+    </div>
+  );
+
+  if (step === "analyzing") {
+    const steps = ["데이터 로딩","산업 매칭 분석","인증 호환성 체크","지역 수요 분석","AI 점수 산정"];
+    return (
+      <div style={{flex:1,display:"flex",alignItems:"center",justifyContent:"center"}}>
+        <div style={{textAlign:"center",maxWidth:400,animation:"fadeIn .4s ease"}}>
+          <div style={{width:56,height:56,borderRadius:14,background:"var(--green-dim)",display:"flex",alignItems:"center",justifyContent:"center",margin:"0 auto 20px"}}><Ic.Sparkle s={24}/></div>
+          <h3 style={{fontSize:18,fontWeight:800,marginBottom:6}}>AI 분석 중...</h3>
+          <p style={{fontSize:12,color:"var(--t3)",marginBottom:24}}>바이어 데이터를 분석하고 있습니다</p>
+          <div style={{display:"grid",gap:10,textAlign:"left"}}>
+            {steps.map((s,i)=>(
+              <div key={i} style={{display:"flex",alignItems:"center",gap:10,padding:"8px 14px",borderRadius:8,background:i<progress?"var(--green-dim)":i===progress?"var(--bg-3)":"var(--bg-2)",border:`1px solid ${i<progress?"rgba(16,185,129,.2)":"var(--border)"}`,transition:"all .3s ease"}}>
+                <div style={{width:20,height:20,borderRadius:"50%",background:i<progress?"var(--green)":i===progress?"var(--amber)":"var(--bg-4)",display:"flex",alignItems:"center",justifyContent:"center",transition:"all .3s"}}>
+                  {i<progress ? <Ic.Check s={10}/> : i===progress ? <div style={{width:6,height:6,borderRadius:"50%",background:"var(--amber)",animation:"pulse 1s infinite"}}/> : null}
+                </div>
+                <span style={{fontSize:12,fontWeight:600,color:i<=progress?"var(--t1)":"var(--t4)"}}>{s}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Results
+  const topScore = results?.[0]?.matchPct || 0;
+  const avgScore = results ? Math.round(results.reduce((a,b)=>a+b.matchPct,0)/results.length) : 0;
+  const highIntent = results ? results.filter(r=>r.buyingIntent==="높음").length : 0;
+
+  return (
+    <div style={{flex:1,overflow:"auto",padding:24}}>
+      <div style={{maxWidth:800,margin:"0 auto"}}>
+        {/* Summary Cards */}
+        <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:12,marginBottom:20,animation:"fadeIn .4s ease"}}>
+          {[{label:"최고 매칭률",val:`${topScore}%`,color:"var(--green)"},{label:"평균 매칭률",val:`${avgScore}%`,color:"var(--cyan)"},{label:"구매의향 높음",val:`${highIntent}명`,color:"var(--amber)"}].map((s,i)=>(
+            <div key={i} style={{padding:16,borderRadius:10,background:"var(--bg-2)",border:"1px solid var(--border)",textAlign:"center"}}>
+              <div style={{fontSize:24,fontWeight:800,fontFamily:"var(--mono)",color:s.color}}>{s.val}</div>
+              <div style={{fontSize:11,color:"var(--t3)",marginTop:4}}>{s.label}</div>
+            </div>
+          ))}
+        </div>
+
+        {/* Action buttons */}
+        <div style={{display:"flex",gap:8,marginBottom:20,animation:"fadeIn .4s ease .1s",animationFillMode:"both"}}>
+          <div onClick={exportCSV} style={{padding:"8px 16px",borderRadius:7,background:"var(--bg-3)",border:"1px solid var(--border)",cursor:"pointer",fontSize:11,fontWeight:600,color:"var(--t2)",display:"flex",alignItems:"center",gap:5}}><Ic.Download s={12}/>CSV 내보내기</div>
+          <div onClick={()=>{setStep("input");setResults(null);}} style={{padding:"8px 16px",borderRadius:7,background:"var(--bg-3)",border:"1px solid var(--border)",cursor:"pointer",fontSize:11,fontWeight:600,color:"var(--t2)",display:"flex",alignItems:"center",gap:5}}><Ic.Search s={12}/>다시 검색</div>
+        </div>
+
+        {/* Results List */}
+        <div style={{display:"grid",gap:10}}>
+          {results && results.map((r,i)=>(
+            <div key={r.id} style={{padding:16,borderRadius:12,background:"var(--bg-2)",border:"1px solid var(--border)",display:"flex",alignItems:"center",gap:14,animation:`fadeIn .3s ease ${i*0.05}s`,animationFillMode:"both",transition:"border-color .2s",cursor:"pointer"}}
+              onMouseEnter={e=>e.currentTarget.style.borderColor="var(--border-h)"} onMouseLeave={e=>e.currentTarget.style.borderColor="var(--border)"}>
+              {/* Rank */}
+              <div style={{width:32,height:32,borderRadius:8,background:i<3?`linear-gradient(135deg,${i===0?"var(--green),#0d9488":i===1?"var(--cyan),var(--blue)":"var(--amber),var(--orange)"})`:"var(--bg-4)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:13,fontWeight:800,color:i<3?"#fff":"var(--t3)",flexShrink:0}}>{i+1}</div>
+              {/* Info */}
+              <div style={{flex:1,minWidth:0}}>
+                <div style={{display:"flex",alignItems:"center",gap:6}}>
+                  <span style={{fontSize:13,fontWeight:700}}>{r.name}</span>
+                  <span style={{fontSize:11,color:"var(--t3)"}}>{r.flag} {r.company}</span>
+                </div>
+                <div style={{fontSize:11,color:"var(--t3)",marginTop:3}}>{r.title} · {r.industry} · {r.demand}</div>
+                <div style={{display:"flex",gap:5,marginTop:6,flexWrap:"wrap"}}>
+                  {r.reasons.map((reason,ri)=>(
+                    <span key={ri} style={{padding:"2px 7px",borderRadius:4,background:"var(--green-dim)",color:"var(--green)",fontSize:9,fontWeight:600,border:"1px solid rgba(16,185,129,.15)"}}>{reason}</span>
+                  ))}
+                </div>
+              </div>
+              {/* Score Ring */}
+              <div style={{position:"relative",width:48,height:48,flexShrink:0}}>
+                <svg width="48" height="48" viewBox="0 0 48 48">
+                  <circle cx="24" cy="24" r="20" fill="none" stroke="var(--bg-4)" strokeWidth="3"/>
+                  <circle cx="24" cy="24" r="20" fill="none" stroke={cColor(r.matchPct)} strokeWidth="3" strokeDasharray={`${(r.matchPct/100)*126} 126`} strokeLinecap="round" transform="rotate(-90 24 24)"/>
+                </svg>
+                <div style={{position:"absolute",inset:0,display:"flex",alignItems:"center",justifyContent:"center",fontSize:12,fontWeight:800,fontFamily:"var(--mono)",color:cColor(r.matchPct)}}>{r.matchPct}</div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function FilterSidebar({ filters, setFilters, collapsed, setCollapsed }) {
   const [openSections, setOpenSections] = useState({"산업":true,"지역":true,"회사규모":false,"인증":false,"구매의향":false,"매칭점수":false});
   const toggle = k => setOpenSections(p=>({...p,[k]:!p[k]}));
@@ -1181,7 +1395,7 @@ export default function App() {
 
       <div style={{display:"flex",height:"100vh",overflow:"hidden",background:"var(--bg-0)"}}>
         {/* Filter Sidebar */}
-        <FilterSidebar filters={filters} setFilters={setFilters} collapsed={sideCollapsed} setCollapsed={setSideCollapsed} />
+        {view==="buyers" && <FilterSidebar filters={filters} setFilters={setFilters} collapsed={sideCollapsed} setCollapsed={setSideCollapsed} />}
 
         {/* Main Content */}
         <div style={{flex:1,display:"flex",flexDirection:"column",overflow:"hidden"}}>
@@ -1203,12 +1417,13 @@ export default function App() {
             <div className="nx-header-actions" style={{marginLeft:"auto",display:"flex",alignItems:"center",gap:8}}>
               <Tooltip text="검색 저장"><div style={{padding:"6px 10px",borderRadius:6,border:"1px solid var(--border)",cursor:"pointer",color:"var(--t3)",display:"flex",alignItems:"center",gap:5,fontSize:11,fontWeight:500}}><Ic.Bookmark s={12}/>저장된 검색</div></Tooltip>
               <Tooltip text="대시보드"><div onClick={()=>setView(v=>v==="dashboard"?"buyers":"dashboard")} style={{padding:"6px 10px",borderRadius:6,border:view==="dashboard"?"1px solid var(--cyan)":"1px solid var(--border)",cursor:"pointer",color:view==="dashboard"?"var(--cyan)":"var(--t3)",background:view==="dashboard"?"var(--cyan-dim)":"transparent",display:"flex",alignItems:"center",gap:5,fontSize:11,fontWeight:500,transition:"all .2s"}}><Ic.Bar s={12}/>대시보드</div></Tooltip>
+              <Tooltip text="AI 매칭"><div onClick={()=>setView(v=>v==="aiMatch"?"buyers":"aiMatch")} style={{padding:"6px 10px",borderRadius:6,border:view==="aiMatch"?"1px solid var(--green)":"1px solid var(--border)",cursor:"pointer",color:view==="aiMatch"?"var(--green)":"var(--t3)",background:view==="aiMatch"?"var(--green-dim)":"transparent",display:"flex",alignItems:"center",gap:5,fontSize:11,fontWeight:500,transition:"all .2s"}}><Ic.Sparkle s={12}/>AI 매칭</div></Tooltip>
               <Tooltip text="이메일 파인더"><div onClick={()=>setView(v=>v==="buyers"?"emailfinder":"buyers")} style={{padding:"6px 10px",borderRadius:6,border:view==="emailfinder"?"1px solid var(--blue)":"1px solid var(--border)",cursor:"pointer",color:view==="emailfinder"?"var(--blue)":"var(--t3)",background:view==="emailfinder"?"var(--blue-dim)":"transparent",display:"flex",alignItems:"center",gap:5,fontSize:11,fontWeight:500,transition:"all .2s"}}><Ic.Mail s={12}/>이메일 파인더</div></Tooltip>
               <Tooltip text="컬럼 설정"><div style={{padding:6,borderRadius:6,border:"1px solid var(--border)",cursor:"pointer",color:"var(--t3)"}}><Ic.Columns s={14}/></div></Tooltip>
             </div>
           </div>
 
-          {view==="dashboard" ? <DashboardView buyers={ALL_BUYERS} savedSet={savedSet} starred={starred} /> : view==="emailfinder" ? <EmailFinderView /> : <>
+          {view==="aiMatch" ? <AIMatchView buyers={ALL_BUYERS} /> : view==="dashboard" ? <DashboardView buyers={ALL_BUYERS} savedSet={savedSet} starred={starred} /> : view==="emailfinder" ? <EmailFinderView /> : <>
           {/* Tabs + Meta */}
           <div style={{padding:"8px 20px",borderBottom:"1px solid var(--border)",background:"var(--bg-1)",display:"flex",alignItems:"center",gap:16,flexShrink:0}}>
             <div style={{display:"flex",gap:2,padding:2,background:"var(--bg-3)",borderRadius:7}}>
