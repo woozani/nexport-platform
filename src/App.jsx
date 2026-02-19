@@ -985,6 +985,8 @@ export default function App() {
   return (
     <>
       <style>{CSS}</style>
+      {detailBuyer && <BuyerDetailPanel buyer={detailBuyer} onClose={()=>setDetailBuyer(null)} onSave={(b)=>{savedSet.has(b.id)?setSavedSet(p=>{const n=new Set(p);n.delete(b.id);return n}):setSavedSet(p=>new Set([...p,b.id]))}} isSaved={savedSet.has(detailBuyer.id)} />}
+
       <div style={{display:"flex",height:"100vh",overflow:"hidden",background:"var(--bg-0)"}}>
         {/* Filter Sidebar */}
         <FilterSidebar filters={filters} setFilters={setFilters} collapsed={sideCollapsed} setCollapsed={setSideCollapsed} />
@@ -1077,7 +1079,7 @@ export default function App() {
                   const isSel = selected.has(b.id);
                   const isSaved = savedSet.has(b.id);
                   return (
-                    <tr key={b.id} className={`
+                    <tr key={b.id} onClick={()=>setDetailBuyer(b)} style={{cursor:"pointer"}} className={`
 
 .nx-loading-overlay{position:absolute;inset:0;background:rgba(6,7,10,.6);display:flex;align-items:center;justify-content:center;z-index:20;backdrop-filter:blur(2px)}
 .nx-empty-bounce{animation:fadeIn .4s ease}
