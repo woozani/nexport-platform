@@ -28,7 +28,9 @@ input,textarea,select,button{font-family:inherit}
 @keyframes pulse{0%,100%{opacity:.4}50%{opacity:1}}
 @keyframes barGrow{from{transform:scaleX(0)}to{transform:scaleX(1)}}
 @keyframes float{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}
-@keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+@keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}
+@keyframes slideInRight{from{opacity:0;transform:translateX(100%)}to{opacity:1;transform:translateX(0)}}
+}
 }
 .fi{animation:fadeIn .4s ease forwards;opacity:0}
 .fi1{animation-delay:.03s}.fi2{animation-delay:.06s}.fi3{animation-delay:.09s}.fi4{animation-delay:.12s}.fi5{animation-delay:.15s}
@@ -197,6 +199,97 @@ function SkeletonRow({ cols=8 }) {
 
 function SkeletonTable({ rows=8, cols=8 }) {
   return <>{Array.from({length:rows}).map((_,i)=><SkeletonRow key={i} cols={cols}/>)}</>;
+}
+
+
+// ─────────── BUYER DETAIL PANEL ───────────
+function BuyerDetailPanel({ buyer, onClose, onSave, isSaved }) {
+  if (!buyer) return null;
+  const cColor = (s) => s>=80?"var(--green)":s>=65?"var(--cyan)":s>=50?"var(--amber)":"var(--red)";
+  const sections = [
+    {label:"산업",value:buyer.industry,icon:<Ic.Grid s={13}/>},
+    {label:"수요 품목",value:buyer.demand,icon:<Ic.Sparkle s={13}/>},
+    {label:"예상 규모",value:buyer.volume,icon:<Ic.Bar s={13}/>},
+    {label:"구매 의향",value:buyer.buyingIntent,icon:<Ic.Eye s={13}/>},
+    {label:"상태",value:buyer.status,icon:<Ic.Check s={13}/>},
+  ];
+  return (
+    <>
+      <div onClick={onClose} style={{position:"fixed",inset:0,background:"rgba(0,0,0,.5)",zIndex:90,animation:"fadeIn .2s ease",backdropFilter:"blur(2px)"}}/>
+      <div style={{position:"fixed",right:0,top:0,bottom:0,width:420,maxWidth:"90vw",background:"var(--bg-1)",borderLeft:"1px solid var(--border)",zIndex:91,display:"flex",flexDirection:"column",animation:"slideInRight .25s ease",overflow:"hidden"}}>
+        <div style={{padding:"16px 20px",borderBottom:"1px solid var(--border)",display:"flex",alignItems:"center",gap:12,flexShrink:0}}>
+          <div onClick={onClose} style={{cursor:"pointer",padding:4,borderRadius:6,color:"var(--t3)"}}><Ic.X s={16}/></div>
+          <span style={{fontSize:14,fontWeight:700,flex:1}}>바이어 상세</span>
+          <div onClick={()=>onSave(buyer)} style={{padding:"6px 14px",borderRadius:6,background:isSaved?"var(--green-dim)":"var(--bg-3)",border:`1px solid ${isSaved?"var(--green)":"var(--border)"}`,cursor:"pointer",fontSize:11,fontWeight:600,color:isSaved?"var(--green)":"var(--t2)",display:"flex",alignItems:"center",gap:5}}>
+            <Ic.Bookmark s={12}/>{isSaved?"저장됨":"저장"}
+          </div>
+        </div>
+        <div style={{flex:1,overflow:"auto",padding:20}}>
+          <div style={{display:"flex",alignItems:"center",gap:14,marginBottom:20}}>
+            <div style={{width:52,height:52,borderRadius:13,background:"linear-gradient(135deg,var(--blue-dim),var(--violet-dim))",display:"flex",alignItems:"center",justifyContent:"center",fontSize:20,fontWeight:800,color:"var(--blue)",flexShrink:0}}>{buyer.name.charAt(0)}</div>
+            <div>
+              <div style={{fontSize:16,fontWeight:800}}>{buyer.name}</div>
+              <div style={{fontSize:12,color:"var(--t3)",marginTop:2}}>{buyer.title}</div>
+              <div style={{fontSize:12,color:"var(--t3)",display:"flex",alignItems:"center",gap:4,marginTop:1}}>{buyer.flag} {buyer.company} · {buyer.country}</div>
+            </div>
+          </div>
+          <div style={{padding:16,borderRadius:10,background:"var(--bg-2)",border:"1px solid var(--border)",marginBottom:16,display:"flex",alignItems:"center",gap:16}}>
+            <div style={{position:"relative",width:64,height:64,flexShrink:0}}>
+              <svg width="64" height="64" viewBox="0 0 64 64">
+                <circle cx="32" cy="32" r="28" fill="none" stroke="var(--bg-4)" strokeWidth="4"/>
+                <circle cx="32" cy="32" r="28" fill="none" stroke={cColor(buyer.score)} strokeWidth="4" strokeDasharray={`${(buyer.score/100)*176} 176`} strokeLinecap="round" transform="rotate(-90 32 32)"/>
+              </svg>
+              <div style={{position:"absolute",inset:0,display:"flex",alignItems:"center",justifyContent:"center",fontSize:18,fontWeight:800,fontFamily:"var(--mono)",color:cColor(buyer.score)}}>{buyer.score}</div>
+            </div>
+            <div>
+              <div style={{fontSize:13,fontWeight:700}}>AI 매칭 점수</div>
+              <div style={{fontSize:11,color:"var(--t3)",marginTop:4}}>산업 적합도, 인증, 구매 이력 기반</div>
+            </div>
+          </div>
+          <div style={{padding:16,borderRadius:10,background:"var(--bg-2)",border:"1px solid var(--border)",marginBottom:16}}>
+            <div style={{fontSize:12,fontWeight:700,color:"var(--t2)",marginBottom:12,display:"flex",alignItems:"center",gap:6}}><Ic.Mail s={13}/>연락처</div>
+            <div style={{display:"grid",gap:10}}>
+              <div style={{display:"flex",alignItems:"center",gap:8}}>
+                <div style={{width:28,height:28,borderRadius:6,background:"var(--blue-dim)",display:"flex",alignItems:"center",justifyContent:"center"}}><Ic.Mail s={12}/></div>
+                <div><div style={{fontSize:10,color:"var(--t4)",textTransform:"uppercase",letterSpacing:".05em",fontWeight:600}}>이메일</div><div style={{fontSize:12,color:"var(--blue)"}}>{buyer.email}</div></div>
+                <div onClick={()=>navigator.clipboard.writeText(buyer.email)} style={{marginLeft:"auto",padding:"4px 8px",borderRadius:4,border:"1px solid var(--border)",cursor:"pointer",fontSize:10,color:"var(--t3)"}}>복사</div>
+              </div>
+              <div style={{display:"flex",alignItems:"center",gap:8}}>
+                <div style={{width:28,height:28,borderRadius:6,background:"var(--green-dim)",display:"flex",alignItems:"center",justifyContent:"center"}}><Ic.Phone s={12}/></div>
+                <div><div style={{fontSize:10,color:"var(--t4)",textTransform:"uppercase",letterSpacing:".05em",fontWeight:600}}>전화</div><div style={{fontSize:12,color:"var(--t1)"}}>{buyer.phone}</div></div>
+              </div>
+            </div>
+          </div>
+          <div style={{padding:16,borderRadius:10,background:"var(--bg-2)",border:"1px solid var(--border)",marginBottom:16}}>
+            <div style={{fontSize:12,fontWeight:700,color:"var(--t2)",marginBottom:12,display:"flex",alignItems:"center",gap:6}}><Ic.Grid s={13}/>상세 정보</div>
+            <div style={{display:"grid",gap:10}}>
+              {sections.map((s,i)=>(<div key={i} style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"6px 0",borderBottom:i<sections.length-1?"1px solid var(--border)":"none"}}><span style={{fontSize:11,color:"var(--t3)",display:"flex",alignItems:"center",gap:6}}>{s.icon}{s.label}</span><span style={{fontSize:12,fontWeight:600,color:"var(--t1)"}}>{s.value}</span></div>))}
+            </div>
+          </div>
+          <div style={{padding:16,borderRadius:10,background:"var(--bg-2)",border:"1px solid var(--border)",marginBottom:16}}>
+            <div style={{fontSize:12,fontWeight:700,color:"var(--t2)",marginBottom:12,display:"flex",alignItems:"center",gap:6}}><Ic.Shield s={13}/>인증</div>
+            <div style={{display:"flex",gap:6,flexWrap:"wrap"}}>
+              {(buyer.certifications||[]).map((c,i)=>(<span key={i} style={{padding:"3px 8px",borderRadius:5,background:"var(--cyan-dim)",color:"var(--cyan)",fontSize:10,fontWeight:600,border:"1px solid rgba(34,211,238,.15)"}}>{c}</span>))}
+              {(!buyer.certifications||buyer.certifications.length===0)&&<span style={{fontSize:11,color:"var(--t4)"}}>인증 정보 없음</span>}
+            </div>
+          </div>
+          <div style={{padding:16,borderRadius:10,background:"var(--bg-2)",border:"1px solid var(--border)"}}>
+            <div style={{fontSize:12,fontWeight:700,color:"var(--t2)",marginBottom:12,display:"flex",alignItems:"center",gap:6}}><Ic.Sparkle s={13}/>AI 분석</div>
+            <div style={{fontSize:12,color:"var(--t2)",lineHeight:1.7}}>
+              {buyer.name}은(는) <strong style={{color:"var(--t1)"}}>{buyer.industry}</strong> 분야의 바이어로, 현재 <strong style={{color:cColor(buyer.score)}}>{buyer.buyingIntent}</strong> 수준의 구매 의향을 보이고 있습니다. 주요 수요 품목은 <strong style={{color:"var(--t1)"}}>{buyer.demand}</strong>이며, 예상 거래 규모는 <strong style={{color:"var(--cyan)"}}>{buyer.volume}</strong>입니다.
+              {buyer.score>=80&&" AI 분석 결과 높은 매칭률을 보이며, 즉시 접촉을 권장합니다."}
+              {buyer.score>=60&&buyer.score<80&&" 잠재적 매칭 가능성이 있으며, 추가 검토를 권장합니다."}
+              {buyer.score<60&&" 추가적인 니즈 파악이 필요합니다."}
+            </div>
+          </div>
+        </div>
+        <div style={{padding:"12px 20px",borderTop:"1px solid var(--border)",display:"flex",gap:8,flexShrink:0}}>
+          <div onClick={()=>navigator.clipboard.writeText(buyer.email)} style={{flex:1,padding:"10px 0",borderRadius:8,background:"var(--blue)",color:"#fff",textAlign:"center",fontSize:12,fontWeight:600,cursor:"pointer"}}>이메일 복사</div>
+          <div onClick={()=>window.open("mailto:"+buyer.email)} style={{flex:1,padding:"10px 0",borderRadius:8,background:"var(--bg-3)",border:"1px solid var(--border)",color:"var(--t1)",textAlign:"center",fontSize:12,fontWeight:600,cursor:"pointer"}}>이메일 보내기</div>
+        </div>
+      </div>
+    </>
+  );
 }
 
 function FilterSidebar({ filters, setFilters, collapsed, setCollapsed }) {
@@ -908,6 +1001,7 @@ export default function App() {
   const [filters, setFilters] = useState({industries:[],regions:[],sizes:[],certs:[],intents:[],scoreMin:0,scoreMax:100});
   const [sideCollapsed, setSideCollapsed] = useState(false);
   const [search, setSearch] = useState("");
+  const [detailBuyer, setDetailBuyer] = useState(null);
   const [tab, setTab] = useState("전체");
   const [sort, setSort] = useState({field:"score",asc:false});
   const [selected, setSelected] = useState(new Set());
