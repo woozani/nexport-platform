@@ -27,7 +27,9 @@ input,textarea,select,button{font-family:inherit}
 @keyframes scaleIn{from{opacity:0;transform:scale(.96)}to{opacity:1;transform:scale(1)}}
 @keyframes pulse{0%,100%{opacity:.4}50%{opacity:1}}
 @keyframes barGrow{from{transform:scaleX(0)}to{transform:scaleX(1)}}
-@keyframes float{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+@keyframes float{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}
+@keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+}
 .fi{animation:fadeIn .4s ease forwards;opacity:0}
 .fi1{animation-delay:.03s}.fi2{animation-delay:.06s}.fi3{animation-delay:.09s}.fi4{animation-delay:.12s}.fi5{animation-delay:.15s}
 `;
@@ -157,6 +159,46 @@ const Tooltip = ({children, text}) => {
 };
 
 // ─────────── FILTER SIDEBAR ───────────
+
+// ─────────── UI STATE COMPONENTS ───────────
+function LoadingSpinner({ size=20, color="var(--blue)" }) {
+  return <div style={{display:"inline-flex",alignItems:"center",justifyContent:"center"}}>
+    <svg width={size} height={size} viewBox="0 0 24 24" style={{animation:"spin 1s linear infinite"}}>
+      <circle cx="12" cy="12" r="10" fill="none" stroke="var(--bg-4)" strokeWidth="3"/>
+      <path d="M12 2a10 10 0 0 1 10 10" fill="none" stroke={color} strokeWidth="3" strokeLinecap="round"/>
+    </svg>
+  </div>;
+}
+
+function EmptyState({ icon, title, subtitle, action, actionLabel }) {
+  return <div style={{display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",padding:"60px 20px",animation:"fadeIn .4s ease"}}>
+    <div style={{width:56,height:56,borderRadius:14,background:"var(--bg-3)",display:"flex",alignItems:"center",justifyContent:"center",marginBottom:16}}>
+      {icon || <Ic.Search s={24}/>}
+    </div>
+    <div style={{fontSize:15,fontWeight:700,color:"var(--t1)",marginBottom:6}}>{title}</div>
+    <div style={{fontSize:12,color:"var(--t3)",textAlign:"center",maxWidth:320,lineHeight:1.6}}>{subtitle}</div>
+    {action && <div onClick={action} style={{marginTop:16,padding:"8px 20px",borderRadius:8,background:"var(--blue)",color:"#fff",fontSize:12,fontWeight:600,cursor:"pointer",transition:"opacity .15s"}}
+      onMouseEnter={e=>e.currentTarget.style.opacity=".85"} onMouseLeave={e=>e.currentTarget.style.opacity="1"}>{actionLabel||"다시 시도"}</div>}
+  </div>;
+}
+
+function ErrorBanner({ message, onRetry, onDismiss }) {
+  return <div style={{margin:"8px 20px",padding:"10px 14px",borderRadius:8,background:"var(--red-dim)",border:"1px solid rgba(239,68,68,.2)",display:"flex",alignItems:"center",gap:10,animation:"fadeIn .3s ease"}}>
+    <div style={{width:20,height:20,borderRadius:"50%",background:"var(--red)",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}><Ic.X s={10}/></div>
+    <span style={{flex:1,fontSize:12,color:"var(--red)"}}>{message}</span>
+    {onRetry && <div onClick={onRetry} style={{padding:"4px 10px",borderRadius:5,border:"1px solid rgba(239,68,68,.3)",color:"var(--red)",fontSize:11,cursor:"pointer",fontWeight:500}}>재시도</div>}
+    {onDismiss && <div onClick={onDismiss} style={{cursor:"pointer",color:"var(--t4)"}}><Ic.X s={14}/></div>}
+  </div>;
+}
+
+function SkeletonRow({ cols=8 }) {
+  return <tr>{Array.from({length:cols}).map((_,i)=><td key={i} style={{padding:"10px 12px"}}><div style={{height:12,borderRadius:4,background:"var(--bg-4)",animation:"pulse 1.5s ease infinite",width:i===0?"60%":i===cols-1?"40%":"75%"}}/></td>)}</tr>;
+}
+
+function SkeletonTable({ rows=8, cols=8 }) {
+  return <>{Array.from({length:rows}).map((_,i)=><SkeletonRow key={i} cols={cols}/>)}</>;
+}
+
 function FilterSidebar({ filters, setFilters, collapsed, setCollapsed }) {
   const [openSections, setOpenSections] = useState({"산업":true,"지역":true,"회사규모":false,"인증":false,"구매의향":false,"매칭점수":false});
   const toggle = k => setOpenSections(p=>({...p,[k]:!p[k]}));
@@ -764,12 +806,12 @@ function EmailFinderView() {
 
         {searchType==="domain" && <div style={{display:"flex",gap:8}}>
           <input style={inputStyle} placeholder="예: techparts.de, pacifictrade.com" value={domain} onChange={e=>setDomain(e.target.value)} onKeyDown={e=>e.key==="Enter"&&doSearch()} />
-          <button onClick={doSearch} style={btnStyle} disabled={loading}>{loading?"검색 중...":"검색"}</button>
+          <button onClick={doSearch} style={btnStyle} disabled={loading}>{loading?<><LoadingSpinner size={14} color="#fff"/> 검색 중...</>:"검색"}</button>
         </div>}
 
         {searchType==="company" && <div style={{display:"flex",gap:8}}>
           <input style={inputStyle} placeholder="예: TechParts GmbH, Pacific Trade" value={company} onChange={e=>setCompany(e.target.value)} onKeyDown={e=>e.key==="Enter"&&doSearch()} />
-          <button onClick={doSearch} style={btnStyle} disabled={loading}>{loading?"검색 중...":"검색"}</button>
+          <button onClick={doSearch} style={btnStyle} disabled={loading}>{loading?<><LoadingSpinner size={14} color="#fff"/> 검색 중...</>:"검색"}</button>
         </div>}
 
         {searchType==="person" && <div style={{display:"grid",gap:10}}>
@@ -778,12 +820,12 @@ function EmailFinderView() {
             <input style={inputStyle} placeholder="First Name" value={firstName} onChange={e=>setFirstName(e.target.value)} />
             <input style={inputStyle} placeholder="Last Name" value={lastName} onChange={e=>setLastName(e.target.value)} onKeyDown={e=>e.key==="Enter"&&doSearch()} />
           </div>
-          <button onClick={doSearch} style={{...btnStyle,justifyContent:"center"}} disabled={loading}>{loading?"검색 중...":"이메일 찾기"}</button>
+          <button onClick={doSearch} style={{...btnStyle,justifyContent:"center"}} disabled={loading}>{loading?<><LoadingSpinner size={14} color="#fff"/> 검색 중...</>:"이메일 찾기"}</button>
         </div>}
       </div>
 
       {/* Error */}
-      {error && <div className="fi fi3" style={{...cardStyle,borderColor:"var(--red)",background:"var(--red-dim)",marginBottom:16}}><span style={{color:"var(--red)",fontSize:12}}>{error}</span></div>}
+      {error && <ErrorBanner message={error} onDismiss={()=>setError(null)} onRetry={doSearch} />}
 
       {/* Domain/Company Results */}
       {results && (searchType==="domain"||searchType==="company") && <div className="fi fi3">
@@ -1036,6 +1078,10 @@ export default function App() {
                   const isSaved = savedSet.has(b.id);
                   return (
                     <tr key={b.id} className={`
+
+.nx-loading-overlay{position:absolute;inset:0;background:rgba(6,7,10,.6);display:flex;align-items:center;justify-content:center;z-index:20;backdrop-filter:blur(2px)}
+.nx-empty-bounce{animation:fadeIn .4s ease}
+
 /* ─── RESPONSIVE BREAKPOINTS ─── */
 @media (max-width: 1024px) {
   .nx-sidebar { width: 200px !important; min-width: 200px !important; }
@@ -1121,12 +1167,7 @@ fi fi${Math.min(i+1,5)}`}
                 })}
               </tbody>
             </table></div>
-            {paged.length === 0 && (
-              <div style={{textAlign:"center",padding:"60px 20px",color:"var(--t3)"}}>
-                <Ic.Search s={24}/><p style={{marginTop:8,fontSize:14}}>검색 결과가 없습니다</p>
-                <p style={{fontSize:12,color:"var(--t4)",marginTop:4}}>필터를 조정하거나 검색어를 변경해보세요</p>
-              </div>
-            )}
+            {paged.length === 0 && <div style={{padding:"40px 0"}}><EmptyState icon={<Ic.Search s={24}/>} title="검색 결과가 없습니다" subtitle="다른 필터 조건이나 검색어를 시도해 보세요" /></div>}
           </div>
 
           {/* Pagination */}
