@@ -292,6 +292,101 @@ function BuyerDetailPanel({ buyer, onClose, onSave, isSaved }) {
   );
 }
 
+
+// ─────────── LANDING HERO ───────────
+function LandingHero({ onEnter }) {
+  const [visible, setVisible] = useState(false);
+  useEffect(() => { setTimeout(() => setVisible(true), 100); }, []);
+  const stats = [
+    { val: "60+", label: "글로벌 바이어", color: "var(--blue)" },
+    { val: "15개국", label: "커버리지", color: "var(--cyan)" },
+    { val: "AI", label: "매칭 엔진", color: "var(--green)" },
+    { val: "실시간", label: "이메일 파인더", color: "var(--violet)" },
+  ];
+  const features = [
+    { icon: <Ic.Search s={18}/>, title: "바이어 탐색", desc: "60개국 산업·인증·지역별 고급 필터링으로 최적의 바이어를 찾으세요", color: "var(--blue)", dim: "var(--blue-dim)" },
+    { icon: <Ic.Mail s={18}/>, title: "이메일 파인더", desc: "Hunter.io 기반 실시간 바이어 이메일 검색 및 검증", color: "var(--cyan)", dim: "var(--cyan-dim)" },
+    { icon: <Ic.Bar s={18}/>, title: "대시보드", desc: "파이프라인 관리, KPI 지표, 전환율 분석을 한눈에", color: "var(--amber)", dim: "var(--amber-dim)" },
+    { icon: <Ic.Sparkle s={18}/>, title: "AI 매칭", desc: "제조사 프로필 기반 TOP 15 바이어 자동 추천", color: "var(--green)", dim: "var(--green-dim)" },
+  ];
+  return (
+    <div style={{position:"fixed",inset:0,zIndex:100,background:"var(--bg-0)",overflow:"auto"}}>
+      {/* Ambient glow */}
+      <div style={{position:"fixed",top:"-20%",left:"10%",width:"50vw",height:"50vw",borderRadius:"50%",background:"radial-gradient(circle,rgba(59,107,245,.06) 0%,transparent 70%)",pointerEvents:"none"}}/>
+      <div style={{position:"fixed",bottom:"-10%",right:"5%",width:"40vw",height:"40vw",borderRadius:"50%",background:"radial-gradient(circle,rgba(139,92,246,.05) 0%,transparent 70%)",pointerEvents:"none"}}/>
+
+      <div style={{maxWidth:960,margin:"0 auto",padding:"0 24px"}}>
+        {/* Nav */}
+        <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"20px 0",opacity:visible?1:0,transform:visible?"none":"translateY(-10px)",transition:"all .6s ease"}}>
+          <div style={{display:"flex",alignItems:"center",gap:10}}>
+            <div style={{width:32,height:32,borderRadius:8,background:"linear-gradient(135deg,var(--blue),var(--violet))",display:"flex",alignItems:"center",justifyContent:"center"}}><Ic.Users s={16}/></div>
+            <span style={{fontSize:18,fontWeight:800,letterSpacing:"-.03em"}}>NEXPORT</span>
+          </div>
+          <div onClick={onEnter} style={{padding:"8px 20px",borderRadius:8,background:"var(--blue)",color:"#fff",fontSize:12,fontWeight:600,cursor:"pointer",transition:"opacity .2s"}}
+            onMouseEnter={e=>e.currentTarget.style.opacity=".85"} onMouseLeave={e=>e.currentTarget.style.opacity="1"}>플랫폼 시작</div>
+        </div>
+
+        {/* Hero */}
+        <div style={{textAlign:"center",padding:"60px 0 40px",opacity:visible?1:0,transform:visible?"none":"translateY(20px)",transition:"all .8s ease .1s"}}>
+          <div style={{display:"inline-block",padding:"5px 14px",borderRadius:20,background:"var(--blue-dim)",border:"1px solid rgba(59,107,245,.15)",fontSize:11,fontWeight:600,color:"var(--blue)",marginBottom:20,letterSpacing:".02em"}}>AI-Powered Export Platform</div>
+          <h1 style={{fontSize:44,fontWeight:900,lineHeight:1.2,letterSpacing:"-.03em",marginBottom:16,fontFamily:"var(--font)"}}>
+            <span style={{color:"var(--t1)"}}>한국 제조업체의</span><br/>
+            <span style={{background:"linear-gradient(135deg,var(--blue),var(--cyan))",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent"}}>글로벌 수출을 AI로</span>
+          </h1>
+          <p style={{fontSize:16,color:"var(--t3)",maxWidth:520,margin:"0 auto",lineHeight:1.7}}>
+            바이어 발굴부터 이메일 검색, AI 매칭까지.<br/>수출의 모든 과정을 하나의 플랫폼에서.
+          </p>
+          <div style={{display:"flex",gap:12,justifyContent:"center",marginTop:32}}>
+            <div onClick={onEnter} style={{padding:"12px 32px",borderRadius:10,background:"var(--blue)",color:"#fff",fontSize:14,fontWeight:700,cursor:"pointer",transition:"all .2s",boxShadow:"0 4px 20px rgba(59,107,245,.3)"}}
+              onMouseEnter={e=>{e.currentTarget.style.transform="translateY(-2px)";e.currentTarget.style.boxShadow="0 6px 24px rgba(59,107,245,.4)"}}
+              onMouseLeave={e=>{e.currentTarget.style.transform="none";e.currentTarget.style.boxShadow="0 4px 20px rgba(59,107,245,.3)"}}>
+              무료로 시작하기
+            </div>
+            <div onClick={onEnter} style={{padding:"12px 32px",borderRadius:10,background:"var(--bg-3)",border:"1px solid var(--border)",color:"var(--t1)",fontSize:14,fontWeight:600,cursor:"pointer",transition:"all .2s"}}
+              onMouseEnter={e=>e.currentTarget.style.borderColor="var(--border-h)"} onMouseLeave={e=>e.currentTarget.style.borderColor="var(--border)"}>
+              데모 보기
+            </div>
+          </div>
+        </div>
+
+        {/* Stats Row */}
+        <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:12,padding:"20px 0 50px",opacity:visible?1:0,transform:visible?"none":"translateY(20px)",transition:"all .8s ease .3s"}}>
+          {stats.map((s,i)=>(
+            <div key={i} style={{textAlign:"center",padding:"20px 12px",borderRadius:12,background:"var(--bg-2)",border:"1px solid var(--border)"}}>
+              <div style={{fontSize:28,fontWeight:800,fontFamily:"var(--mono)",color:s.color,letterSpacing:"-.02em"}}>{s.val}</div>
+              <div style={{fontSize:11,color:"var(--t3)",marginTop:4,fontWeight:500}}>{s.label}</div>
+            </div>
+          ))}
+        </div>
+
+        {/* Features Grid */}
+        <div style={{opacity:visible?1:0,transform:visible?"none":"translateY(20px)",transition:"all .8s ease .5s"}}>
+          <div style={{textAlign:"center",marginBottom:32}}>
+            <div style={{fontSize:11,fontWeight:700,color:"var(--blue)",textTransform:"uppercase",letterSpacing:".1em",marginBottom:8}}>Features</div>
+            <h2 style={{fontSize:28,fontWeight:800,letterSpacing:"-.02em"}}>핵심 기능</h2>
+          </div>
+          <div style={{display:"grid",gridTemplateColumns:"repeat(2,1fr)",gap:14,paddingBottom:60}}>
+            {features.map((f,i)=>(
+              <div key={i} style={{padding:24,borderRadius:14,background:"var(--bg-2)",border:"1px solid var(--border)",transition:"all .2s",cursor:"default"}}
+                onMouseEnter={e=>{e.currentTarget.style.borderColor="var(--border-h)";e.currentTarget.style.transform="translateY(-2px)"}}
+                onMouseLeave={e=>{e.currentTarget.style.borderColor="var(--border)";e.currentTarget.style.transform="none"}}>
+                <div style={{width:40,height:40,borderRadius:10,background:f.dim,display:"flex",alignItems:"center",justifyContent:"center",marginBottom:14,color:f.color}}>{f.icon}</div>
+                <div style={{fontSize:15,fontWeight:700,marginBottom:6}}>{f.title}</div>
+                <div style={{fontSize:12,color:"var(--t3)",lineHeight:1.6}}>{f.desc}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Footer */}
+        <div style={{textAlign:"center",padding:"30px 0",borderTop:"1px solid var(--border)",opacity:visible?1:0,transition:"all .8s ease .7s"}}>
+          <div style={{fontSize:11,color:"var(--t4)"}}>© 2026 NEXPORT. AI 기반 수출 바이어 매칭 플랫폼</div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function FilterSidebar({ filters, setFilters, collapsed, setCollapsed }) {
   const [openSections, setOpenSections] = useState({"산업":true,"지역":true,"회사규모":false,"인증":false,"구매의향":false,"매칭점수":false});
   const toggle = k => setOpenSections(p=>({...p,[k]:!p[k]}));
@@ -1002,6 +1097,7 @@ export default function App() {
   const [sideCollapsed, setSideCollapsed] = useState(false);
   const [search, setSearch] = useState("");
   const [detailBuyer, setDetailBuyer] = useState(null);
+  const [showLanding, setShowLanding] = useState(true);
   const [tab, setTab] = useState("전체");
   const [sort, setSort] = useState({field:"score",asc:false});
   const [selected, setSelected] = useState(new Set());
@@ -1079,6 +1175,8 @@ export default function App() {
   return (
     <>
       <style>{CSS}</style>
+      {showLanding && <LandingHero onEnter={()=>setShowLanding(false)} />}
+
       {detailBuyer && <BuyerDetailPanel buyer={detailBuyer} onClose={()=>setDetailBuyer(null)} onSave={(b)=>{savedSet.has(b.id)?setSavedSet(p=>{const n=new Set(p);n.delete(b.id);return n}):setSavedSet(p=>new Set([...p,b.id]))}} isSaved={savedSet.has(detailBuyer.id)} />}
 
       <div style={{display:"flex",height:"100vh",overflow:"hidden",background:"var(--bg-0)"}}>
