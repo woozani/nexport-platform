@@ -648,7 +648,7 @@ function AIMatchView({ buyers }) {
 
 
 // ─────────── COLD EMAIL GENERATOR ───────────
-function ColdEmailModal({ buyer, onClose }) {
+function ColdEmailModal({ buyer, onClose, lang }) {
   const [tone, setTone] = useState("formal");
   const [lang, setLang] = useState("en");
   const [copied, setCopied] = useState(false);
@@ -1174,7 +1174,7 @@ function FilterSidebar({ filters, setFilters, collapsed, setCollapsed }) {
   const FilterSection = ({title, icon:Icon, children}) => (
     <div style={{borderBottom:"1px solid var(--border)"}}>
       <div onClick={()=>toggle(title)} style={{display:"flex",alignItems:"center",gap:8,padding:"10px 14px",cursor:"pointer",color:openSections[title]?"var(--t1)":"var(--t3)",transition:"color .15s",fontSize:12,fontWeight:600}}>
-        <Icon s={14} />
+        
         <span style={{flex:1}}>{title}</span>
         <span style={{transform:`rotate(${openSections[title]?180:0}deg)`,transition:"transform .2s"}}><Ic.ChevDown s={12} /></span>
       </div>
@@ -1184,7 +1184,7 @@ function FilterSidebar({ filters, setFilters, collapsed, setCollapsed }) {
 
   const CheckItem = ({label, checked, onChange, count}) => (
     <div onClick={onChange} style={{display:"flex",alignItems:"center",gap:8,padding:"4px 0",cursor:"pointer",fontSize:12,color:checked?"var(--t1)":"var(--t2)"}}>
-      <Checkbox checked={checked} onChange={onChange} />
+      
       <span style={{flex:1}}>{label}</span>
       {count !== undefined && <span style={{fontFamily:"var(--mono)",fontSize:10,color:"var(--t4)"}}>{count}</span>}
     </div>
@@ -1266,98 +1266,7 @@ function FilterSidebar({ filters, setFilters, collapsed, setCollapsed }) {
 }
 
 // ─────────── DETAIL PANEL ───────────
-function DetailPanel({ buyer, onClose }) {
-  if (!buyer) return null;
-  const c = buyer.score >= 85 ? "var(--green)" : buyer.score >= 70 ? "var(--blue)" : "var(--amber)";
-  const r = 32, circ = 2 * Math.PI * r, off = circ - (buyer.score/100)*circ;
 
-  return (
-    <div style={{width:380,background:"var(--bg-1)",borderLeft:"1px solid var(--border)",display:"flex",flexDirection:"column",flexShrink:0,animation:"fadeIn .3s ease",overflow:"hidden"}}>
-      <div style={{padding:"14px 18px",borderBottom:"1px solid var(--border)",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
-        <span style={{fontSize:13,fontWeight:700}}>바이어 상세</span>
-        <div onClick={onClose} style={{cursor:"pointer",color:"var(--t4)",padding:4}}><Ic.X s={16}/></div>
-      </div>
-      <div style={{flex:1,overflowY:"auto",padding:18}}>
-        {/* Header */}
-        <div style={{display:"flex",gap:16,marginBottom:20}}>
-          <div style={{position:"relative",width:72,height:72,flexShrink:0}}>
-            <svg width={72} height={72} style={{transform:"rotate(-90deg)"}}>
-              <circle cx={36} cy={36} r={r} fill="none" stroke="var(--bg-4)" strokeWidth="4"/>
-              <circle cx={36} cy={36} r={r} fill="none" stroke={c} strokeWidth="4" strokeDasharray={circ} strokeDashoffset={off} strokeLinecap="round" style={{transition:"all 1s ease"}}/>
-            </svg>
-            <div style={{position:"absolute",inset:0,display:"flex",alignItems:"center",justifyContent:"center",fontFamily:"var(--mono)",fontSize:18,fontWeight:700,color:c}}>{buyer.score}</div>
-          </div>
-          <div>
-            <div style={{fontSize:16,fontWeight:800}}>{buyer.name}</div>
-            <div style={{fontSize:12,color:"var(--t2)",marginTop:2}}>{buyer.title}</div>
-            <div style={{fontSize:12,color:"var(--t3)",marginTop:4,display:"flex",alignItems:"center",gap:4}}>{buyer.flag} {buyer.company}</div>
-          </div>
-        </div>
-
-        {/* Quick Actions */}
-        <div style={{display:"flex",gap:6,marginBottom:20}}>
-          {[["이메일",Ic.Mail,"var(--blue)"],["전화",Ic.Phone,"var(--green)"],["리스트 추가",Ic.List,"var(--violet)"],["내보내기",Ic.Download,"var(--amber)"]].map(([l,Icon,col])=>(
-            <div key={l} style={{flex:1,display:"flex",flexDirection:"column",alignItems:"center",gap:4,padding:"8px 4px",borderRadius:8,background:"var(--bg-3)",border:"1px solid var(--border)",cursor:"pointer",transition:"all .15s",fontSize:10,color:"var(--t2)"}}
-              onMouseEnter={e=>{e.currentTarget.style.borderColor=col;e.currentTarget.style.color=col}}
-              onMouseLeave={e=>{e.currentTarget.style.borderColor="var(--border)";e.currentTarget.style.color="var(--t2)"}}
-            ><Icon s={14}/>{l}</div>
-          ))}
-        </div>
-
-        {/* Info Grid */}
-        <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8,marginBottom:20}}>
-          {[["국가",`${buyer.flag} ${buyer.country}`],["산업",buyer.industry],["수요 품목",buyer.demand],["예상 규모",buyer.volume],["직원 수",buyer.employeeLabel],["매출 규모",buyer.revenue],["구매의향",buyer.buyingIntent],["상태",buyer.status]].map(([l,v])=>(
-            <div key={l} style={{padding:"8px 10px",borderRadius:8,background:"var(--bg-3)"}}>
-              <div style={{fontSize:10,color:"var(--t4)",textTransform:"uppercase",letterSpacing:".06em",marginBottom:3}}>{l}</div>
-              <div style={{fontSize:12,fontWeight:600}}>{v}</div>
-            </div>
-          ))}
-        </div>
-
-        {/* Contact */}
-        <div style={{padding:14,borderRadius:10,background:"var(--bg-3)",border:"1px solid var(--border)",marginBottom:16}}>
-          <div style={{fontSize:11,fontWeight:700,color:"var(--t3)",textTransform:"uppercase",letterSpacing:".08em",marginBottom:10}}>연락처</div>
-          <div style={{display:"flex",flexDirection:"column",gap:8}}>
-            <div style={{display:"flex",alignItems:"center",gap:8,fontSize:12}}><Ic.Mail s={12}/><span style={{color:"var(--blue)"}}>{buyer.email}</span></div>
-            <div style={{display:"flex",alignItems:"center",gap:8,fontSize:12}}><Ic.Phone s={12}/><span>{buyer.phone}</span></div>
-          </div>
-        </div>
-
-        {/* Certifications */}
-        <div style={{marginBottom:16}}>
-          <div style={{fontSize:11,fontWeight:700,color:"var(--t3)",textTransform:"uppercase",letterSpacing:".08em",marginBottom:8}}>인증</div>
-          <div style={{display:"flex",gap:4,flexWrap:"wrap"}}>
-            {buyer.certifications.map(c => <Badge key={c} color="var(--cyan)">{c}</Badge>)}
-          </div>
-        </div>
-
-        {/* Score Breakdown */}
-        <div style={{padding:14,borderRadius:10,background:"linear-gradient(135deg,var(--blue-dim),var(--violet-dim))",border:"1px solid rgba(59,107,245,.15)"}}>
-          <div style={{fontSize:11,fontWeight:700,color:"var(--t2)",marginBottom:10,display:"flex",alignItems:"center",gap:6}}><Ic.Sparkle s={12}/>AI 매칭 분석</div>
-          {[["제품 적합도",Math.min(99,buyer.score+3)],["시장 수요",Math.min(99,buyer.score-5)],["인증 일치",buyer.certifications.length*15+10],["거래 가능성",Math.min(99,buyer.score+1)]].map(([label,val])=>(
-            <div key={label} style={{marginBottom:8}}>
-              <div style={{display:"flex",justifyContent:"space-between",fontSize:11,marginBottom:3}}>
-                <span style={{color:"var(--t2)"}}>{label}</span>
-                <span style={{fontFamily:"var(--mono)",fontSize:10,fontWeight:600,color:"var(--t1)"}}>{Math.min(99,Math.max(20,val))}%</span>
-              </div>
-              <div style={{height:3,borderRadius:2,background:"rgba(255,255,255,.06)",overflow:"hidden"}}>
-                <div style={{width:`${Math.min(99,Math.max(20,val))}%`,height:"100%",borderRadius:2,background:"var(--blue-light)",animation:"barGrow .8s ease forwards"}} />
-              </div>
-            </div>
-          ))}
-        </div>
-
-        <div style={{fontSize:11,color:"var(--t4)",marginTop:16,textAlign:"center"}}>마지막 활동: {buyer.lastActive}</div>
-      </div>
-    </div>
-  );
-}
-
-// ─────────── MAIN TABLE ───────────
-
-// ─────────── EMAIL FINDER ───────────
-
-// ─────────── DASHBOARD ───────────
 function DashboardView({ buyers, savedSet, starred }) {
   const saved = buyers.filter(b => savedSet.has(b.id));
   const totalBuyers = buyers.length;
@@ -1984,7 +1893,7 @@ export default function App() {
         />
       <ToastContainer />
       {showAssistant && <AIAssistant buyers={ALL_BUYERS} onClose={()=>setShowAssistant(false)} />}
-      {emailBuyer && <ColdEmailModal buyer={emailBuyer} onClose={()=>setEmailBuyer(null)} />}
+      {emailBuyer && <ColdEmailModal lang={lang} buyer={emailBuyer} onClose={()=>setEmailBuyer(null)} />}
       {detailBuyer && <BuyerDetailPanel buyer={detailBuyer} onClose={()=>setDetailBuyer(null)} onSave={(b)=>{savedSet.has(b.id)?setSavedSet(p=>{const n=new Set(p);n.delete(b.id);return n}):setSavedSet(p=>new Set([...p,b.id]))}} isSaved={savedSet.has(detailBuyer.id)} />}
 
       <div style={{display:"flex",height:"100vh",overflow:"hidden",background:"var(--bg-0)"}}>
@@ -2068,7 +1977,7 @@ export default function App() {
             <div className="nx-table-wrap"><table className="nx-main-table" style={{width:"100%",borderCollapse:"collapse",minWidth:1100}}>
               <thead>
                 <tr style={{position:"sticky",top:0,zIndex:10,background:"var(--bg-2)"}}>
-                  <th style={{width:40,padding:"8px 12px"}}><Checkbox checked={allOnPageSelected} indeterminate={selected.size>0&&!allOnPageSelected} onChange={toggleAll}/></th>
+                  <th style={{width:40,padding:"8px 12px"}}></th>
                   <th style={{width:30}}/>
                   {[
                     ["name","바이어",180],["company","기업명",150],["country","국가",80],["industry","산업",110],
@@ -2081,7 +1990,7 @@ export default function App() {
                       width:w,borderBottom:"1px solid var(--border)",userSelect:"none"
                     }}>
                       <div style={{display:"flex",alignItems:"center",gap:4}}>
-                        {label}<span style={{color:sort.field===field?"var(--blue)":"var(--t4)"}}><SortIcon field={field}/></span>
+                        {label}<span style={{color:sort.field===field?"var(--blue)":"var(--t4)"}}></span>
                       </div>
                     </th>
                   ))}
@@ -2209,7 +2118,7 @@ fi fi${Math.min(i+1,5)}`}
                       onMouseEnter={e=>{if(!isSel)e.currentTarget.style.background="var(--bg-hover)"}}
                       onMouseLeave={e=>{if(!isSel)e.currentTarget.style.background=isSel?"var(--blue-dim)":"transparent"}}
                     >
-                      <td style={{padding:"8px 12px"}} onClick={e=>e.stopPropagation()}><Checkbox checked={isSel} onChange={()=>toggleSelect(b.id)}/></td>
+                      <td style={{padding:"8px 12px"}} onClick={e=>e.stopPropagation()}></td>
                       <td style={{padding:"4px 0"}} onClick={e=>{e.stopPropagation();setStarred(p=>{const n=new Set(p);n.has(b.id)?n.delete(b.id):n.add(b.id);return n})}}>
                         <span style={{cursor:"pointer",color:starred.has(b.id)?"var(--amber)":"var(--t4)"}}>{starred.has(b.id)?<Ic.StarFill s={13}/>:<Ic.Star s={13}/>}</span>
                       </td>
@@ -2223,11 +2132,11 @@ fi fi${Math.min(i+1,5)}`}
                       </td>
                       <td style={{padding:"8px 10px",fontSize:12}}><span>{b.flag}</span> <span style={{color:"var(--t2)"}}>{b.country}</span></td>
                       <td style={{padding:"8px 10px",fontSize:12,color:"var(--t2)"}}>{b.industry}</td>
-                      <td style={{padding:"8px 10px"}}><ScoreBar score={b.score}/></td>
+                      <td style={{padding:"8px 10px"}}></td>
                       <td style={{padding:"8px 10px",fontSize:12,color:"var(--t2)"}}>{b.demand}</td>
                       <td style={{padding:"8px 10px"}}><span style={{fontFamily:"var(--mono)",fontSize:12,fontWeight:600,color:"var(--green)"}}>{b.volume}</span></td>
                       <td style={{padding:"8px 10px"}}><span style={{width:6,height:6,borderRadius:"50%",background:intentColor(b.buyingIntent),display:"inline-block",marginRight:4}}/><span style={{fontSize:11,color:intentColor(b.buyingIntent)}}>{b.buyingIntent}</span></td>
-                      <td style={{padding:"8px 10px"}}><Badge color={statusColor(b.status)}>{b.status}</Badge></td>
+                      <td style={{padding:"8px 10px"}}></td>
                       <td style={{padding:"8px 10px",fontSize:11,color:"var(--t3)"}}>{b.email}</td>
                       <td style={{padding:"8px 10px"}} onClick={e=>e.stopPropagation()}>
                         {!isSaved ? (
@@ -2293,7 +2202,7 @@ fi fi${Math.min(i+1,5)}`}
                 }}
                   onMouseEnter={e=>{e.currentTarget.style.background=`${color}15`;e.currentTarget.style.color=color}}
                   onMouseLeave={e=>{e.currentTarget.style.background="transparent";e.currentTarget.style.color="var(--t2)"}}
-                ><Icon s={13}/>{label}</div>
+                >{label}</div>
               ))}
               <div style={{width:1,height:20,background:"var(--border)"}} />
               <div onClick={()=>setSelected(new Set())} style={{cursor:"pointer",color:"var(--t4)",padding:4}}><Ic.X s={14}/></div>
