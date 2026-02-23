@@ -1880,6 +1880,7 @@ export default function App() {
   const [detailBuyer, setDetailBuyer] = useState(null);
   const [emailBuyer, setEmailBuyer] = useState(null);
   const [showAssistant, setShowAssistant] = useState(false);
+  const [lang, setLang] = useState("ko");
   const [showLanding, setShowLanding] = useState(true);
   const [tab, setTab] = useState("전체");
   const [sort, setSort] = useState({field:"score",asc:false});
