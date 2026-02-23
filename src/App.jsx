@@ -297,7 +297,7 @@ function BuyerDetailPanel({ buyer, onClose, onSave, isSaved }) {
               <div style={{display:"flex",alignItems:"center",gap:8}}>
                 <div style={{width:28,height:28,borderRadius:6,background:"var(--blue-dim)",display:"flex",alignItems:"center",justifyContent:"center"}}><Ic.Mail s={12}/></div>
                 <div><div style={{fontSize:10,color:"var(--t4)",textTransform:"uppercase",letterSpacing:".05em",fontWeight:600}}>이메일</div><div style={{fontSize:12,color:"var(--blue)"}}>{buyer.email}</div></div>
-                <div onClick={()=>{navigator.clipboard.writeText(buyer.email);addToast('이메일이 복사되었습니다')}} style={{marginLeft:"auto",padding:"4px 8px",borderRadius:4,border:"1px solid var(--border)",cursor:"pointer",fontSize:10,color:"var(--t3)"}}>복사</div>
+                <div onClick={()=>navigator.clipboard.writeText(buyer.email)} style={{marginLeft:"auto",padding:"4px 8px",borderRadius:4,border:"1px solid var(--border)",cursor:"pointer",fontSize:10,color:"var(--t3)"}}>복사</div>
               </div>
               <div style={{display:"flex",alignItems:"center",gap:8}}>
                 <div style={{width:28,height:28,borderRadius:6,background:"var(--green-dim)",display:"flex",alignItems:"center",justifyContent:"center"}}><Ic.Phone s={12}/></div>
@@ -329,7 +329,7 @@ function BuyerDetailPanel({ buyer, onClose, onSave, isSaved }) {
           </div>
         </div>
         <div style={{padding:"12px 20px",borderTop:"1px solid var(--border)",display:"flex",gap:8,flexShrink:0}}>
-          <div onClick={()=>{navigator.clipboard.writeText(buyer.email);addToast('이메일이 복사되었습니다')}} style={{flex:1,padding:"10px 0",borderRadius:8,background:"var(--blue)",color:"#fff",textAlign:"center",fontSize:12,fontWeight:600,cursor:"pointer"}}>이메일 복사</div>
+          <div onClick={()=>navigator.clipboard.writeText(buyer.email)} style={{flex:1,padding:"10px 0",borderRadius:8,background:"var(--blue)",color:"#fff",textAlign:"center",fontSize:12,fontWeight:600,cursor:"pointer"}}>이메일 복사</div>
           <div onClick={()=>setEmailBuyer(buyer)} style={{flex:1,padding:"10px 0",borderRadius:8,background:"linear-gradient(135deg,var(--green),#0d9488)",color:"#fff",textAlign:"center",fontSize:12,fontWeight:600,cursor:"pointer"}}>AI 이메일 작성</div>
         </div>
       </div>
@@ -339,7 +339,7 @@ function BuyerDetailPanel({ buyer, onClose, onSave, isSaved }) {
 
 
 // ─────────── LANDING HERO ───────────
-function LandingHero({ onEnter, lang }) {
+function LandingHero({ onEnter }) {
   const [visible, setVisible] = useState(false);
   useEffect(() => { setTimeout(() => setVisible(true), 100); }, []);
   const stats = [
@@ -648,7 +648,7 @@ function AIMatchView({ buyers }) {
 
 
 // ─────────── COLD EMAIL GENERATOR ───────────
-function ColdEmailModal({ buyer, onClose, lang }) {
+function ColdEmailModal({ buyer, onClose }) {
   const [tone, setTone] = useState("formal");
   const [lang, setLang] = useState("en");
   const [copied, setCopied] = useState(false);
@@ -1117,93 +1117,6 @@ function AIAssistant({ buyers, onAction, onClose }) {
   );
 }
 
-
-// ─────────── TOAST NOTIFICATION ───────────
-const ToastContext = { toasts: [], listeners: [] };
-function addToast(msg, type="success") {
-  const id = Date.now();
-  ToastContext.toasts = [...ToastContext.toasts, {id, msg, type}];
-  ToastContext.listeners.forEach(fn => fn([...ToastContext.toasts]));
-  setTimeout(() => {
-    ToastContext.toasts = ToastContext.toasts.filter(t => t.id !== id);
-    ToastContext.listeners.forEach(fn => fn([...ToastContext.toasts]));
-  }, 3000);
-}
-function ToastContainer() {
-  const [toasts, setToasts] = useState([]);
-  useEffect(() => {
-    ToastContext.listeners.push(setToasts);
-    return () => { ToastContext.listeners = ToastContext.listeners.filter(fn => fn !== setToasts); };
-  }, []);
-  if (!toasts.length) return null;
-  const icons = { success: <Ic.Check s={12}/>, error: <Ic.X s={12}/>, info: <Ic.Eye s={12}/> };
-  const colors = { success: "var(--green)", error: "var(--red)", info: "var(--blue)" };
-  return (
-    <div className="nx-toast-container">
-      {toasts.map(t => (
-        <div key={t.id} className="nx-toast">
-          <div style={{width:20,height:20,borderRadius:5,background:`${colors[t.type]}20`,display:"flex",alignItems:"center",justifyContent:"center",color:colors[t.type]}}>{icons[t.type]}</div>
-          <span style={{color:"var(--t1)"}}>{t.msg}</span>
-        </div>
-      ))}
-    </div>
-  );
-}
-
-
-// ─────────── BULK ACTION BAR ───────────
-function BulkActionBar({ count, onClear, onExport, onEmail, onSave }) {
-  if (count === 0) return null;
-  return (
-    <div className={`nx-bulk-bar ${count > 0 ? "active" : ""}`}>
-      <div style={{width:28,height:28,borderRadius:7,background:"var(--blue)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:12,fontWeight:800,color:"#fff"}}>{count}</div>
-      <span style={{fontSize:12,fontWeight:600}}>개 선택됨</span>
-      <div style={{display:"flex",gap:6,marginLeft:12}}>
-        <div onClick={onExport} className="nx-btn-press" style={{padding:"6px 14px",borderRadius:6,background:"var(--bg-3)",border:"1px solid var(--border)",cursor:"pointer",fontSize:11,fontWeight:600,color:"var(--t2)",display:"flex",alignItems:"center",gap:5,transition:"all .15s"}}><Ic.Download s={12}/>CSV 내보내기</div>
-        <div onClick={onSave} className="nx-btn-press" style={{padding:"6px 14px",borderRadius:6,background:"var(--bg-3)",border:"1px solid var(--border)",cursor:"pointer",fontSize:11,fontWeight:600,color:"var(--t2)",display:"flex",alignItems:"center",gap:5,transition:"all .15s"}}><Ic.Bookmark s={12}/>저장</div>
-      </div>
-      <div onClick={onClear} style={{marginLeft:"auto",padding:"6px 14px",borderRadius:6,cursor:"pointer",fontSize:11,fontWeight:500,color:"var(--t4)"}}><Ic.X s={12}/> 선택 해제</div>
-    </div>
-  );
-}
-
-
-// ─────────── INLINE UI COMPONENTS ───────────
-function Badge({ color, children }) {
-  return <span style={{padding:"2px 8px",borderRadius:4,fontSize:10,fontWeight:600,color:color,background:color+"20",whiteSpace:"nowrap"}}>{children}</span>;
-}
-function Checkbox({ checked, onChange }) {
-  return <div onClick={e=>{e.stopPropagation();onChange&&onChange(!checked)}} style={{width:16,height:16,borderRadius:4,border:`1.5px solid ${checked?"var(--blue)":"var(--t4)"}`,background:checked?"var(--blue)":"transparent",display:"flex",alignItems:"center",justifyContent:"center",cursor:"pointer",transition:"all .15s",flexShrink:0}}>{checked&&<Ic.Check s={10} color="#fff"/>}</div>;
-}
-function CheckItem({ label, count, checked, onChange }) {
-  return <div onClick={()=>onChange&&onChange(!checked)} style={{display:"flex",alignItems:"center",gap:8,padding:"4px 0",cursor:"pointer",fontSize:11,color:checked?"var(--t1)":"var(--t3)"}}>
-    <Checkbox checked={checked} onChange={onChange} />
-    <span style={{flex:1}}>{label}</span>
-    {count!==undefined&&<span style={{fontSize:10,color:"var(--t4)"}}>{count}</span>}
-  </div>;
-}
-function FilterSection({ title, icon:IconComp, children, defaultOpen=true }) {
-  const [open, setOpen] = useState(defaultOpen);
-  return <div style={{marginBottom:12}}>
-    <div onClick={()=>setOpen(!open)} style={{display:"flex",alignItems:"center",gap:6,padding:"6px 0",cursor:"pointer",fontSize:11,fontWeight:700,color:"var(--t2)"}}>
-      {IconComp&&<IconComp s={12}/>}
-      <span style={{flex:1}}>{title}</span>
-      <Ic.ChevronDown s={10} style={{transform:open?"none":"rotate(-90deg)",transition:"transform .15s"}}/>
-    </div>
-    {open&&<div style={{paddingLeft:4}}>{children}</div>}
-  </div>;
-}
-function ScoreBar({ score }) {
-  const c = score>=80?"var(--green)":score>=65?"var(--cyan)":score>=50?"var(--amber)":"var(--red)";
-  return <div style={{display:"flex",alignItems:"center",gap:6}}>
-    <div style={{flex:1,height:4,borderRadius:2,background:"var(--bg-4)",overflow:"hidden"}}><div style={{width:`${score}%`,height:"100%",borderRadius:2,background:c}}/></div>
-    <span style={{fontSize:11,fontWeight:700,fontFamily:"var(--mono)",color:c,minWidth:24,textAlign:"right"}}>{score}</span>
-  </div>;
-}
-function SortIcon({ dir }) {
-  return <span style={{fontSize:8,marginLeft:2}}>{dir==="asc"?"▲":dir==="desc"?"▼":"↕"}</span>;
-}
-
 function FilterSidebar({ filters, setFilters, collapsed, setCollapsed }) {
   const [openSections, setOpenSections] = useState({"산업":true,"지역":true,"회사규모":false,"인증":false,"구매의향":false,"매칭점수":false});
   const toggle = k => setOpenSections(p=>({...p,[k]:!p[k]}));
@@ -1211,7 +1124,7 @@ function FilterSidebar({ filters, setFilters, collapsed, setCollapsed }) {
   const FilterSection = ({title, icon:Icon, children}) => (
     <div style={{borderBottom:"1px solid var(--border)"}}>
       <div onClick={()=>toggle(title)} style={{display:"flex",alignItems:"center",gap:8,padding:"10px 14px",cursor:"pointer",color:openSections[title]?"var(--t1)":"var(--t3)",transition:"color .15s",fontSize:12,fontWeight:600}}>
-        
+        <Icon s={14} />
         <span style={{flex:1}}>{title}</span>
         <span style={{transform:`rotate(${openSections[title]?180:0}deg)`,transition:"transform .2s"}}><Ic.ChevDown s={12} /></span>
       </div>
@@ -1221,7 +1134,7 @@ function FilterSidebar({ filters, setFilters, collapsed, setCollapsed }) {
 
   const CheckItem = ({label, checked, onChange, count}) => (
     <div onClick={onChange} style={{display:"flex",alignItems:"center",gap:8,padding:"4px 0",cursor:"pointer",fontSize:12,color:checked?"var(--t1)":"var(--t2)"}}>
-      
+      <Checkbox checked={checked} onChange={onChange} />
       <span style={{flex:1}}>{label}</span>
       {count !== undefined && <span style={{fontFamily:"var(--mono)",fontSize:10,color:"var(--t4)"}}>{count}</span>}
     </div>
@@ -1303,7 +1216,98 @@ function FilterSidebar({ filters, setFilters, collapsed, setCollapsed }) {
 }
 
 // ─────────── DETAIL PANEL ───────────
+function DetailPanel({ buyer, onClose }) {
+  if (!buyer) return null;
+  const c = buyer.score >= 85 ? "var(--green)" : buyer.score >= 70 ? "var(--blue)" : "var(--amber)";
+  const r = 32, circ = 2 * Math.PI * r, off = circ - (buyer.score/100)*circ;
 
+  return (
+    <div style={{width:380,background:"var(--bg-1)",borderLeft:"1px solid var(--border)",display:"flex",flexDirection:"column",flexShrink:0,animation:"fadeIn .3s ease",overflow:"hidden"}}>
+      <div style={{padding:"14px 18px",borderBottom:"1px solid var(--border)",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+        <span style={{fontSize:13,fontWeight:700}}>바이어 상세</span>
+        <div onClick={onClose} style={{cursor:"pointer",color:"var(--t4)",padding:4}}><Ic.X s={16}/></div>
+      </div>
+      <div style={{flex:1,overflowY:"auto",padding:18}}>
+        {/* Header */}
+        <div style={{display:"flex",gap:16,marginBottom:20}}>
+          <div style={{position:"relative",width:72,height:72,flexShrink:0}}>
+            <svg width={72} height={72} style={{transform:"rotate(-90deg)"}}>
+              <circle cx={36} cy={36} r={r} fill="none" stroke="var(--bg-4)" strokeWidth="4"/>
+              <circle cx={36} cy={36} r={r} fill="none" stroke={c} strokeWidth="4" strokeDasharray={circ} strokeDashoffset={off} strokeLinecap="round" style={{transition:"all 1s ease"}}/>
+            </svg>
+            <div style={{position:"absolute",inset:0,display:"flex",alignItems:"center",justifyContent:"center",fontFamily:"var(--mono)",fontSize:18,fontWeight:700,color:c}}>{buyer.score}</div>
+          </div>
+          <div>
+            <div style={{fontSize:16,fontWeight:800}}>{buyer.name}</div>
+            <div style={{fontSize:12,color:"var(--t2)",marginTop:2}}>{buyer.title}</div>
+            <div style={{fontSize:12,color:"var(--t3)",marginTop:4,display:"flex",alignItems:"center",gap:4}}>{buyer.flag} {buyer.company}</div>
+          </div>
+        </div>
+
+        {/* Quick Actions */}
+        <div style={{display:"flex",gap:6,marginBottom:20}}>
+          {[["이메일",Ic.Mail,"var(--blue)"],["전화",Ic.Phone,"var(--green)"],["리스트 추가",Ic.List,"var(--violet)"],["내보내기",Ic.Download,"var(--amber)"]].map(([l,Icon,col])=>(
+            <div key={l} style={{flex:1,display:"flex",flexDirection:"column",alignItems:"center",gap:4,padding:"8px 4px",borderRadius:8,background:"var(--bg-3)",border:"1px solid var(--border)",cursor:"pointer",transition:"all .15s",fontSize:10,color:"var(--t2)"}}
+              onMouseEnter={e=>{e.currentTarget.style.borderColor=col;e.currentTarget.style.color=col}}
+              onMouseLeave={e=>{e.currentTarget.style.borderColor="var(--border)";e.currentTarget.style.color="var(--t2)"}}
+            ><Icon s={14}/>{l}</div>
+          ))}
+        </div>
+
+        {/* Info Grid */}
+        <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8,marginBottom:20}}>
+          {[["국가",`${buyer.flag} ${buyer.country}`],["산업",buyer.industry],["수요 품목",buyer.demand],["예상 규모",buyer.volume],["직원 수",buyer.employeeLabel],["매출 규모",buyer.revenue],["구매의향",buyer.buyingIntent],["상태",buyer.status]].map(([l,v])=>(
+            <div key={l} style={{padding:"8px 10px",borderRadius:8,background:"var(--bg-3)"}}>
+              <div style={{fontSize:10,color:"var(--t4)",textTransform:"uppercase",letterSpacing:".06em",marginBottom:3}}>{l}</div>
+              <div style={{fontSize:12,fontWeight:600}}>{v}</div>
+            </div>
+          ))}
+        </div>
+
+        {/* Contact */}
+        <div style={{padding:14,borderRadius:10,background:"var(--bg-3)",border:"1px solid var(--border)",marginBottom:16}}>
+          <div style={{fontSize:11,fontWeight:700,color:"var(--t3)",textTransform:"uppercase",letterSpacing:".08em",marginBottom:10}}>연락처</div>
+          <div style={{display:"flex",flexDirection:"column",gap:8}}>
+            <div style={{display:"flex",alignItems:"center",gap:8,fontSize:12}}><Ic.Mail s={12}/><span style={{color:"var(--blue)"}}>{buyer.email}</span></div>
+            <div style={{display:"flex",alignItems:"center",gap:8,fontSize:12}}><Ic.Phone s={12}/><span>{buyer.phone}</span></div>
+          </div>
+        </div>
+
+        {/* Certifications */}
+        <div style={{marginBottom:16}}>
+          <div style={{fontSize:11,fontWeight:700,color:"var(--t3)",textTransform:"uppercase",letterSpacing:".08em",marginBottom:8}}>인증</div>
+          <div style={{display:"flex",gap:4,flexWrap:"wrap"}}>
+            {buyer.certifications.map(c => <Badge key={c} color="var(--cyan)">{c}</Badge>)}
+          </div>
+        </div>
+
+        {/* Score Breakdown */}
+        <div style={{padding:14,borderRadius:10,background:"linear-gradient(135deg,var(--blue-dim),var(--violet-dim))",border:"1px solid rgba(59,107,245,.15)"}}>
+          <div style={{fontSize:11,fontWeight:700,color:"var(--t2)",marginBottom:10,display:"flex",alignItems:"center",gap:6}}><Ic.Sparkle s={12}/>AI 매칭 분석</div>
+          {[["제품 적합도",Math.min(99,buyer.score+3)],["시장 수요",Math.min(99,buyer.score-5)],["인증 일치",buyer.certifications.length*15+10],["거래 가능성",Math.min(99,buyer.score+1)]].map(([label,val])=>(
+            <div key={label} style={{marginBottom:8}}>
+              <div style={{display:"flex",justifyContent:"space-between",fontSize:11,marginBottom:3}}>
+                <span style={{color:"var(--t2)"}}>{label}</span>
+                <span style={{fontFamily:"var(--mono)",fontSize:10,fontWeight:600,color:"var(--t1)"}}>{Math.min(99,Math.max(20,val))}%</span>
+              </div>
+              <div style={{height:3,borderRadius:2,background:"rgba(255,255,255,.06)",overflow:"hidden"}}>
+                <div style={{width:`${Math.min(99,Math.max(20,val))}%`,height:"100%",borderRadius:2,background:"var(--blue-light)",animation:"barGrow .8s ease forwards"}} />
+              </div>
+            </div>
+          ))}
+        </div>
+
+        <div style={{fontSize:11,color:"var(--t4)",marginTop:16,textAlign:"center"}}>마지막 활동: {buyer.lastActive}</div>
+      </div>
+    </div>
+  );
+}
+
+// ─────────── MAIN TABLE ───────────
+
+// ─────────── EMAIL FINDER ───────────
+
+// ─────────── DASHBOARD ───────────
 function DashboardView({ buyers, savedSet, starred }) {
   const saved = buyers.filter(b => savedSet.has(b.id));
   const totalBuyers = buyers.length;
@@ -1826,12 +1830,11 @@ export default function App() {
   const [detailBuyer, setDetailBuyer] = useState(null);
   const [emailBuyer, setEmailBuyer] = useState(null);
   const [showAssistant, setShowAssistant] = useState(false);
-  const [lang, setLang] = useState("ko");
   const [showLanding, setShowLanding] = useState(true);
   const [tab, setTab] = useState("전체");
   const [sort, setSort] = useState({field:"score",asc:false});
   const [selected, setSelected] = useState(new Set());
-  
+  const [detail, setDetail] = useState(null);
   const [page, setPage] = useState(1);
   const [starred, setStarred] = useState(new Set(ALL_BUYERS.filter(b=>b.starred).map(b=>b.id)));
   const [savedSet, setSavedSet] = useState(new Set(ALL_BUYERS.filter(b=>b.saved).map(b=>b.id)));
@@ -1912,25 +1915,10 @@ export default function App() {
   return (
     <>
       <style>{CSS}</style>
-      {showLanding && <LandingHero onEnter={()=>setShowLanding(false)} lang={lang} />}
+      {showLanding && <LandingHero onEnter={()=>setShowLanding(false)} />}
 
-      <BulkActionBar
-          count={selected.size}
-          onClear={()=>setSelected(new Set())}
-          onExport={()=>{
-            const sel = ALL_BUYERS.filter(b=>selected.has(b.id));
-            const csv = "이름,회사,국가,산업,이메일,매칭점수\n"+sel.map(b=>`${b.name},${b.company},${b.country},${b.industry},${b.email},${b.score}`).join("\n");
-            const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([csv],{type:"text/csv"}));a.download=`nexport-export-${new Date().toISOString().slice(0,10)}.csv`;a.click();
-            addToast(`${sel.length}명의 바이어를 CSV로 내보냈습니다`);
-          }}
-          onSave={()=>{
-            selected.forEach(id=>setSavedSet(p=>new Set([...p,id])));
-            addToast(`${selected.size}명을 저장했습니다`);
-          }}
-        />
-      <ToastContainer />
       {showAssistant && <AIAssistant buyers={ALL_BUYERS} onClose={()=>setShowAssistant(false)} />}
-      {emailBuyer && <ColdEmailModal lang={lang} buyer={emailBuyer} onClose={()=>setEmailBuyer(null)} />}
+      {emailBuyer && <ColdEmailModal buyer={emailBuyer} onClose={()=>setEmailBuyer(null)} />}
       {detailBuyer && <BuyerDetailPanel buyer={detailBuyer} onClose={()=>setDetailBuyer(null)} onSave={(b)=>{savedSet.has(b.id)?setSavedSet(p=>{const n=new Set(p);n.delete(b.id);return n}):setSavedSet(p=>new Set([...p,b.id]))}} isSaved={savedSet.has(detailBuyer.id)} />}
 
       <div style={{display:"flex",height:"100vh",overflow:"hidden",background:"var(--bg-0)"}}>
@@ -2014,7 +2002,7 @@ export default function App() {
             <div className="nx-table-wrap"><table className="nx-main-table" style={{width:"100%",borderCollapse:"collapse",minWidth:1100}}>
               <thead>
                 <tr style={{position:"sticky",top:0,zIndex:10,background:"var(--bg-2)"}}>
-                  <th style={{width:40,padding:"8px 12px"}}><Checkbox checked={allOnPageSelected} onChange={toggleAll}/></th>
+                  <th style={{width:40,padding:"8px 12px"}}><Checkbox checked={allOnPageSelected} indeterminate={selected.size>0&&!allOnPageSelected} onChange={toggleAll}/></th>
                   <th style={{width:30}}/>
                   {[
                     ["name","바이어",180],["company","기업명",150],["country","국가",80],["industry","산업",110],
@@ -2027,7 +2015,7 @@ export default function App() {
                       width:w,borderBottom:"1px solid var(--border)",userSelect:"none"
                     }}>
                       <div style={{display:"flex",alignItems:"center",gap:4}}>
-                        {label}<span style={{color:sort.field===field?"var(--blue)":"var(--t4)"}}><SortIcon dir={sort.field===field?sort.dir:null}/></span>
+                        {label}<span style={{color:sort.field===field?"var(--blue)":"var(--t4)"}}><SortIcon field={field}/></span>
                       </div>
                     </th>
                   ))}
@@ -2039,7 +2027,7 @@ export default function App() {
                   const isSel = selected.has(b.id);
                   const isSaved = savedSet.has(b.id);
                   return (
-                    <tr key={b.id} onClick={()=>setDetailBuyer(b)} className={`
+                    <tr key={b.id} onClick={()=>setDetailBuyer(b)} style={{cursor:"pointer"}} className={`
 
 .nx-loading-overlay{position:absolute;inset:0;background:rgba(6,7,10,.6);display:flex;align-items:center;justify-content:center;z-index:20;backdrop-filter:blur(2px)}
 .nx-empty-bounce{animation:fadeIn .4s ease}
@@ -2048,60 +2036,6 @@ export default function App() {
 /* Nav tabs */
 .nx-header-actions > div:not(:hover) { }
 .nx-header-actions > div:hover { background: var(--bg-hover) !important; color: var(--t1) !important; }
-
-
-/* ─── APOLLO-STYLE ELEVATIONS ─── */
-.nx-card-1{box-shadow:0 1px 3px rgba(0,0,0,.12),0 1px 2px rgba(0,0,0,.08)}
-.nx-card-2{box-shadow:0 4px 12px rgba(0,0,0,.15),0 2px 4px rgba(0,0,0,.1)}
-.nx-card-3{box-shadow:0 8px 24px rgba(0,0,0,.2),0 4px 8px rgba(0,0,0,.12)}
-
-/* Table row hover - Apollo style */
-table tbody tr{transition:background .12s ease}
-table tbody tr:hover{background:var(--bg-hover) !important}
-table tbody tr:hover td{color:var(--t1) !important}
-
-/* Row quick actions */
-.nx-row-actions{opacity:0;transition:opacity .15s ease;display:flex;gap:4px;position:absolute;right:8px;top:50%;transform:translateY(-50%)}
-table tbody tr:hover .nx-row-actions{opacity:1}
-
-/* Bulk action bar */
-.nx-bulk-bar{position:fixed;bottom:0;left:0;right:0;padding:12px 24px;background:var(--bg-2);border-top:1px solid var(--border);display:flex;align-items:center;gap:12px;z-index:50;transform:translateY(100%);transition:transform .25s cubic-bezier(.4,0,.2,1);box-shadow:0 -4px 20px rgba(0,0,0,.3)}
-.nx-bulk-bar.active{transform:translateY(0)}
-
-/* Toast notifications */
-.nx-toast-container{position:fixed;bottom:24px;right:24px;z-index:200;display:grid;gap:8px}
-.nx-toast{padding:10px 16px;border-radius:8px;background:var(--bg-2);border:1px solid var(--border);display:flex;align-items:center;gap:10px;font-size:12px;animation:slideInToast .3s ease;box-shadow:0 8px 24px rgba(0,0,0,.25)}
-@keyframes slideInToast{from{opacity:0;transform:translateX(20px)}to{opacity:1;transform:translateX(0)}}
-
-/* Smooth scrollbar */
-*::-webkit-scrollbar{width:6px;height:6px}
-*::-webkit-scrollbar-track{background:transparent}
-*::-webkit-scrollbar-thumb{background:var(--t4);border-radius:3px}
-*::-webkit-scrollbar-thumb:hover{background:var(--t3)}
-
-/* Active filter badge */
-.nx-filter-badge{width:16px;height:16px;border-radius:50%;background:var(--blue);color:#fff;font-size:9px;font-weight:800;display:flex;align-items:center;justify-content:center;position:absolute;top:-4px;right:-4px}
-
-/* Search focus glow */
-.nx-search-focused{border-color:var(--blue) !important;box-shadow:0 0 0 3px rgba(59,107,245,.15) !important}
-
-/* Button press effect */
-.nx-btn-press:active{transform:scale(.97)}
-
-/* Skeleton shimmer */
-@keyframes shimmer{0%{background-position:-200px 0}100%{background-position:200px 0}}
-.nx-shimmer{background:linear-gradient(90deg,var(--bg-3) 25%,var(--bg-4) 50%,var(--bg-3) 75%);background-size:400px 100%;animation:shimmer 1.5s infinite}
-
-/* Smooth page transitions */
-.nx-page-enter{animation:fadeIn .3s ease}
-
-/* Status indicator pulse */
-.nx-status-dot{width:6px;height:6px;border-radius:50%;display:inline-block}
-.nx-status-dot.active{animation:pulse 2s infinite}
-
-/* Card hover lift */
-.nx-card-hover:hover{transform:translateY(-1px);box-shadow:0 6px 16px rgba(0,0,0,.18) !important;border-color:var(--border-h) !important}
-.nx-card-hover{transition:all .2s ease}
 
 /* ─── RESPONSIVE BREAKPOINTS ─── */
 @media (max-width: 1024px) {
@@ -2151,11 +2085,12 @@ table tbody tr:hover .nx-row-actions{opacity:1}
 }
 
 fi fi${Math.min(i+1,5)}`}
+                      onClick={()=>setDetail(b)}
                       style={{cursor:"pointer",borderBottom:"1px solid var(--border)",background:isSel?"var(--blue-dim)":"transparent",transition:"background .12s"}}
                       onMouseEnter={e=>{if(!isSel)e.currentTarget.style.background="var(--bg-hover)"}}
                       onMouseLeave={e=>{if(!isSel)e.currentTarget.style.background=isSel?"var(--blue-dim)":"transparent"}}
                     >
-                      <td style={{padding:"8px 12px"}} onClick={e=>e.stopPropagation()}><Checkbox checked={selected.has(b.id)} onChange={()=>toggleRow(b.id)}/></td>
+                      <td style={{padding:"8px 12px"}} onClick={e=>e.stopPropagation()}><Checkbox checked={isSel} onChange={()=>toggleSelect(b.id)}/></td>
                       <td style={{padding:"4px 0"}} onClick={e=>{e.stopPropagation();setStarred(p=>{const n=new Set(p);n.has(b.id)?n.delete(b.id):n.add(b.id);return n})}}>
                         <span style={{cursor:"pointer",color:starred.has(b.id)?"var(--amber)":"var(--t4)"}}>{starred.has(b.id)?<Ic.StarFill s={13}/>:<Ic.Star s={13}/>}</span>
                       </td>
@@ -2173,7 +2108,7 @@ fi fi${Math.min(i+1,5)}`}
                       <td style={{padding:"8px 10px",fontSize:12,color:"var(--t2)"}}>{b.demand}</td>
                       <td style={{padding:"8px 10px"}}><span style={{fontFamily:"var(--mono)",fontSize:12,fontWeight:600,color:"var(--green)"}}>{b.volume}</span></td>
                       <td style={{padding:"8px 10px"}}><span style={{width:6,height:6,borderRadius:"50%",background:intentColor(b.buyingIntent),display:"inline-block",marginRight:4}}/><span style={{fontSize:11,color:intentColor(b.buyingIntent)}}>{b.buyingIntent}</span></td>
-                      <td style={{padding:"8px 10px"}}><Badge color={b.status==="활성"?"var(--green)":b.status==="잠재"?"var(--amber)":"var(--t4)"}>{b.status}</Badge></td>
+                      <td style={{padding:"8px 10px"}}><Badge color={statusColor(b.status)}>{b.status}</Badge></td>
                       <td style={{padding:"8px 10px",fontSize:11,color:"var(--t3)"}}>{b.email}</td>
                       <td style={{padding:"8px 10px"}} onClick={e=>e.stopPropagation()}>
                         {!isSaved ? (
@@ -2239,7 +2174,7 @@ fi fi${Math.min(i+1,5)}`}
                 }}
                   onMouseEnter={e=>{e.currentTarget.style.background=`${color}15`;e.currentTarget.style.color=color}}
                   onMouseLeave={e=>{e.currentTarget.style.background="transparent";e.currentTarget.style.color="var(--t2)"}}
-                >{label}</div>
+                ><Icon s={13}/>{label}</div>
               ))}
               <div style={{width:1,height:20,background:"var(--border)"}} />
               <div onClick={()=>setSelected(new Set())} style={{cursor:"pointer",color:"var(--t4)",padding:4}}><Ic.X s={14}/></div>
@@ -2249,7 +2184,7 @@ fi fi${Math.min(i+1,5)}`}
         </div>
 
         {/* Detail Panel */}
-        
+        {detail && <DetailPanel buyer={detail} onClose={()=>setDetail(null)} />}
       </div>
 
       {/* Export Modal */}
