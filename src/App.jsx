@@ -297,7 +297,7 @@ function BuyerDetailPanel({ buyer, onClose, onSave, isSaved }) {
               <div style={{display:"flex",alignItems:"center",gap:8}}>
                 <div style={{width:28,height:28,borderRadius:6,background:"var(--blue-dim)",display:"flex",alignItems:"center",justifyContent:"center"}}><Ic.Mail s={12}/></div>
                 <div><div style={{fontSize:10,color:"var(--t4)",textTransform:"uppercase",letterSpacing:".05em",fontWeight:600}}>이메일</div><div style={{fontSize:12,color:"var(--blue)"}}>{buyer.email}</div></div>
-                <div onClick={()=>navigator.clipboard.writeText(buyer.email)} style={{marginLeft:"auto",padding:"4px 8px",borderRadius:4,border:"1px solid var(--border)",cursor:"pointer",fontSize:10,color:"var(--t3)"}}>복사</div>
+                <div onClick={()=>{navigator.clipboard.writeText(buyer.email);addToast('이메일이 복사되었습니다')}} style={{marginLeft:"auto",padding:"4px 8px",borderRadius:4,border:"1px solid var(--border)",cursor:"pointer",fontSize:10,color:"var(--t3)"}}>복사</div>
               </div>
               <div style={{display:"flex",alignItems:"center",gap:8}}>
                 <div style={{width:28,height:28,borderRadius:6,background:"var(--green-dim)",display:"flex",alignItems:"center",justifyContent:"center"}}><Ic.Phone s={12}/></div>
@@ -329,7 +329,7 @@ function BuyerDetailPanel({ buyer, onClose, onSave, isSaved }) {
           </div>
         </div>
         <div style={{padding:"12px 20px",borderTop:"1px solid var(--border)",display:"flex",gap:8,flexShrink:0}}>
-          <div onClick={()=>navigator.clipboard.writeText(buyer.email)} style={{flex:1,padding:"10px 0",borderRadius:8,background:"var(--blue)",color:"#fff",textAlign:"center",fontSize:12,fontWeight:600,cursor:"pointer"}}>이메일 복사</div>
+          <div onClick={()=>{navigator.clipboard.writeText(buyer.email);addToast('이메일이 복사되었습니다')}} style={{flex:1,padding:"10px 0",borderRadius:8,background:"var(--blue)",color:"#fff",textAlign:"center",fontSize:12,fontWeight:600,cursor:"pointer"}}>이메일 복사</div>
           <div onClick={()=>setEmailBuyer(buyer)} style={{flex:1,padding:"10px 0",borderRadius:8,background:"linear-gradient(135deg,var(--green),#0d9488)",color:"#fff",textAlign:"center",fontSize:12,fontWeight:600,cursor:"pointer"}}>AI 이메일 작성</div>
         </div>
       </div>
@@ -1113,6 +1113,56 @@ function AIAssistant({ buyers, onAction, onClose }) {
           <span style={{fontSize:10,color:"var(--t4)",marginLeft:"auto"}}>NEXPORT AI Assistant</span>
         </div>
       </div>
+    </div>
+  );
+}
+
+
+// ─────────── TOAST NOTIFICATION ───────────
+const ToastContext = { toasts: [], listeners: [] };
+function addToast(msg, type="success") {
+  const id = Date.now();
+  ToastContext.toasts = [...ToastContext.toasts, {id, msg, type}];
+  ToastContext.listeners.forEach(fn => fn([...ToastContext.toasts]));
+  setTimeout(() => {
+    ToastContext.toasts = ToastContext.toasts.filter(t => t.id !== id);
+    ToastContext.listeners.forEach(fn => fn([...ToastContext.toasts]));
+  }, 3000);
+}
+function ToastContainer() {
+  const [toasts, setToasts] = useState([]);
+  useEffect(() => {
+    ToastContext.listeners.push(setToasts);
+    return () => { ToastContext.listeners = ToastContext.listeners.filter(fn => fn !== setToasts); };
+  }, []);
+  if (!toasts.length) return null;
+  const icons = { success: <Ic.Check s={12}/>, error: <Ic.X s={12}/>, info: <Ic.Eye s={12}/> };
+  const colors = { success: "var(--green)", error: "var(--red)", info: "var(--blue)" };
+  return (
+    <div className="nx-toast-container">
+      {toasts.map(t => (
+        <div key={t.id} className="nx-toast">
+          <div style={{width:20,height:20,borderRadius:5,background:`${colors[t.type]}20`,display:"flex",alignItems:"center",justifyContent:"center",color:colors[t.type]}}>{icons[t.type]}</div>
+          <span style={{color:"var(--t1)"}}>{t.msg}</span>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+
+// ─────────── BULK ACTION BAR ───────────
+function BulkActionBar({ count, onClear, onExport, onEmail, onSave }) {
+  if (count === 0) return null;
+  return (
+    <div className={`nx-bulk-bar ${count > 0 ? "active" : ""}`}>
+      <div style={{width:28,height:28,borderRadius:7,background:"var(--blue)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:12,fontWeight:800,color:"#fff"}}>{count}</div>
+      <span style={{fontSize:12,fontWeight:600}}>개 선택됨</span>
+      <div style={{display:"flex",gap:6,marginLeft:12}}>
+        <div onClick={onExport} className="nx-btn-press" style={{padding:"6px 14px",borderRadius:6,background:"var(--bg-3)",border:"1px solid var(--border)",cursor:"pointer",fontSize:11,fontWeight:600,color:"var(--t2)",display:"flex",alignItems:"center",gap:5,transition:"all .15s"}}><Ic.Download s={12}/>CSV 내보내기</div>
+        <div onClick={onSave} className="nx-btn-press" style={{padding:"6px 14px",borderRadius:6,background:"var(--bg-3)",border:"1px solid var(--border)",cursor:"pointer",fontSize:11,fontWeight:600,color:"var(--t2)",display:"flex",alignItems:"center",gap:5,transition:"all .15s"}}><Ic.Bookmark s={12}/>저장</div>
+      </div>
+      <div onClick={onClear} style={{marginLeft:"auto",padding:"6px 14px",borderRadius:6,cursor:"pointer",fontSize:11,fontWeight:500,color:"var(--t4)"}}><Ic.X s={12}/> 선택 해제</div>
     </div>
   );
 }
@@ -1917,6 +1967,21 @@ export default function App() {
       <style>{CSS}</style>
       {showLanding && <LandingHero onEnter={()=>setShowLanding(false)} />}
 
+      <BulkActionBar
+          count={selected.size}
+          onClear={()=>setSelected(new Set())}
+          onExport={()=>{
+            const sel = ALL_BUYERS.filter(b=>selected.has(b.id));
+            const csv = "이름,회사,국가,산업,이메일,매칭점수\n"+sel.map(b=>`${b.name},${b.company},${b.country},${b.industry},${b.email},${b.score}`).join("\n");
+            const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([csv],{type:"text/csv"}));a.download=`nexport-export-${new Date().toISOString().slice(0,10)}.csv`;a.click();
+            addToast(`${sel.length}명의 바이어를 CSV로 내보냈습니다`);
+          }}
+          onSave={()=>{
+            selected.forEach(id=>setSavedSet(p=>new Set([...p,id])));
+            addToast(`${selected.size}명을 저장했습니다`);
+          }}
+        />
+      <ToastContainer />
       {showAssistant && <AIAssistant buyers={ALL_BUYERS} onClose={()=>setShowAssistant(false)} />}
       {emailBuyer && <ColdEmailModal buyer={emailBuyer} onClose={()=>setEmailBuyer(null)} />}
       {detailBuyer && <BuyerDetailPanel buyer={detailBuyer} onClose={()=>setDetailBuyer(null)} onSave={(b)=>{savedSet.has(b.id)?setSavedSet(p=>{const n=new Set(p);n.delete(b.id);return n}):setSavedSet(p=>new Set([...p,b.id]))}} isSaved={savedSet.has(detailBuyer.id)} />}
@@ -2036,6 +2101,60 @@ export default function App() {
 /* Nav tabs */
 .nx-header-actions > div:not(:hover) { }
 .nx-header-actions > div:hover { background: var(--bg-hover) !important; color: var(--t1) !important; }
+
+
+/* ─── APOLLO-STYLE ELEVATIONS ─── */
+.nx-card-1{box-shadow:0 1px 3px rgba(0,0,0,.12),0 1px 2px rgba(0,0,0,.08)}
+.nx-card-2{box-shadow:0 4px 12px rgba(0,0,0,.15),0 2px 4px rgba(0,0,0,.1)}
+.nx-card-3{box-shadow:0 8px 24px rgba(0,0,0,.2),0 4px 8px rgba(0,0,0,.12)}
+
+/* Table row hover - Apollo style */
+table tbody tr{transition:background .12s ease}
+table tbody tr:hover{background:var(--bg-hover) !important}
+table tbody tr:hover td{color:var(--t1) !important}
+
+/* Row quick actions */
+.nx-row-actions{opacity:0;transition:opacity .15s ease;display:flex;gap:4px;position:absolute;right:8px;top:50%;transform:translateY(-50%)}
+table tbody tr:hover .nx-row-actions{opacity:1}
+
+/* Bulk action bar */
+.nx-bulk-bar{position:fixed;bottom:0;left:0;right:0;padding:12px 24px;background:var(--bg-2);border-top:1px solid var(--border);display:flex;align-items:center;gap:12px;z-index:50;transform:translateY(100%);transition:transform .25s cubic-bezier(.4,0,.2,1);box-shadow:0 -4px 20px rgba(0,0,0,.3)}
+.nx-bulk-bar.active{transform:translateY(0)}
+
+/* Toast notifications */
+.nx-toast-container{position:fixed;bottom:24px;right:24px;z-index:200;display:grid;gap:8px}
+.nx-toast{padding:10px 16px;border-radius:8px;background:var(--bg-2);border:1px solid var(--border);display:flex;align-items:center;gap:10px;font-size:12px;animation:slideInToast .3s ease;box-shadow:0 8px 24px rgba(0,0,0,.25)}
+@keyframes slideInToast{from{opacity:0;transform:translateX(20px)}to{opacity:1;transform:translateX(0)}}
+
+/* Smooth scrollbar */
+*::-webkit-scrollbar{width:6px;height:6px}
+*::-webkit-scrollbar-track{background:transparent}
+*::-webkit-scrollbar-thumb{background:var(--t4);border-radius:3px}
+*::-webkit-scrollbar-thumb:hover{background:var(--t3)}
+
+/* Active filter badge */
+.nx-filter-badge{width:16px;height:16px;border-radius:50%;background:var(--blue);color:#fff;font-size:9px;font-weight:800;display:flex;align-items:center;justify-content:center;position:absolute;top:-4px;right:-4px}
+
+/* Search focus glow */
+.nx-search-focused{border-color:var(--blue) !important;box-shadow:0 0 0 3px rgba(59,107,245,.15) !important}
+
+/* Button press effect */
+.nx-btn-press:active{transform:scale(.97)}
+
+/* Skeleton shimmer */
+@keyframes shimmer{0%{background-position:-200px 0}100%{background-position:200px 0}}
+.nx-shimmer{background:linear-gradient(90deg,var(--bg-3) 25%,var(--bg-4) 50%,var(--bg-3) 75%);background-size:400px 100%;animation:shimmer 1.5s infinite}
+
+/* Smooth page transitions */
+.nx-page-enter{animation:fadeIn .3s ease}
+
+/* Status indicator pulse */
+.nx-status-dot{width:6px;height:6px;border-radius:50%;display:inline-block}
+.nx-status-dot.active{animation:pulse 2s infinite}
+
+/* Card hover lift */
+.nx-card-hover:hover{transform:translateY(-1px);box-shadow:0 6px 16px rgba(0,0,0,.18) !important;border-color:var(--border-h) !important}
+.nx-card-hover{transition:all .2s ease}
 
 /* ─── RESPONSIVE BREAKPOINTS ─── */
 @media (max-width: 1024px) {
