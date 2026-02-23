@@ -936,6 +936,187 @@ function KanbanPipeline({ buyers }) {
   );
 }
 
+
+// ─────────── AI ASSISTANT ───────────
+function AIAssistant({ buyers, onAction, onClose }) {
+  const [query, setQuery] = useState("");
+  const [thinking, setThinking] = useState(false);
+  const [result, setResult] = useState(null);
+  const [history, setHistory] = useState([]);
+
+  const suggestions = [
+    "유럽에서 구매의향 높은 바이어 찾아줘",
+    "자동차 부품 산업 바이어 TOP 5",
+    "이번 달 파이프라인 요약해줘",
+    "독일 바이어에게 보낼 이메일 작성해줘",
+    "매칭점수 90 이상 바이어 리스트",
+    "동남아 시장 진출 전략 추천",
+  ];
+
+  const processQuery = (q) => {
+    if (!q.trim()) return;
+    setThinking(true);
+    setResult(null);
+    const input = q.toLowerCase();
+
+    setTimeout(() => {
+      let response = { type:"text", content:"", data:null };
+
+      // Intent: find buyers by region
+      if (input.includes("유럽") || input.includes("europe")) {
+        const eu = buyers.filter(b=>["독일","프랑스","영국","스웨덴","네덜란드","이탈리아","스페인","폴란드"].includes(b.country));
+        const high = input.includes("높") || input.includes("high") ? eu.filter(b=>b.buyingIntent==="높음") : eu;
+        response = { type:"buyers", content:`유럽 지역${input.includes("높")?" 구매의향 높은":""} 바이어 ${high.length}명을 찾았습니다.`, data:high.slice(0,8) };
+      }
+      // Intent: find by industry
+      else if (input.includes("자동차") || input.includes("전자") || input.includes("의료") || input.includes("화학")) {
+        const keyword = ["자동차","전자","의료","화학","기계","섬유"].find(k=>input.includes(k)) || "";
+        const matched = buyers.filter(b=>b.industry && b.industry.includes(keyword));
+        const top = input.includes("top") || input.includes("5") ? matched.sort((a,b)=>b.score-a.score).slice(0,5) : matched.slice(0,8);
+        response = { type:"buyers", content:`${keyword} 관련 바이어 ${top.length}명입니다. 매칭점수 높은 순으로 정렬했습니다.`, data:top };
+      }
+      // Intent: score filter
+      else if (input.includes("매칭") && (input.includes("90") || input.includes("80") || input.includes("70"))) {
+        const threshold = input.includes("90") ? 90 : input.includes("80") ? 80 : 70;
+        const matched = buyers.filter(b=>b.score >= threshold).sort((a,b)=>b.score-a.score);
+        response = { type:"buyers", content:`매칭점수 ${threshold}점 이상 바이어 ${matched.length}명입니다.`, data:matched.slice(0,10) };
+      }
+      // Intent: pipeline summary
+      else if (input.includes("파이프라인") || input.includes("요약") || input.includes("summary")) {
+        const high = buyers.filter(b=>b.buyingIntent==="높음").length;
+        const mid = buyers.filter(b=>b.buyingIntent==="중간").length;
+        response = { type:"summary", content:`파이프라인 현황 요약`, data:{
+          total: buyers.length,
+          highIntent: high,
+          midIntent: mid,
+          avgScore: Math.round(buyers.reduce((a,b)=>a+b.score,0)/buyers.length),
+          topCountries: ["독일","미국","일본","베트남","프랑스"].slice(0,5),
+          pipeline: "$4.8M",
+          conversion: "8%"
+        }};
+      }
+      // Intent: email
+      else if (input.includes("이메일") || input.includes("email") || input.includes("작성")) {
+        response = { type:"action", content:"이메일 작성 기능으로 이동합니다. 바이어를 클릭하여 AI 이메일을 생성하세요.", action:"email" };
+      }
+      // Intent: Southeast Asia
+      else if (input.includes("동남아") || input.includes("southeast")) {
+        const sea = buyers.filter(b=>["베트남","태국","인도네시아","말레이시아","싱가포르","필리핀"].includes(b.country));
+        response = { type:"buyers", content:`동남아 바이어 ${sea.length}명을 찾았습니다. 현재 베트남, 태국 등에서 수요가 증가하는 추세입니다.`, data:sea.slice(0,8) };
+      }
+      // Default
+      else {
+        const sample = buyers.sort((a,b)=>b.score-a.score).slice(0,5);
+        response = { type:"buyers", content:`"${q}"에 대한 분석 결과입니다. 관련도 높은 바이어를 추천합니다.`, data:sample };
+      }
+
+      setResult(response);
+      setHistory(h=>[...h, {q, r:response}]);
+      setThinking(false);
+    }, 1200);
+  };
+
+  const cColor = (s) => s>=80?"var(--green)":s>=65?"var(--cyan)":s>=50?"var(--amber)":"var(--red)";
+  const intentColor = (i) => i==="높음"?"var(--green)":i==="중간"?"var(--amber)":"var(--t4)";
+
+  return (
+    <div style={{position:"fixed",inset:0,zIndex:100,display:"flex",alignItems:"flex-start",justifyContent:"center",paddingTop:"8vh"}}>
+      <div onClick={onClose} style={{position:"fixed",inset:0,background:"rgba(0,0,0,.6)",backdropFilter:"blur(4px)"}}/>
+      <div style={{position:"relative",width:680,maxWidth:"92vw",maxHeight:"80vh",background:"var(--bg-1)",border:"1px solid var(--border)",borderRadius:16,display:"flex",flexDirection:"column",animation:"scaleIn .2s ease",overflow:"hidden",boxShadow:"0 20px 60px rgba(0,0,0,.4)"}}>
+        {/* Search bar */}
+        <div style={{padding:"16px 20px",borderBottom:"1px solid var(--border)",display:"flex",alignItems:"center",gap:12}}>
+          <div style={{width:32,height:32,borderRadius:8,background:"linear-gradient(135deg,var(--blue),var(--violet))",display:"flex",alignItems:"center",justifyContent:"center"}}><Ic.Sparkle s={16}/></div>
+          <input value={query} onChange={e=>setQuery(e.target.value)}
+            onKeyDown={e=>{if(e.key==="Enter")processQuery(query)}}
+            placeholder="무엇이든 물어보세요... (예: 유럽에서 구매의향 높은 바이어)"
+            autoFocus
+            style={{flex:1,background:"transparent",border:"none",outline:"none",color:"var(--t1)",fontSize:15,fontWeight:500}} />
+          {query && <div onClick={()=>{setQuery("");setResult(null)}} style={{cursor:"pointer",color:"var(--t4)"}}><Ic.X s={16}/></div>}
+          <div onClick={onClose} style={{padding:4,cursor:"pointer",color:"var(--t4)"}}><Ic.X s={14}/></div>
+        </div>
+
+        <div style={{flex:1,overflow:"auto",padding:20}}>
+          {/* Suggestions */}
+          {!result && !thinking && (
+            <div style={{animation:"fadeIn .3s ease"}}>
+              <div style={{fontSize:11,fontWeight:600,color:"var(--t4)",marginBottom:12,textTransform:"uppercase",letterSpacing:".05em"}}>추천 질문</div>
+              <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8}}>
+                {suggestions.map((s,i)=>(
+                  <div key={i} onClick={()=>{setQuery(s);processQuery(s)}} style={{padding:"10px 14px",borderRadius:8,background:"var(--bg-2)",border:"1px solid var(--border)",fontSize:12,color:"var(--t2)",cursor:"pointer",transition:"all .15s"}}
+                    onMouseEnter={e=>{e.currentTarget.style.borderColor="var(--blue)";e.currentTarget.style.color="var(--t1)"}}
+                    onMouseLeave={e=>{e.currentTarget.style.borderColor="var(--border)";e.currentTarget.style.color="var(--t2)"}}>
+                    {s}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Thinking */}
+          {thinking && (
+            <div style={{textAlign:"center",padding:"40px 0",animation:"fadeIn .3s ease"}}>
+              <div style={{display:"inline-flex",gap:6}}>
+                {[0,1,2].map(i=><div key={i} style={{width:8,height:8,borderRadius:"50%",background:"var(--blue)",animation:`pulse 1.2s ease ${i*0.2}s infinite`}}/>)}
+              </div>
+              <div style={{fontSize:12,color:"var(--t3)",marginTop:12}}>AI가 분석 중입니다...</div>
+            </div>
+          )}
+
+          {/* Results */}
+          {result && !thinking && (
+            <div style={{animation:"fadeIn .3s ease"}}>
+              <div style={{padding:14,borderRadius:10,background:"var(--bg-2)",border:"1px solid var(--border)",marginBottom:16}}>
+                <div style={{fontSize:13,color:"var(--t1)",lineHeight:1.6}}>{result.content}</div>
+              </div>
+
+              {result.type==="buyers" && result.data && (
+                <div style={{display:"grid",gap:8}}>
+                  {result.data.map((b,i)=>(
+                    <div key={b.id||i} style={{padding:12,borderRadius:10,background:"var(--bg-2)",border:"1px solid var(--border)",display:"flex",alignItems:"center",gap:12,transition:"border-color .15s",cursor:"pointer"}}
+                      onMouseEnter={e=>e.currentTarget.style.borderColor="var(--border-h)"} onMouseLeave={e=>e.currentTarget.style.borderColor="var(--border)"}>
+                      <div style={{width:28,height:28,borderRadius:7,background:"var(--blue-dim)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:12,fontWeight:800,color:"var(--blue)"}}>{i+1}</div>
+                      <div style={{flex:1,minWidth:0}}>
+                        <div style={{fontSize:12,fontWeight:700}}>{b.name} <span style={{fontWeight:400,color:"var(--t3)"}}>{b.flag} {b.company}</span></div>
+                        <div style={{fontSize:11,color:"var(--t3)",marginTop:2}}>{b.industry} · {b.demand}</div>
+                      </div>
+                      <div style={{padding:"3px 8px",borderRadius:5,fontSize:10,fontWeight:700,color:intentColor(b.buyingIntent),background:b.buyingIntent==="높음"?"var(--green-dim)":b.buyingIntent==="중간"?"var(--amber-dim)":"var(--bg-4)"}}>{b.buyingIntent}</div>
+                      <div style={{fontSize:14,fontWeight:800,fontFamily:"var(--mono)",color:cColor(b.score)}}>{b.score}</div>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {result.type==="summary" && result.data && (
+                <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:10}}>
+                  {[
+                    {label:"전체 바이어",val:result.data.total,color:"var(--blue)"},
+                    {label:"높은 구매의향",val:result.data.highIntent+"명",color:"var(--green)"},
+                    {label:"평균 매칭점수",val:result.data.avgScore,color:"var(--cyan)"},
+                    {label:"파이프라인",val:result.data.pipeline,color:"var(--amber)"},
+                    {label:"전환율",val:result.data.conversion,color:"var(--violet)"},
+                    {label:"TOP 국가",val:result.data.topCountries.slice(0,3).join(", "),color:"var(--t2)"},
+                  ].map((s,i)=>(
+                    <div key={i} style={{padding:14,borderRadius:10,background:"var(--bg-2)",border:"1px solid var(--border)",textAlign:"center"}}>
+                      <div style={{fontSize:20,fontWeight:800,fontFamily:"var(--mono)",color:s.color}}>{s.val}</div>
+                      <div style={{fontSize:10,color:"var(--t3)",marginTop:4}}>{s.label}</div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+
+        {/* Footer hint */}
+        <div style={{padding:"10px 20px",borderTop:"1px solid var(--border)",display:"flex",alignItems:"center",gap:8}}>
+          <span style={{fontSize:10,color:"var(--t4)"}}>Enter로 검색 · ESC로 닫기</span>
+          <span style={{fontSize:10,color:"var(--t4)",marginLeft:"auto"}}>NEXPORT AI Assistant</span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function FilterSidebar({ filters, setFilters, collapsed, setCollapsed }) {
   const [openSections, setOpenSections] = useState({"산업":true,"지역":true,"회사규모":false,"인증":false,"구매의향":false,"매칭점수":false});
   const toggle = k => setOpenSections(p=>({...p,[k]:!p[k]}));
@@ -1648,6 +1829,7 @@ export default function App() {
   const [search, setSearch] = useState("");
   const [detailBuyer, setDetailBuyer] = useState(null);
   const [emailBuyer, setEmailBuyer] = useState(null);
+  const [showAssistant, setShowAssistant] = useState(false);
   const [showLanding, setShowLanding] = useState(true);
   const [tab, setTab] = useState("전체");
   const [sort, setSort] = useState({field:"score",asc:false});
@@ -1696,6 +1878,13 @@ export default function App() {
 
   const totalPages = Math.ceil(filtered.length / perPage);
   const paged = filtered.slice((page - 1) * perPage, page * perPage);
+  // Keyboard shortcut: Cmd+K for AI Assistant
+  useEffect(() => {
+    const handler = (e) => { if ((e.metaKey || e.ctrlKey) && e.key === "k") { e.preventDefault(); setShowAssistant(s=>!s); } if (e.key === "Escape") setShowAssistant(false); };
+    window.addEventListener("keydown", handler);
+    return () => window.removeEventListener("keydown", handler);
+  }, []);
+
   const allOnPageSelected = paged.length > 0 && paged.every(b => selected.has(b.id));
 
   const toggleSort = (field) => setSort(p => p.field === field ? { field, asc: !p.asc } : { field, asc: false });
@@ -1728,6 +1917,7 @@ export default function App() {
       <style>{CSS}</style>
       {showLanding && <LandingHero onEnter={()=>setShowLanding(false)} />}
 
+      {showAssistant && <AIAssistant buyers={ALL_BUYERS} onClose={()=>setShowAssistant(false)} />}
       {emailBuyer && <ColdEmailModal buyer={emailBuyer} onClose={()=>setEmailBuyer(null)} />}
       {detailBuyer && <BuyerDetailPanel buyer={detailBuyer} onClose={()=>setDetailBuyer(null)} onSave={(b)=>{savedSet.has(b.id)?setSavedSet(p=>{const n=new Set(p);n.delete(b.id);return n}):setSavedSet(p=>new Set([...p,b.id]))}} isSaved={savedSet.has(detailBuyer.id)} />}
 
@@ -1750,6 +1940,10 @@ export default function App() {
                 <Ic.Search s={14}/>
                 <input value={search} onChange={e=>setSearch(e.target.value)} placeholder="바이어, 기업명, 품목, 국가 검색..." style={{flex:1,background:"transparent",border:"none",outline:"none",color:"var(--t1)",fontSize:12}} />
                 {search && <div onClick={()=>setSearch("")} style={{cursor:"pointer",color:"var(--t4)"}}><Ic.X s={12}/></div>}
+                <div onClick={()=>setShowAssistant(true)} style={{padding:"3px 8px",borderRadius:5,background:"linear-gradient(135deg,var(--blue-dim),var(--violet-dim))",border:"1px solid rgba(59,107,245,.2)",cursor:"pointer",display:"flex",alignItems:"center",gap:4,fontSize:10,fontWeight:600,color:"var(--blue)",whiteSpace:"nowrap",transition:"all .15s"}}
+                  onMouseEnter={e=>e.currentTarget.style.borderColor="var(--blue)"} onMouseLeave={e=>e.currentTarget.style.borderColor="rgba(59,107,245,.2)"}>
+                  <Ic.Sparkle s={10}/>AI
+                </div>
               </div>
             </div>
             <div style={{display:"flex",gap:2,padding:2,background:"var(--bg-3)",borderRadius:6,marginLeft:8}}>
