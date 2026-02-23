@@ -1884,7 +1884,7 @@ export default function App() {
   const [tab, setTab] = useState("전체");
   const [sort, setSort] = useState({field:"score",asc:false});
   const [selected, setSelected] = useState(new Set());
-  const [detail, setDetail] = useState(null);
+  
   const [page, setPage] = useState(1);
   const [starred, setStarred] = useState(new Set(ALL_BUYERS.filter(b=>b.starred).map(b=>b.id)));
   const [savedSet, setSavedSet] = useState(new Set(ALL_BUYERS.filter(b=>b.saved).map(b=>b.id)));
@@ -2204,7 +2204,6 @@ table tbody tr:hover .nx-row-actions{opacity:1}
 }
 
 fi fi${Math.min(i+1,5)}`}
-                      onClick={()=>setDetail(b)}
                       style={{cursor:"pointer",borderBottom:"1px solid var(--border)",background:isSel?"var(--blue-dim)":"transparent",transition:"background .12s"}}
                       onMouseEnter={e=>{if(!isSel)e.currentTarget.style.background="var(--bg-hover)"}}
                       onMouseLeave={e=>{if(!isSel)e.currentTarget.style.background=isSel?"var(--blue-dim)":"transparent"}}
@@ -2303,7 +2302,7 @@ fi fi${Math.min(i+1,5)}`}
         </div>
 
         {/* Detail Panel */}
-        {detail && <DetailPanel buyer={detail} onClose={()=>setDetail(null)} />}
+        
       </div>
 
       {/* Export Modal */}
