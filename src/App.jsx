@@ -162,6 +162,51 @@ const Tooltip = ({children, text}) => {
 
 // ─────────── FILTER SIDEBAR ───────────
 
+
+// ─────────── i18n ───────────
+const T = {
+  ko: {
+    buyers:"바이어", dashboard:"대시보드", email:"이메일", aiMatch:"AI 매칭",
+    search:"바이어, 기업명, 품목, 국가 검색...", savedSearch:"저장된 검색", columns:"컬럼",
+    all:"전체", new:"신규", saved:"저장됨",
+    name:"바이어", company:"기업명", country:"국가", industry:"산업",
+    score:"매칭점수", demand:"수요 품목", volume:"예상 규모",
+    intent:"의향", status:"상태", emailCol:"이메일",
+    showing:"건 표시 중", of:"중", page:"페이지",
+    heroTitle1:"{T[lang].heroTitle1}", heroTitle2:"글로벌 수출을 AI로",
+    heroDesc:"바이어 발굴부터 이메일 검색, AI 매칭까지.\n수출의 모든 과정을 하나의 플랫폼에서.",
+    startFree:"무료로 시작하기", viewDemo:"데모 보기",
+    globalBuyers:"글로벌 바이어", coverage:"커버리지", matchEngine:"매칭 엔진", realtime:"이메일 파인더",
+    features:"핵심 기능",
+    buyerSearch:"바이어 탐색", buyerSearchDesc:"60개국 산업·인증·지역별 고급 필터링으로 최적의 바이어를 찾으세요",
+    emailFinder:"이메일 파인더", emailFinderDesc:"Hunter.io 기반 실시간 바이어 이메일 검색 및 검증",
+    dashboardDesc:"파이프라인 관리, KPI 지표, 전환율 분석을 한눈에",
+    aiMatchDesc:"제조사 프로필 기반 TOP 15 바이어 자동 추천",
+    platformStart:"플랫폼 시작",
+    copyright:"© 2026 NEXPORT. AI 기반 수출 바이어 매칭 플랫폼",
+  },
+  en: {
+    buyers:"Buyers", dashboard:"Dashboard", email:"Email", aiMatch:"AI Match",
+    search:"Search buyers, companies, products, countries...", savedSearch:"Saved", columns:"Columns",
+    all:"All", new:"New", saved:"Saved",
+    name:"Buyer", company:"Company", country:"Country", industry:"Industry",
+    score:"Match Score", demand:"Demand", volume:"Est. Volume",
+    intent:"Intent", status:"Status", emailCol:"Email",
+    showing:"showing", of:"of", page:"Page",
+    heroTitle1:"Korean Manufacturers'", heroTitle2:"Global Export, Powered by AI",
+    heroDesc:"From buyer discovery to email search and AI matching.\nAll export workflows in one platform.",
+    startFree:"Start Free", viewDemo:"View Demo",
+    globalBuyers:"Global Buyers", coverage:"Countries", matchEngine:"AI Engine", realtime:"Email Finder",
+    features:"Key Features",
+    buyerSearch:"Buyer Search", buyerSearchDesc:"Find the best buyers with advanced filters across 60+ countries, industries, and certifications",
+    emailFinder:"Email Finder", emailFinderDesc:"Real-time buyer email discovery and verification powered by Hunter.io",
+    dashboardDesc:"Pipeline management, KPI metrics, and conversion analytics at a glance",
+    aiMatchDesc:"AI-powered TOP 15 buyer recommendations based on manufacturer profiles",
+    platformStart:"Enter Platform",
+    copyright:"© 2026 NEXPORT. AI-Powered Export Buyer Matching Platform",
+  }
+};
+
 // ─────────── UI STATE COMPONENTS ───────────
 function LoadingSpinner({ size=20, color="var(--blue)" }) {
   return <div style={{display:"inline-flex",alignItems:"center",justifyContent:"center"}}>
@@ -323,7 +368,7 @@ function LandingHero({ onEnter }) {
             <span style={{fontSize:18,fontWeight:800,letterSpacing:"-.03em"}}>NEXPORT</span>
           </div>
           <div onClick={onEnter} style={{padding:"8px 20px",borderRadius:8,background:"var(--blue)",color:"#fff",fontSize:12,fontWeight:600,cursor:"pointer",transition:"opacity .2s"}}
-            onMouseEnter={e=>e.currentTarget.style.opacity=".85"} onMouseLeave={e=>e.currentTarget.style.opacity="1"}>플랫폼 시작</div>
+            onMouseEnter={e=>e.currentTarget.style.opacity=".85"} onMouseLeave={e=>e.currentTarget.style.opacity="1"}>{T[lang].platformStart}</div>
         </div>
 
         {/* Hero */}
@@ -331,7 +376,7 @@ function LandingHero({ onEnter }) {
           <div style={{display:"inline-block",padding:"5px 14px",borderRadius:20,background:"var(--blue-dim)",border:"1px solid rgba(59,107,245,.15)",fontSize:11,fontWeight:600,color:"var(--blue)",marginBottom:20,letterSpacing:".02em"}}>AI-Powered Export Platform</div>
           <h1 style={{fontSize:44,fontWeight:900,lineHeight:1.2,letterSpacing:"-.03em",marginBottom:16,fontFamily:"var(--font)"}}>
             <span style={{color:"var(--t1)"}}>한국 제조업체의</span><br/>
-            <span style={{background:"linear-gradient(135deg,var(--blue),var(--cyan))",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent"}}>글로벌 수출을 AI로</span>
+            <span style={{background:"linear-gradient(135deg,var(--blue),var(--cyan))",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent"}}>{T[lang].heroTitle2}</span>
           </h1>
           <p style={{fontSize:16,color:"var(--t3)",maxWidth:520,margin:"0 auto",lineHeight:1.7}}>
             바이어 발굴부터 이메일 검색, AI 매칭까지.<br/>수출의 모든 과정을 하나의 플랫폼에서.
@@ -363,7 +408,7 @@ function LandingHero({ onEnter }) {
         <div style={{opacity:visible?1:0,transform:visible?"none":"translateY(20px)",transition:"all .8s ease .5s"}}>
           <div style={{textAlign:"center",marginBottom:32}}>
             <div style={{fontSize:11,fontWeight:700,color:"var(--blue)",textTransform:"uppercase",letterSpacing:".1em",marginBottom:8}}>Features</div>
-            <h2 style={{fontSize:28,fontWeight:800,letterSpacing:"-.02em"}}>핵심 기능</h2>
+            <h2 style={{fontSize:28,fontWeight:800,letterSpacing:"-.02em"}}>{T[lang].features}</h2>
           </div>
           <div style={{display:"grid",gridTemplateColumns:"repeat(2,1fr)",gap:14,paddingBottom:60}}>
             {features.map((f,i)=>(
@@ -832,6 +877,62 @@ ${company}
         </div>
       </div>
     </>
+  );
+}
+
+
+// ─────────── KANBAN PIPELINE ───────────
+function KanbanPipeline({ buyers }) {
+  const stages = [
+    { key:"신규 리드", color:"var(--blue)", dim:"var(--blue-dim)", count:12 },
+    { key:"검토 중", color:"var(--violet)", dim:"var(--violet-dim)", count:8 },
+    { key:"협상 중", color:"var(--amber)", dim:"var(--amber-dim)", count:4 },
+    { key:"LOI 발행", color:"var(--cyan)", dim:"var(--cyan-dim)", count:3 },
+    { key:"계약 완료", color:"var(--green)", dim:"var(--green-dim)", count:2 },
+  ];
+  const allBuyers = buyers || [];
+  const getBuyers = (stageIdx) => {
+    const start = stages.slice(0, stageIdx).reduce((a,s)=>a+s.count, 0);
+    return allBuyers.slice(start, start + stages[stageIdx].count).slice(0, 5);
+  };
+  return (
+    <div style={{marginTop:16}}>
+      <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:14}}>
+        <Ic.Grid s={14}/>
+        <span style={{fontSize:13,fontWeight:700}}>세일즈 파이프라인</span>
+        <span style={{fontSize:11,color:"var(--t4)",marginLeft:"auto"}}>{allBuyers.length}건 관리 중</span>
+      </div>
+      <div style={{display:"grid",gridTemplateColumns:"repeat(5,1fr)",gap:10,overflow:"auto"}}>
+        {stages.map((st,si)=>{
+          const cards = getBuyers(si);
+          return (
+            <div key={st.key} style={{background:"var(--bg-2)",borderRadius:10,border:"1px solid var(--border)",overflow:"hidden",minWidth:160}}>
+              <div style={{padding:"10px 12px",borderBottom:"1px solid var(--border)",display:"flex",alignItems:"center",gap:8}}>
+                <div style={{width:8,height:8,borderRadius:"50%",background:st.color}}/>
+                <span style={{fontSize:11,fontWeight:700,flex:1}}>{st.key}</span>
+                <span style={{fontSize:10,fontWeight:700,color:st.color,background:st.dim,padding:"2px 6px",borderRadius:4}}>{st.count}</span>
+              </div>
+              <div style={{padding:8,display:"grid",gap:6,minHeight:100}}>
+                {cards.map((b,i)=>(
+                  <div key={b.id||i} style={{padding:"8px 10px",borderRadius:8,background:"var(--bg-3)",border:"1px solid var(--border)",fontSize:11,transition:"all .15s",cursor:"pointer"}}
+                    onMouseEnter={e=>{e.currentTarget.style.borderColor="var(--border-h)";e.currentTarget.style.transform="translateY(-1px)"}}
+                    onMouseLeave={e=>{e.currentTarget.style.borderColor="var(--border)";e.currentTarget.style.transform="none"}}>
+                    <div style={{fontWeight:700,fontSize:11,marginBottom:3}}>{b.name}</div>
+                    <div style={{color:"var(--t3)",fontSize:10,display:"flex",alignItems:"center",gap:4}}>{b.flag} {b.company}</div>
+                    <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginTop:6}}>
+                      <span style={{fontSize:9,color:"var(--t4)"}}>{b.volume}</span>
+                      <span style={{fontSize:10,fontWeight:700,fontFamily:"var(--mono)",color:st.color}}>{b.score}</span>
+                    </div>
+                  </div>
+                ))}
+                {cards.length === 0 && <div style={{textAlign:"center",padding:12,fontSize:10,color:"var(--t4)"}}>비어있음</div>}
+                {st.count > 5 && <div style={{textAlign:"center",padding:4,fontSize:9,color:"var(--t4)"}}>+{st.count-5}건 더보기</div>}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
   );
 }
 
@@ -1336,7 +1437,8 @@ function DashboardView({ buyers, savedSet, starred }) {
 
           {/* Recent Activity */}
           <div className="fi fi5" style={cardStyle}>
-            <div style={{fontSize:14,fontWeight:700,marginBottom:14,display:"flex",alignItems:"center",gap:8}}><Ic.Sparkle s={14}/>최근 활동</div>
+            <KanbanPipeline buyers={buyers} />
+          <div style={{fontSize:14,fontWeight:700,marginBottom:14,display:"flex",alignItems:"center",gap:8}}><Ic.Sparkle s={14}/>최근 활동</div>
             <div style={{display:"grid",gap:8}}>
               {recentActivity.map((a,i) => (
                 <div key={i} style={{
@@ -1650,12 +1752,17 @@ export default function App() {
                 {search && <div onClick={()=>setSearch("")} style={{cursor:"pointer",color:"var(--t4)"}}><Ic.X s={12}/></div>}
               </div>
             </div>
+            <div style={{display:"flex",gap:2,padding:2,background:"var(--bg-3)",borderRadius:6,marginLeft:8}}>
+              {[["ko","🇰🇷"],["en","🇺🇸"]].map(([k,flag])=>(
+                <div key={k} onClick={()=>setLang(k)} style={{padding:"4px 8px",borderRadius:4,fontSize:11,cursor:"pointer",transition:"all .15s",background:lang===k?"var(--bg-1)":"transparent",color:lang===k?"var(--t1)":"var(--t4)",boxShadow:lang===k?"0 1px 3px rgba(0,0,0,.2)":"none"}}>{flag}</div>
+              ))}
+            </div>
             <div className="nx-header-actions" style={{marginLeft:"auto",display:"flex",alignItems:"center",gap:2,background:"var(--bg-3)",borderRadius:8,padding:2}}>
               {[
-                {key:"buyers",label:"바이어",icon:<Ic.Users s={12}/>},
-                {key:"dashboard",label:"대시보드",icon:<Ic.Bar s={12}/>},
-                {key:"emailfinder",label:"이메일",icon:<Ic.Mail s={12}/>},
-                {key:"aiMatch",label:"AI 매칭",icon:<Ic.Sparkle s={12}/>},
+                {key:"buyers",label:T[lang].buyers,icon:<Ic.Users s={12}/>},
+                {key:"dashboard",label:T[lang].dashboard,icon:<Ic.Bar s={12}/>},
+                {key:"emailfinder",label:T[lang].email,icon:<Ic.Mail s={12}/>},
+                {key:"aiMatch",label:T[lang].aiMatch,icon:<Ic.Sparkle s={12}/>},
               ].map(tab=>{
                 const active = view===tab.key;
                 return <div key={tab.key} onClick={()=>setView(tab.key)} style={{padding:"6px 14px",borderRadius:6,cursor:"pointer",display:"flex",alignItems:"center",gap:5,fontSize:11,fontWeight:active?700:500,transition:"all .2s",background:active?"var(--bg-1)":"transparent",color:active?"var(--t1)":"var(--t3)",boxShadow:active?"0 1px 3px rgba(0,0,0,.2)":"none"}}>{tab.icon}{tab.label}</div>;
