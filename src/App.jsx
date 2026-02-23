@@ -339,7 +339,7 @@ function BuyerDetailPanel({ buyer, onClose, onSave, isSaved }) {
 
 
 // ─────────── LANDING HERO ───────────
-function LandingHero({ onEnter }) {
+function LandingHero({ onEnter, lang }) {
   const [visible, setVisible] = useState(false);
   useEffect(() => { setTimeout(() => setVisible(true), 100); }, []);
   const stats = [
@@ -1966,7 +1966,7 @@ export default function App() {
   return (
     <>
       <style>{CSS}</style>
-      {showLanding && <LandingHero onEnter={()=>setShowLanding(false)} />}
+      {showLanding && <LandingHero onEnter={()=>setShowLanding(false)} lang={lang} />}
 
       <BulkActionBar
           count={selected.size}
