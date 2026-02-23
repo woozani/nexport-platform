@@ -1404,7 +1404,7 @@ export default function App() {
             <div style={{display:"flex",alignItems:"center",gap:10}}>
               <div style={{width:28,height:28,borderRadius:7,background:"linear-gradient(135deg,var(--blue),var(--violet))",display:"flex",alignItems:"center",justifyContent:"center"}}><Ic.Users s={14}/></div>
               <div>
-                <h1 className="nx-header-brand" style={{fontSize:16,fontWeight:800,letterSpacing:"-.02em",fontFamily:"var(--font)"}}>바이어 탐색</h1>
+                <h1 className="nx-header-brand" style={{fontSize:16,fontWeight:800,letterSpacing:"-.03em",fontFamily:"var(--font)"}}>NEXPORT</h1>
               </div>
             </div>
             <div className="nx-header-search" style={{flex:1,maxWidth:420}}>
@@ -1414,12 +1414,16 @@ export default function App() {
                 {search && <div onClick={()=>setSearch("")} style={{cursor:"pointer",color:"var(--t4)"}}><Ic.X s={12}/></div>}
               </div>
             </div>
-            <div className="nx-header-actions" style={{marginLeft:"auto",display:"flex",alignItems:"center",gap:8}}>
-              <Tooltip text="검색 저장"><div style={{padding:"6px 10px",borderRadius:6,border:"1px solid var(--border)",cursor:"pointer",color:"var(--t3)",display:"flex",alignItems:"center",gap:5,fontSize:11,fontWeight:500}}><Ic.Bookmark s={12}/>저장된 검색</div></Tooltip>
-              <Tooltip text="대시보드"><div onClick={()=>setView(v=>v==="dashboard"?"buyers":"dashboard")} style={{padding:"6px 10px",borderRadius:6,border:view==="dashboard"?"1px solid var(--cyan)":"1px solid var(--border)",cursor:"pointer",color:view==="dashboard"?"var(--cyan)":"var(--t3)",background:view==="dashboard"?"var(--cyan-dim)":"transparent",display:"flex",alignItems:"center",gap:5,fontSize:11,fontWeight:500,transition:"all .2s"}}><Ic.Bar s={12}/>대시보드</div></Tooltip>
-              <Tooltip text="AI 매칭"><div onClick={()=>setView(v=>v==="aiMatch"?"buyers":"aiMatch")} style={{padding:"6px 10px",borderRadius:6,border:view==="aiMatch"?"1px solid var(--green)":"1px solid var(--border)",cursor:"pointer",color:view==="aiMatch"?"var(--green)":"var(--t3)",background:view==="aiMatch"?"var(--green-dim)":"transparent",display:"flex",alignItems:"center",gap:5,fontSize:11,fontWeight:500,transition:"all .2s"}}><Ic.Sparkle s={12}/>AI 매칭</div></Tooltip>
-              <Tooltip text="이메일 파인더"><div onClick={()=>setView(v=>v==="buyers"?"emailfinder":"buyers")} style={{padding:"6px 10px",borderRadius:6,border:view==="emailfinder"?"1px solid var(--blue)":"1px solid var(--border)",cursor:"pointer",color:view==="emailfinder"?"var(--blue)":"var(--t3)",background:view==="emailfinder"?"var(--blue-dim)":"transparent",display:"flex",alignItems:"center",gap:5,fontSize:11,fontWeight:500,transition:"all .2s"}}><Ic.Mail s={12}/>이메일 파인더</div></Tooltip>
-              <Tooltip text="컬럼 설정"><div style={{padding:6,borderRadius:6,border:"1px solid var(--border)",cursor:"pointer",color:"var(--t3)"}}><Ic.Columns s={14}/></div></Tooltip>
+            <div className="nx-header-actions" style={{marginLeft:"auto",display:"flex",alignItems:"center",gap:2,background:"var(--bg-3)",borderRadius:8,padding:2}}>
+              {[
+                {key:"buyers",label:"바이어",icon:<Ic.Users s={12}/>},
+                {key:"dashboard",label:"대시보드",icon:<Ic.Bar s={12}/>},
+                {key:"emailfinder",label:"이메일",icon:<Ic.Mail s={12}/>},
+                {key:"aiMatch",label:"AI 매칭",icon:<Ic.Sparkle s={12}/>},
+              ].map(tab=>{
+                const active = view===tab.key;
+                return <div key={tab.key} onClick={()=>setView(tab.key)} style={{padding:"6px 14px",borderRadius:6,cursor:"pointer",display:"flex",alignItems:"center",gap:5,fontSize:11,fontWeight:active?700:500,transition:"all .2s",background:active?"var(--bg-1)":"transparent",color:active?"var(--t1)":"var(--t3)",boxShadow:active?"0 1px 3px rgba(0,0,0,.2)":"none"}}>{tab.icon}{tab.label}</div>;
+              })}
             </div>
           </div>
 
@@ -1490,6 +1494,11 @@ export default function App() {
 
 .nx-loading-overlay{position:absolute;inset:0;background:rgba(6,7,10,.6);display:flex;align-items:center;justify-content:center;z-index:20;backdrop-filter:blur(2px)}
 .nx-empty-bounce{animation:fadeIn .4s ease}
+
+
+/* Nav tabs */
+.nx-header-actions > div:not(:hover) { }
+.nx-header-actions > div:hover { background: var(--bg-hover) !important; color: var(--t1) !important; }
 
 /* ─── RESPONSIVE BREAKPOINTS ─── */
 @media (max-width: 1024px) {
