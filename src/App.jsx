@@ -1167,6 +1167,43 @@ function BulkActionBar({ count, onClear, onExport, onEmail, onSave }) {
   );
 }
 
+
+// ─────────── INLINE UI COMPONENTS ───────────
+function Badge({ color, children }) {
+  return <span style={{padding:"2px 8px",borderRadius:4,fontSize:10,fontWeight:600,color:color,background:color+"20",whiteSpace:"nowrap"}}>{children}</span>;
+}
+function Checkbox({ checked, onChange }) {
+  return <div onClick={e=>{e.stopPropagation();onChange&&onChange(!checked)}} style={{width:16,height:16,borderRadius:4,border:`1.5px solid ${checked?"var(--blue)":"var(--t4)"}`,background:checked?"var(--blue)":"transparent",display:"flex",alignItems:"center",justifyContent:"center",cursor:"pointer",transition:"all .15s",flexShrink:0}}>{checked&&<Ic.Check s={10} color="#fff"/>}</div>;
+}
+function CheckItem({ label, count, checked, onChange }) {
+  return <div onClick={()=>onChange&&onChange(!checked)} style={{display:"flex",alignItems:"center",gap:8,padding:"4px 0",cursor:"pointer",fontSize:11,color:checked?"var(--t1)":"var(--t3)"}}>
+    <Checkbox checked={checked} onChange={onChange} />
+    <span style={{flex:1}}>{label}</span>
+    {count!==undefined&&<span style={{fontSize:10,color:"var(--t4)"}}>{count}</span>}
+  </div>;
+}
+function FilterSection({ title, icon:IconComp, children, defaultOpen=true }) {
+  const [open, setOpen] = useState(defaultOpen);
+  return <div style={{marginBottom:12}}>
+    <div onClick={()=>setOpen(!open)} style={{display:"flex",alignItems:"center",gap:6,padding:"6px 0",cursor:"pointer",fontSize:11,fontWeight:700,color:"var(--t2)"}}>
+      {IconComp&&<IconComp s={12}/>}
+      <span style={{flex:1}}>{title}</span>
+      <Ic.ChevronDown s={10} style={{transform:open?"none":"rotate(-90deg)",transition:"transform .15s"}}/>
+    </div>
+    {open&&<div style={{paddingLeft:4}}>{children}</div>}
+  </div>;
+}
+function ScoreBar({ score }) {
+  const c = score>=80?"var(--green)":score>=65?"var(--cyan)":score>=50?"var(--amber)":"var(--red)";
+  return <div style={{display:"flex",alignItems:"center",gap:6}}>
+    <div style={{flex:1,height:4,borderRadius:2,background:"var(--bg-4)",overflow:"hidden"}}><div style={{width:`${score}%`,height:"100%",borderRadius:2,background:c}}/></div>
+    <span style={{fontSize:11,fontWeight:700,fontFamily:"var(--mono)",color:c,minWidth:24,textAlign:"right"}}>{score}</span>
+  </div>;
+}
+function SortIcon({ dir }) {
+  return <span style={{fontSize:8,marginLeft:2}}>{dir==="asc"?"▲":dir==="desc"?"▼":"↕"}</span>;
+}
+
 function FilterSidebar({ filters, setFilters, collapsed, setCollapsed }) {
   const [openSections, setOpenSections] = useState({"산업":true,"지역":true,"회사규모":false,"인증":false,"구매의향":false,"매칭점수":false});
   const toggle = k => setOpenSections(p=>({...p,[k]:!p[k]}));
@@ -1977,7 +2014,7 @@ export default function App() {
             <div className="nx-table-wrap"><table className="nx-main-table" style={{width:"100%",borderCollapse:"collapse",minWidth:1100}}>
               <thead>
                 <tr style={{position:"sticky",top:0,zIndex:10,background:"var(--bg-2)"}}>
-                  <th style={{width:40,padding:"8px 12px"}}></th>
+                  <th style={{width:40,padding:"8px 12px"}}><Checkbox checked={allOnPageSelected} onChange={toggleAll}/></th>
                   <th style={{width:30}}/>
                   {[
                     ["name","바이어",180],["company","기업명",150],["country","국가",80],["industry","산업",110],
@@ -1990,7 +2027,7 @@ export default function App() {
                       width:w,borderBottom:"1px solid var(--border)",userSelect:"none"
                     }}>
                       <div style={{display:"flex",alignItems:"center",gap:4}}>
-                        {label}<span style={{color:sort.field===field?"var(--blue)":"var(--t4)"}}></span>
+                        {label}<span style={{color:sort.field===field?"var(--blue)":"var(--t4)"}}><SortIcon dir={sort.field===field?sort.dir:null}/></span>
                       </div>
                     </th>
                   ))}
@@ -2118,7 +2155,7 @@ fi fi${Math.min(i+1,5)}`}
                       onMouseEnter={e=>{if(!isSel)e.currentTarget.style.background="var(--bg-hover)"}}
                       onMouseLeave={e=>{if(!isSel)e.currentTarget.style.background=isSel?"var(--blue-dim)":"transparent"}}
                     >
-                      <td style={{padding:"8px 12px"}} onClick={e=>e.stopPropagation()}></td>
+                      <td style={{padding:"8px 12px"}} onClick={e=>e.stopPropagation()}><Checkbox checked={selected.has(b.id)} onChange={()=>toggleRow(b.id)}/></td>
                       <td style={{padding:"4px 0"}} onClick={e=>{e.stopPropagation();setStarred(p=>{const n=new Set(p);n.has(b.id)?n.delete(b.id):n.add(b.id);return n})}}>
                         <span style={{cursor:"pointer",color:starred.has(b.id)?"var(--amber)":"var(--t4)"}}>{starred.has(b.id)?<Ic.StarFill s={13}/>:<Ic.Star s={13}/>}</span>
                       </td>
@@ -2132,11 +2169,11 @@ fi fi${Math.min(i+1,5)}`}
                       </td>
                       <td style={{padding:"8px 10px",fontSize:12}}><span>{b.flag}</span> <span style={{color:"var(--t2)"}}>{b.country}</span></td>
                       <td style={{padding:"8px 10px",fontSize:12,color:"var(--t2)"}}>{b.industry}</td>
-                      <td style={{padding:"8px 10px"}}></td>
+                      <td style={{padding:"8px 10px"}}><ScoreBar score={b.score}/></td>
                       <td style={{padding:"8px 10px",fontSize:12,color:"var(--t2)"}}>{b.demand}</td>
                       <td style={{padding:"8px 10px"}}><span style={{fontFamily:"var(--mono)",fontSize:12,fontWeight:600,color:"var(--green)"}}>{b.volume}</span></td>
                       <td style={{padding:"8px 10px"}}><span style={{width:6,height:6,borderRadius:"50%",background:intentColor(b.buyingIntent),display:"inline-block",marginRight:4}}/><span style={{fontSize:11,color:intentColor(b.buyingIntent)}}>{b.buyingIntent}</span></td>
-                      <td style={{padding:"8px 10px"}}></td>
+                      <td style={{padding:"8px 10px"}}><Badge color={b.status==="활성"?"var(--green)":b.status==="잠재"?"var(--amber)":"var(--t4)"}>{b.status}</Badge></td>
                       <td style={{padding:"8px 10px",fontSize:11,color:"var(--t3)"}}>{b.email}</td>
                       <td style={{padding:"8px 10px"}} onClick={e=>e.stopPropagation()}>
                         {!isSaved ? (
