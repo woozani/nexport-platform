@@ -285,7 +285,7 @@ function BuyerDetailPanel({ buyer, onClose, onSave, isSaved }) {
         </div>
         <div style={{padding:"12px 20px",borderTop:"1px solid var(--border)",display:"flex",gap:8,flexShrink:0}}>
           <div onClick={()=>navigator.clipboard.writeText(buyer.email)} style={{flex:1,padding:"10px 0",borderRadius:8,background:"var(--blue)",color:"#fff",textAlign:"center",fontSize:12,fontWeight:600,cursor:"pointer"}}>이메일 복사</div>
-          <div onClick={()=>window.open("mailto:"+buyer.email)} style={{flex:1,padding:"10px 0",borderRadius:8,background:"var(--bg-3)",border:"1px solid var(--border)",color:"var(--t1)",textAlign:"center",fontSize:12,fontWeight:600,cursor:"pointer"}}>이메일 보내기</div>
+          <div onClick={()=>setEmailBuyer(buyer)} style={{flex:1,padding:"10px 0",borderRadius:8,background:"linear-gradient(135deg,var(--green),#0d9488)",color:"#fff",textAlign:"center",fontSize:12,fontWeight:600,cursor:"pointer"}}>AI 이메일 작성</div>
         </div>
       </div>
     </>
@@ -598,6 +598,240 @@ function AIMatchView({ buyers }) {
         </div>
       </div>
     </div>
+  );
+}
+
+
+// ─────────── COLD EMAIL GENERATOR ───────────
+function ColdEmailModal({ buyer, onClose }) {
+  const [tone, setTone] = useState("formal");
+  const [lang, setLang] = useState("en");
+  const [copied, setCopied] = useState(false);
+  const [company, setCompany] = useState("한국정밀부품(주)");
+  const [product, setProduct] = useState("CNC 정밀가공 부품");
+
+  const templates = {
+    formal: {
+      en: {
+        subject: `Partnership Inquiry - ${product} Supply from Korea`,
+        body: `Dear ${buyer.name},
+
+I hope this message finds you well. My name is [Your Name], and I am reaching out from ${company}, a certified Korean manufacturer specializing in ${product}.
+
+We have been following ${buyer.company}'s growth in the ${buyer.industry} sector and believe there is a strong synergy between our capabilities and your sourcing needs.
+
+Key highlights of our offering:
+• Certified manufacturing (ISO 9001, IATF 16949)
+• Competitive pricing with consistent quality
+• Flexible MOQ and customization options
+• Direct export experience to ${buyer.country}
+
+We would welcome the opportunity to discuss how we can support your supply chain. Would you be available for a brief call this week?
+
+Best regards,
+[Your Name]
+${company}
+[Phone] | [Email]`
+      },
+      ko: {
+        subject: `파트너십 문의 - ${product} 공급 제안`,
+        body: `${buyer.name} 님께,
+
+안녕하세요. ${company}에서 해외영업을 담당하고 있는 [이름]입니다.
+
+저희는 ${product} 전문 제조업체로, ${buyer.company}의 ${buyer.industry} 분야에서의 성장을 주목해왔습니다.
+
+저희의 핵심 강점:
+• 국제 인증 보유 (ISO 9001, IATF 16949)
+• 경쟁력 있는 가격과 안정적인 품질
+• 유연한 MOQ 및 맞춤 생산
+• ${buyer.country} 수출 경험 보유
+
+귀사의 공급망에 기여할 수 있는 방법을 논의하고 싶습니다. 이번 주 간단한 통화가 가능하실까요?
+
+감사합니다.
+[이름]
+${company}
+[연락처]`
+      }
+    },
+    friendly: {
+      en: {
+        subject: `Quick intro - ${company} x ${buyer.company}`,
+        body: `Hi ${buyer.name},
+
+I came across ${buyer.company} while researching leading companies in ${buyer.industry} - really impressive work you're doing in ${buyer.country}!
+
+I'm with ${company} here in Korea. We make ${product}, and I think there could be a great fit for what you're looking for.
+
+A few things that might interest you:
+• We've been supplying similar products to companies in your region
+• Our quality standards match international certifications
+• We're flexible on quantities and can do custom specs
+
+Would love to have a quick 15-min chat to explore if there's a fit. No pressure at all - just curious if we can help!
+
+Cheers,
+[Your Name]
+${company}`
+      },
+      ko: {
+        subject: `안녕하세요! ${company}입니다 😊`,
+        body: `${buyer.name} 님, 안녕하세요!
+
+${buyer.industry} 분야를 리서치하다가 ${buyer.company}를 알게 되었습니다. ${buyer.country}에서 정말 인상적인 성과를 내고 계시네요!
+
+저는 한국에서 ${product}를 제조하는 ${company}에서 일하고 있어요. 저희 제품이 귀사에 도움이 될 수 있을 것 같아 연락드립니다.
+
+• 귀사 지역에 유사 제품 공급 경험 보유
+• 국제 인증 기준 충족
+• 수량과 스펙 맞춤 가능
+
+15분 정도 편하게 이야기 나눌 수 있을까요? 부담 없이, 서로에게 맞는지 탐색해보면 좋겠습니다!
+
+감사합니다,
+[이름]
+${company}`
+      }
+    },
+    urgent: {
+      en: {
+        subject: `Time-Sensitive: Exclusive Pricing for ${buyer.company}`,
+        body: `Dear ${buyer.name},
+
+I'm reaching out because we have a limited-time opportunity that may be relevant to ${buyer.company}.
+
+${company} is currently offering exclusive pricing on ${product} for new partners in ${buyer.country}. This promotion includes:
+
+• 15% below standard market pricing
+• Priority production scheduling
+• Free sample shipment (up to 5 units)
+• Dedicated account manager
+
+This offer is available until the end of this month. Given ${buyer.company}'s position in ${buyer.industry}, I believe this could be a valuable opportunity.
+
+Can we schedule a call in the next 2-3 days to discuss details?
+
+Best regards,
+[Your Name]
+${company}
+[Phone] | [Email]`
+      },
+      ko: {
+        subject: `[긴급] ${buyer.company} 전용 특별 가격 제안`,
+        body: `${buyer.name} 님께,
+
+${buyer.company}에 관련될 수 있는 한시적 기회가 있어 연락드립니다.
+
+${company}는 현재 ${buyer.country} 신규 파트너를 대상으로 ${product}의 특별 가격을 제공하고 있습니다.
+
+• 시장가 대비 15% 할인
+• 우선 생산 스케줄링
+• 무료 샘플 발송 (최대 5개)
+• 전담 매니저 배정
+
+이번 달 말까지 유효한 제안입니다. ${buyer.industry} 분야에서의 귀사의 위치를 감안할 때 좋은 기회가 될 것으로 생각합니다.
+
+2~3일 내 통화가 가능하실까요?
+
+감사합니다.
+[이름]
+${company}
+[연락처]`
+      }
+    }
+  };
+
+  const current = templates[tone][lang];
+
+  const copyAll = () => {
+    navigator.clipboard.writeText(`Subject: ${current.subject}\n\n${current.body}`);
+    setCopied(true); setTimeout(()=>setCopied(false), 2000);
+  };
+
+  const openMailto = () => {
+    window.open(`mailto:${buyer.email}?subject=${encodeURIComponent(current.subject)}&body=${encodeURIComponent(current.body)}`);
+  };
+
+  const toneOptions = [
+    {key:"formal",label:"포멀",icon:<Ic.Shield s={12}/>,desc:"비즈니스 공식"},
+    {key:"friendly",label:"친근",icon:<Ic.Users s={12}/>,desc:"캐주얼 네트워킹"},
+    {key:"urgent",label:"긴급",icon:<Ic.Eye s={12}/>,desc:"한시적 제안"},
+  ];
+
+  return (
+    <>
+      <div onClick={onClose} style={{position:"fixed",inset:0,background:"rgba(0,0,0,.6)",zIndex:100,backdropFilter:"blur(3px)"}}/>
+      <div style={{position:"fixed",top:"50%",left:"50%",transform:"translate(-50%,-50%)",width:640,maxWidth:"92vw",maxHeight:"88vh",background:"var(--bg-1)",border:"1px solid var(--border)",borderRadius:16,zIndex:101,display:"flex",flexDirection:"column",animation:"scaleIn .25s ease",overflow:"hidden"}}>
+        {/* Header */}
+        <div style={{padding:"16px 20px",borderBottom:"1px solid var(--border)",display:"flex",alignItems:"center",gap:12}}>
+          <div style={{width:32,height:32,borderRadius:8,background:"var(--green-dim)",display:"flex",alignItems:"center",justifyContent:"center"}}><Ic.Mail s={16}/></div>
+          <div style={{flex:1}}>
+            <div style={{fontSize:14,fontWeight:700}}>AI 이메일 생성</div>
+            <div style={{fontSize:11,color:"var(--t3)"}}>To: {buyer.name} ({buyer.email})</div>
+          </div>
+          <div onClick={onClose} style={{cursor:"pointer",padding:4,color:"var(--t4)"}}><Ic.X s={16}/></div>
+        </div>
+
+        <div style={{flex:1,overflow:"auto",padding:20}}>
+          {/* Company/Product inputs */}
+          <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10,marginBottom:16}}>
+            <div>
+              <label style={{fontSize:10,color:"var(--t4)",fontWeight:600,marginBottom:4,display:"block",textTransform:"uppercase",letterSpacing:".05em"}}>발신 회사</label>
+              <input value={company} onChange={e=>setCompany(e.target.value)} style={{width:"100%",padding:"8px 10px",borderRadius:6,background:"var(--bg-3)",border:"1px solid var(--border)",color:"var(--t1)",fontSize:12,outline:"none"}} />
+            </div>
+            <div>
+              <label style={{fontSize:10,color:"var(--t4)",fontWeight:600,marginBottom:4,display:"block",textTransform:"uppercase",letterSpacing:".05em"}}>주력 제품</label>
+              <input value={product} onChange={e=>setProduct(e.target.value)} style={{width:"100%",padding:"8px 10px",borderRadius:6,background:"var(--bg-3)",border:"1px solid var(--border)",color:"var(--t1)",fontSize:12,outline:"none"}} />
+            </div>
+          </div>
+
+          {/* Tone + Language */}
+          <div style={{display:"flex",gap:12,marginBottom:16,alignItems:"flex-end"}}>
+            <div style={{flex:1}}>
+              <label style={{fontSize:10,color:"var(--t4)",fontWeight:600,marginBottom:6,display:"block",textTransform:"uppercase",letterSpacing:".05em"}}>톤</label>
+              <div style={{display:"flex",gap:6}}>
+                {toneOptions.map(t=>(
+                  <div key={t.key} onClick={()=>setTone(t.key)} style={{flex:1,padding:"8px 10px",borderRadius:8,cursor:"pointer",textAlign:"center",transition:"all .2s",background:tone===t.key?"var(--blue)":"var(--bg-3)",color:tone===t.key?"#fff":"var(--t3)",border:`1px solid ${tone===t.key?"var(--blue)":"var(--border)"}`}}>
+                    <div style={{display:"flex",alignItems:"center",justifyContent:"center",gap:4,fontSize:12,fontWeight:600}}>{t.icon}{t.label}</div>
+                    <div style={{fontSize:9,marginTop:2,opacity:.7}}>{t.desc}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <div>
+              <div style={{display:"flex",gap:2,padding:2,background:"var(--bg-3)",borderRadius:6}}>
+                {[["en","EN"],["ko","KO"]].map(([k,l])=>(
+                  <div key={k} onClick={()=>setLang(k)} style={{padding:"6px 14px",borderRadius:5,fontSize:11,fontWeight:600,cursor:"pointer",transition:"all .15s",background:lang===k?"var(--bg-1)":"transparent",color:lang===k?"var(--t1)":"var(--t4)",boxShadow:lang===k?"0 1px 3px rgba(0,0,0,.2)":"none"}}>{l}</div>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* Subject */}
+          <div style={{marginBottom:12}}>
+            <label style={{fontSize:10,color:"var(--t4)",fontWeight:600,marginBottom:4,display:"block",textTransform:"uppercase",letterSpacing:".05em"}}>제목</label>
+            <div style={{padding:"9px 12px",borderRadius:8,background:"var(--bg-2)",border:"1px solid var(--border)",fontSize:12,color:"var(--t1)",fontWeight:600}}>{current.subject}</div>
+          </div>
+
+          {/* Body */}
+          <div>
+            <label style={{fontSize:10,color:"var(--t4)",fontWeight:600,marginBottom:4,display:"block",textTransform:"uppercase",letterSpacing:".05em"}}>본문</label>
+            <div style={{padding:14,borderRadius:8,background:"var(--bg-2)",border:"1px solid var(--border)",fontSize:12,color:"var(--t2)",lineHeight:1.8,whiteSpace:"pre-wrap",maxHeight:280,overflow:"auto",fontFamily:"var(--font)"}}>{current.body}</div>
+          </div>
+        </div>
+
+        {/* Footer Actions */}
+        <div style={{padding:"14px 20px",borderTop:"1px solid var(--border)",display:"flex",gap:8}}>
+          <div onClick={copyAll} style={{flex:1,padding:"10px 0",borderRadius:8,background:copied?"var(--green)":"var(--blue)",color:"#fff",textAlign:"center",fontSize:12,fontWeight:600,cursor:"pointer",transition:"all .2s",display:"flex",alignItems:"center",justifyContent:"center",gap:6}}>
+            {copied ? <><Ic.Check s={14}/>복사됨!</> : <><Ic.Filter s={14}/>전체 복사</>}
+          </div>
+          <div onClick={openMailto} style={{flex:1,padding:"10px 0",borderRadius:8,background:"var(--bg-3)",border:"1px solid var(--border)",color:"var(--t1)",textAlign:"center",fontSize:12,fontWeight:600,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",gap:6}}>
+            <Ic.Mail s={14}/>메일 앱으로 열기
+          </div>
+        </div>
+      </div>
+    </>
   );
 }
 
@@ -1311,6 +1545,7 @@ export default function App() {
   const [sideCollapsed, setSideCollapsed] = useState(false);
   const [search, setSearch] = useState("");
   const [detailBuyer, setDetailBuyer] = useState(null);
+  const [emailBuyer, setEmailBuyer] = useState(null);
   const [showLanding, setShowLanding] = useState(true);
   const [tab, setTab] = useState("전체");
   const [sort, setSort] = useState({field:"score",asc:false});
@@ -1391,6 +1626,7 @@ export default function App() {
       <style>{CSS}</style>
       {showLanding && <LandingHero onEnter={()=>setShowLanding(false)} />}
 
+      {emailBuyer && <ColdEmailModal buyer={emailBuyer} onClose={()=>setEmailBuyer(null)} />}
       {detailBuyer && <BuyerDetailPanel buyer={detailBuyer} onClose={()=>setDetailBuyer(null)} onSave={(b)=>{savedSet.has(b.id)?setSavedSet(p=>{const n=new Set(p);n.delete(b.id);return n}):setSavedSet(p=>new Set([...p,b.id]))}} isSaved={savedSet.has(detailBuyer.id)} />}
 
       <div style={{display:"flex",height:"100vh",overflow:"hidden",background:"var(--bg-0)"}}>
