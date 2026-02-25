@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, useCallback, useRef } from "react";
+import { useState, useEffect, useMemo, useCallback, useRef, useReducer } from "react";
 
 // ─────────── STYLES ───────────
 const CSS = `
@@ -1751,9 +1751,19 @@ export default function App() {
   const [savedSet, setSavedSet] = useState(new Set(ALL_BUYERS.filter(b=>b.saved).map(b=>b.id)));
   const [viewSaved, setViewSaved] = useState(null);
   const [showExport, setShowExport] = useState(false);
-  const [navHistory, setNavHistory] = useState(["buyers"]);
-  const [historyIdx, setHistoryIdx] = useState(0);
-  const view = navHistory[historyIdx];
+  const navReducer = (s, a) => {
+    if (a.type==='NAVIGATE') { if (a.key===s.history[s.idx]) return s; return {history:[...s.history.slice(0,s.idx+1),a.key],idx:s.idx+1}; }
+    if (a.type==='BACK') return s.idx>0?{...s,idx:s.idx-1}:s;
+    if (a.type==='FORWARD') return s.idx<s.history.length-1?{...s,idx:s.idx+1}:s;
+    return s;
+  };
+  const [nav, navDispatch] = useReducer(navReducer, {history:['buyers'],idx:0});
+  const view = nav.history[nav.idx];
+  const canBack = nav.idx > 0;
+  const canForward = nav.idx < nav.history.length - 1;
+  const navigateTo = useCallback((key) => navDispatch({type:'NAVIGATE',key}), []);
+  const goBack = useCallback(() => navDispatch({type:'BACK'}), []);
+  const goForward = useCallback(() => navDispatch({type:'FORWARD'}), []);
   const perPage = 15;
 
   // Filtering
@@ -1804,16 +1814,6 @@ export default function App() {
 
   const allOnPageSelected = paged.length > 0 && paged.every(b => selected.has(b.id));
 
-  const canBack = historyIdx > 0;
-  const canForward = historyIdx < navHistory.length - 1;
-  const navigateTo = useCallback((key) => {
-    if (key === view) return;
-    setNavHistory(h => [...h.slice(0, historyIdx + 1), key]);
-    setHistoryIdx(i => i + 1);
-  }, [view, historyIdx]);
-  const goBack = useCallback(() => { if (canBack) setHistoryIdx(i => i - 1); }, [canBack]);
-  const goForward = useCallback(() => { if (canForward) setHistoryIdx(i => i + 1); }, [canForward]);
-
   const toggleSort = (field) => setSort(p => p.field === field ? { field, asc: !p.asc } : { field, asc: false });
   const toggleSelect = (id) => setSelected(p => { const n = new Set(p); n.has(id) ? n.delete(id) : n.add(id); return n; });
   const toggleAll = () => {
@@ -1863,8 +1863,8 @@ export default function App() {
               </div>
             </div>
             <div style={{display:"flex",alignItems:"center",gap:2}}>
-              <div onClick={goBack} title="뒤로 (Alt+←)" style={{width:26,height:26,borderRadius:6,display:"flex",alignItems:"center",justifyContent:"center",cursor:canBack?"pointer":"default",color:canBack?"var(--t2)":"var(--t4)",background:canBack?"var(--bg-3)":"transparent",border:`1px solid ${canBack?"var(--border)":"transparent"}`,transition:"all .15s"}}><Ic.ChevLeft s={14}/></div>
-              <div onClick={goForward} title="앞으로 (Alt+→)" style={{width:26,height:26,borderRadius:6,display:"flex",alignItems:"center",justifyContent:"center",cursor:canForward?"pointer":"default",color:canForward?"var(--t2)":"var(--t4)",background:canForward?"var(--bg-3)":"transparent",border:`1px solid ${canForward?"var(--border)":"transparent"}`,transition:"all .15s"}}><Ic.ChevRight s={14}/></div>
+              <div onClick={canBack?goBack:undefined} title="뒤로 (Alt+←)" style={{width:26,height:26,borderRadius:6,display:"flex",alignItems:"center",justifyContent:"center",cursor:canBack?"pointer":"not-allowed",color:canBack?"var(--t1)":"var(--t4)",background:"var(--bg-3)",border:"1px solid var(--border)",opacity:canBack?1:0.35,transition:"all .15s"}}><Ic.ChevLeft s={14}/></div>
+              <div onClick={canForward?goForward:undefined} title="앞으로 (Alt+→)" style={{width:26,height:26,borderRadius:6,display:"flex",alignItems:"center",justifyContent:"center",cursor:canForward?"pointer":"not-allowed",color:canForward?"var(--t1)":"var(--t4)",background:"var(--bg-3)",border:"1px solid var(--border)",opacity:canForward?1:0.35,transition:"all .15s"}}><Ic.ChevRight s={14}/></div>
             </div>
             <div className="nx-header-search" style={{flex:1,maxWidth:420}}>
               <div style={{display:"flex",alignItems:"center",gap:8,padding:"7px 12px",borderRadius:8,background:"var(--bg-3)",border:"1px solid var(--border)"}}>
