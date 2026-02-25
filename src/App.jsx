@@ -2,38 +2,61 @@ import { useState, useEffect, useMemo, useCallback, useRef, useReducer } from "r
 
 // ─────────── STYLES ───────────
 const CSS = `
-@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700;800;900&family=Noto+Sans+KR:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&family=Instrument+Serif:ital@0;1&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700;800&family=Instrument+Serif:ital@0;1&display=swap');
 :root {
-  --bg-0:#06070A; --bg-1:#0C0D12; --bg-2:#111218; --bg-3:#16171F; --bg-4:#1C1D27;
-  --bg-hover:#1F2130; --bg-active:#252738;
-  --blue:#3B6BF5; --blue-light:#5B8AFF; --blue-dim:rgba(59,107,245,.08);
-  --cyan:#22D3EE; --cyan-dim:rgba(34,211,238,.08);
-  --green:#10B981; --green-dim:rgba(16,185,129,.08);
-  --amber:#F59E0B; --amber-dim:rgba(245,158,11,.08);
-  --red:#EF4444; --red-dim:rgba(239,68,68,.08);
-  --violet:#8B5CF6; --violet-dim:rgba(139,92,246,.08);
-  --t1:#ECEEF4; --t2:#9498A8; --t3:#5C6078; --t4:#3A3D4E;
-  --border:#1E2030; --border-h:#2A2D42;
-  --font: 'DM Sans','Noto Sans KR',sans-serif;
-  --mono: 'JetBrains Mono',monospace;
-  --serif: 'Instrument Serif',serif;
+  /* ── Apple Dark (기본) ── */
+  --bg-0:#000000; --bg-1:#1C1C1E; --bg-2:#2C2C2E; --bg-3:#3A3A3C; --bg-4:#48484A;
+  --bg-hover:rgba(120,120,128,0.18); --bg-active:rgba(120,120,128,0.28);
+  --blue:#0A84FF; --blue-light:#409CFF; --blue-dim:rgba(10,132,255,0.18);
+  --cyan:#32ADE6; --cyan-dim:rgba(50,173,230,0.18);
+  --green:#30D158; --green-dim:rgba(48,209,88,0.18);
+  --amber:#FF9F0A; --amber-dim:rgba(255,159,10,0.18);
+  --red:#FF453A; --red-dim:rgba(255,69,58,0.18);
+  --violet:#BF5AF2; --violet-dim:rgba(191,90,242,0.18);
+  --t1:#FFFFFF; --t2:rgba(235,235,245,0.6); --t3:rgba(235,235,245,0.3); --t4:rgba(235,235,245,0.18);
+  --border:rgba(84,84,88,0.65); --border-h:rgba(84,84,88,0.9);
+  /* Frosted Glass */
+  --glass-bg:rgba(28,28,30,0.85); --glass-bg-strong:rgba(28,28,30,0.94);
+  --glass-shadow:0 8px 32px rgba(0,0,0,0.5),0 2px 8px rgba(0,0,0,0.3);
+  --modal-shadow:0 24px 60px rgba(0,0,0,0.7),0 8px 24px rgba(0,0,0,0.5);
+  --card-shadow:0 4px 16px rgba(0,0,0,0.35),0 1px 4px rgba(0,0,0,0.2);
+  /* Apple System Font */
+  --font:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Noto Sans KR",sans-serif;
+  --mono:"SF Mono",SFMono-Regular,Menlo,monospace;
+  --serif:'Instrument Serif',Georgia,serif;
+}
+[data-theme="light"] {
+  /* ── Apple Light ── */
+  --bg-0:#FFFFFF; --bg-1:#F2F2F7; --bg-2:#EFEFF4; --bg-3:#E5E5EA; --bg-4:#D1D1D6;
+  --bg-hover:rgba(120,120,128,0.12); --bg-active:rgba(120,120,128,0.2);
+  --blue:#007AFF; --blue-light:#0A84FF; --blue-dim:rgba(0,122,255,0.12);
+  --cyan:#32ADE6; --cyan-dim:rgba(50,173,230,0.12);
+  --green:#34C759; --green-dim:rgba(52,199,89,0.12);
+  --amber:#FF9500; --amber-dim:rgba(255,149,0,0.12);
+  --red:#FF3B30; --red-dim:rgba(255,59,48,0.12);
+  --violet:#AF52DE; --violet-dim:rgba(175,82,222,0.12);
+  --t1:#000000; --t2:rgba(60,60,67,0.6); --t3:rgba(60,60,67,0.3); --t4:rgba(60,60,67,0.18);
+  --border:rgba(60,60,67,0.2); --border-h:rgba(60,60,67,0.4);
+  --glass-bg:rgba(255,255,255,0.85); --glass-bg-strong:rgba(255,255,255,0.95);
+  --glass-shadow:0 4px 20px rgba(0,0,0,0.08),0 1px 4px rgba(0,0,0,0.04);
+  --modal-shadow:0 8px 40px rgba(0,0,0,0.15),0 2px 8px rgba(0,0,0,0.08);
+  --card-shadow:0 2px 8px rgba(0,0,0,0.07),0 1px 2px rgba(0,0,0,0.04);
 }
 *{margin:0;padding:0;box-sizing:border-box}
-body{font-family:var(--font);background:var(--bg-0);color:var(--t1);font-size:13px;-webkit-font-smoothing:antialiased}
+html{transition:background .3s,color .3s}
+body{font-family:var(--font);background:var(--bg-0);color:var(--t1);font-size:13px;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;transition:background .3s,color .3s}
 ::-webkit-scrollbar{width:5px;height:5px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:var(--t4);border-radius:3px}
 input,textarea,select,button{font-family:inherit}
-@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+@keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
 @keyframes slideIn{from{opacity:0;transform:translateX(-12px)}to{opacity:1;transform:translateX(0)}}
-@keyframes scaleIn{from{opacity:0;transform:scale(.96)}to{opacity:1;transform:scale(1)}}
+@keyframes scaleIn{from{opacity:0;transform:scale(.95)}to{opacity:1;transform:scale(1)}}
 @keyframes pulse{0%,100%{opacity:.4}50%{opacity:1}}
 @keyframes barGrow{from{transform:scaleX(0)}to{transform:scaleX(1)}}
-@keyframes float{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}
-@keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}
+@keyframes float{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+@keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
 @keyframes slideInRight{from{opacity:0;transform:translateX(100%)}to{opacity:1;transform:translateX(0)}}
-}
-}
-.fi{animation:fadeIn .4s ease forwards;opacity:0}
-.fi1{animation-delay:.03s}.fi2{animation-delay:.06s}.fi3{animation-delay:.09s}.fi4{animation-delay:.12s}.fi5{animation-delay:.15s}
+.fi{animation:fadeIn .4s cubic-bezier(0.2,0,0,1) forwards;opacity:0}
+.fi1{animation-delay:.04s}.fi2{animation-delay:.08s}.fi3{animation-delay:.12s}.fi4{animation-delay:.16s}.fi5{animation-delay:.2s}
 `;
 
 // ─────────── ICONS ───────────
@@ -74,6 +97,8 @@ const Ic = {
   Bell:({s=16})=><svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>,
   BookOpen:({s=14})=><svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>,
   TrendUp:({s=14})=><svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>,
+  Sun:({s=14})=><svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>,
+  Moon:({s=14})=><svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>,
 };
 
 // ─────────── DATA ───────────
@@ -287,7 +312,7 @@ function NotificationCenter({ notifications, unread, onMarkRead, onMarkAllRead, 
   return (
     <>
       <div onClick={onClose} style={{position:"fixed",inset:0,zIndex:199}}/>
-      <div style={{position:"fixed",top:56,right:16,zIndex:200,width:340,background:"var(--bg-2)",border:"1px solid var(--border-h)",borderRadius:14,boxShadow:"0 16px 40px rgba(0,0,0,.5)",animation:"scaleIn .2s ease",transformOrigin:"top right",overflow:"hidden"}}>
+      <div style={{position:"fixed",top:56,right:16,zIndex:200,width:340,background:"var(--glass-bg-strong)",backdropFilter:"blur(40px) saturate(180%)",WebkitBackdropFilter:"blur(40px) saturate(180%)",border:"1px solid var(--border)",borderRadius:16,boxShadow:"var(--glass-shadow)",animation:"scaleIn .25s cubic-bezier(0.05,0.7,0.1,1)",transformOrigin:"top right",overflow:"hidden"}}>
         {/* Header */}
         <div style={{padding:"14px 16px",borderBottom:"1px solid var(--border)",display:"flex",alignItems:"center",gap:8}}>
           <Ic.Bell s={15}/>
@@ -347,8 +372,8 @@ function BuyerDetailPanel({ buyer, onClose, onSave, isSaved, onEmailBuyer, onSho
   ];
   return (
     <>
-      <div onClick={onClose} style={{position:"fixed",inset:0,background:"rgba(0,0,0,.5)",zIndex:90,animation:"fadeIn .2s ease",backdropFilter:"blur(2px)"}}/>
-      <div style={{position:"fixed",right:0,top:0,bottom:0,width:420,maxWidth:"90vw",background:"var(--bg-1)",borderLeft:"1px solid var(--border)",zIndex:91,display:"flex",flexDirection:"column",animation:"slideInRight .25s ease",overflow:"hidden"}}>
+      <div onClick={onClose} style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.5)",zIndex:90,animation:"fadeIn .2s cubic-bezier(0.2,0,0,1)",backdropFilter:"blur(8px) saturate(140%)",WebkitBackdropFilter:"blur(8px) saturate(140%)"}}/>
+      <div style={{position:"fixed",right:0,top:0,bottom:0,width:420,maxWidth:"90vw",background:"var(--glass-bg-strong)",backdropFilter:"blur(40px) saturate(180%)",WebkitBackdropFilter:"blur(40px) saturate(180%)",borderLeft:"1px solid var(--border)",boxShadow:"var(--glass-shadow)",zIndex:91,display:"flex",flexDirection:"column",animation:"slideInRight .3s cubic-bezier(0.2,0,0,1)",overflow:"hidden"}}>
         <div style={{padding:"16px 20px",borderBottom:"1px solid var(--border)",display:"flex",alignItems:"center",gap:12,flexShrink:0}}>
           <div onClick={onClose} style={{cursor:"pointer",padding:4,borderRadius:6,color:"var(--t3)"}}><Ic.X s={16}/></div>
           <span style={{fontSize:14,fontWeight:700,flex:1}}>바이어 상세</span>
@@ -484,8 +509,8 @@ function BuyerNotesPanel({ buyer, notes, onAddNote, onDeleteNote, onClose }) {
   const fmtTime = (ts) => new Date(ts).toLocaleString('ko-KR',{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'});
   return (
     <>
-      <div onClick={onClose} style={{position:"fixed",inset:0,background:"rgba(0,0,0,.4)",zIndex:93,backdropFilter:"blur(1px)"}}/>
-      <div style={{position:"fixed",right:0,top:0,bottom:0,width:420,maxWidth:"90vw",background:"var(--bg-1)",borderLeft:"1px solid var(--border)",zIndex:94,display:"flex",flexDirection:"column",animation:"slideInRight .25s ease",overflow:"hidden"}}>
+      <div onClick={onClose} style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.45)",zIndex:93,backdropFilter:"blur(8px) saturate(140%)",WebkitBackdropFilter:"blur(8px) saturate(140%)"}}/>
+      <div style={{position:"fixed",right:0,top:0,bottom:0,width:420,maxWidth:"90vw",background:"var(--glass-bg-strong)",backdropFilter:"blur(40px) saturate(180%)",WebkitBackdropFilter:"blur(40px) saturate(180%)",borderLeft:"1px solid var(--border)",boxShadow:"var(--glass-shadow)",zIndex:94,display:"flex",flexDirection:"column",animation:"slideInRight .3s cubic-bezier(0.2,0,0,1)",overflow:"hidden"}}>
         <div style={{padding:"16px 20px",borderBottom:"1px solid var(--border)",display:"flex",alignItems:"center",gap:12,flexShrink:0}}>
           <div onClick={onClose} style={{cursor:"pointer",padding:4,borderRadius:6,color:"var(--t3)"}}><Ic.X s={16}/></div>
           <div style={{flex:1}}>
@@ -580,8 +605,8 @@ function BuyerCompareModal({ buyers, onClose }) {
   const scoreColors = s => s >= 90 ? "var(--green)" : s >= 75 ? "var(--cyan)" : s >= 60 ? "var(--blue)" : "var(--amber)";
   return (
     <>
-      <div onClick={onClose} style={{position:"fixed",inset:0,background:"rgba(0,0,0,.65)",zIndex:102,backdropFilter:"blur(4px)"}}/>
-      <div onClick={e=>e.stopPropagation()} style={{position:"fixed",top:"50%",left:"50%",transform:"translate(-50%,-50%)",zIndex:103,background:"var(--bg-1)",border:"1px solid var(--border-h)",borderRadius:18,width:"min(960px,94vw)",maxHeight:"88vh",display:"flex",flexDirection:"column",animation:"scaleIn .25s ease",boxShadow:"0 24px 60px rgba(0,0,0,.6)"}}>
+      <div onClick={onClose} style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.6)",zIndex:102,backdropFilter:"blur(12px) saturate(140%)",WebkitBackdropFilter:"blur(12px) saturate(140%)"}}/>
+      <div onClick={e=>e.stopPropagation()} style={{position:"fixed",top:"50%",left:"50%",transform:"translate(-50%,-50%)",zIndex:103,background:"var(--glass-bg-strong)",backdropFilter:"blur(40px) saturate(180%)",WebkitBackdropFilter:"blur(40px) saturate(180%)",border:"1px solid var(--border)",borderRadius:20,width:"min(960px,94vw)",maxHeight:"88vh",display:"flex",flexDirection:"column",animation:"scaleIn .3s cubic-bezier(0.05,0.7,0.1,1)",boxShadow:"var(--modal-shadow)"}}>
         {/* Header */}
         <div style={{padding:"18px 24px",borderBottom:"1px solid var(--border)",display:"flex",alignItems:"center",gap:16,flexShrink:0}}>
           <div style={{display:"flex",alignItems:"center",gap:6,fontSize:14,fontWeight:700}}><Ic.Columns s={16}/>바이어 비교</div>
@@ -663,8 +688,8 @@ function LandingHero({ onEnter }) {
   return (
     <div style={{position:"fixed",inset:0,zIndex:100,background:"var(--bg-0)",overflow:"auto"}}>
       {/* Ambient glow */}
-      <div style={{position:"fixed",top:"-20%",left:"10%",width:"50vw",height:"50vw",borderRadius:"50%",background:"radial-gradient(circle,rgba(59,107,245,.06) 0%,transparent 70%)",pointerEvents:"none"}}/>
-      <div style={{position:"fixed",bottom:"-10%",right:"5%",width:"40vw",height:"40vw",borderRadius:"50%",background:"radial-gradient(circle,rgba(139,92,246,.05) 0%,transparent 70%)",pointerEvents:"none"}}/>
+      <div style={{position:"fixed",top:"-20%",left:"10%",width:"50vw",height:"50vw",borderRadius:"50%",background:"radial-gradient(circle,rgba(10,132,255,0.08) 0%,transparent 70%)",pointerEvents:"none"}}/>
+      <div style={{position:"fixed",bottom:"-10%",right:"5%",width:"40vw",height:"40vw",borderRadius:"50%",background:"radial-gradient(circle,rgba(191,90,242,0.06) 0%,transparent 70%)",pointerEvents:"none"}}/>
 
       <div style={{maxWidth:960,margin:"0 auto",padding:"0 24px"}}>
         {/* Nav */}
@@ -688,9 +713,9 @@ function LandingHero({ onEnter }) {
             바이어 발굴부터 이메일 검색, AI 매칭까지.<br/>수출의 모든 과정을 하나의 플랫폼에서.
           </p>
           <div style={{display:"flex",gap:12,justifyContent:"center",marginTop:32}}>
-            <div onClick={onEnter} style={{padding:"12px 32px",borderRadius:10,background:"var(--blue)",color:"#fff",fontSize:14,fontWeight:700,cursor:"pointer",transition:"all .2s",boxShadow:"0 4px 20px rgba(59,107,245,.3)"}}
-              onMouseEnter={e=>{e.currentTarget.style.transform="translateY(-2px)";e.currentTarget.style.boxShadow="0 6px 24px rgba(59,107,245,.4)"}}
-              onMouseLeave={e=>{e.currentTarget.style.transform="none";e.currentTarget.style.boxShadow="0 4px 20px rgba(59,107,245,.3)"}}>
+            <div onClick={onEnter} style={{padding:"12px 32px",borderRadius:10,background:"var(--blue)",color:"#fff",fontSize:14,fontWeight:700,cursor:"pointer",transition:"all .25s cubic-bezier(0.2,0,0,1)",boxShadow:"0 4px 20px rgba(10,132,255,0.35)"}}
+              onMouseEnter={e=>{e.currentTarget.style.transform="translateY(-2px)";e.currentTarget.style.boxShadow="0 8px 32px rgba(10,132,255,0.45)"}}
+              onMouseLeave={e=>{e.currentTarget.style.transform="none";e.currentTarget.style.boxShadow="0 4px 20px rgba(10,132,255,0.35)"}}>
               무료로 시작하기
             </div>
             <div onClick={onEnter} style={{padding:"12px 32px",borderRadius:10,background:"var(--bg-3)",border:"1px solid var(--border)",color:"var(--t1)",fontSize:14,fontWeight:600,cursor:"pointer",transition:"all .2s"}}
@@ -718,9 +743,9 @@ function LandingHero({ onEnter }) {
           </div>
           <div style={{display:"grid",gridTemplateColumns:"repeat(2,1fr)",gap:14,paddingBottom:60}}>
             {features.map((f,i)=>(
-              <div key={i} style={{padding:24,borderRadius:14,background:"var(--bg-2)",border:"1px solid var(--border)",transition:"all .2s",cursor:"default"}}
-                onMouseEnter={e=>{e.currentTarget.style.borderColor="var(--border-h)";e.currentTarget.style.transform="translateY(-2px)"}}
-                onMouseLeave={e=>{e.currentTarget.style.borderColor="var(--border)";e.currentTarget.style.transform="none"}}>
+              <div key={i} style={{padding:24,borderRadius:12,background:"var(--bg-2)",border:"1px solid var(--border)",boxShadow:"var(--card-shadow)",transition:"all .25s cubic-bezier(0.2,0,0,1)",cursor:"default"}}
+                onMouseEnter={e=>{e.currentTarget.style.borderColor="var(--border-h)";e.currentTarget.style.transform="translateY(-3px)";e.currentTarget.style.boxShadow="var(--glass-shadow)"}}
+                onMouseLeave={e=>{e.currentTarget.style.borderColor="var(--border)";e.currentTarget.style.transform="none";e.currentTarget.style.boxShadow="var(--card-shadow)"}}>
                 <div style={{width:40,height:40,borderRadius:10,background:f.dim,display:"flex",alignItems:"center",justifyContent:"center",marginBottom:14,color:f.color}}>{f.icon}</div>
                 <div style={{fontSize:15,fontWeight:700,marginBottom:6}}>{f.title}</div>
                 <div style={{fontSize:12,color:"var(--t3)",lineHeight:1.6}}>{f.desc}</div>
@@ -1112,8 +1137,8 @@ ${company}
 
   return (
     <>
-      <div onClick={onClose} style={{position:"fixed",inset:0,background:"rgba(0,0,0,.6)",zIndex:100,backdropFilter:"blur(3px)"}}/>
-      <div style={{position:"fixed",top:"50%",left:"50%",transform:"translate(-50%,-50%)",width:640,maxWidth:"92vw",maxHeight:"88vh",background:"var(--bg-1)",border:"1px solid var(--border)",borderRadius:16,zIndex:101,display:"flex",flexDirection:"column",animation:"scaleIn .25s ease",overflow:"hidden"}}>
+      <div onClick={onClose} style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.55)",zIndex:100,backdropFilter:"blur(12px) saturate(140%)",WebkitBackdropFilter:"blur(12px) saturate(140%)"}}/>
+      <div style={{position:"fixed",top:"50%",left:"50%",transform:"translate(-50%,-50%)",width:640,maxWidth:"92vw",maxHeight:"88vh",background:"var(--glass-bg-strong)",backdropFilter:"blur(40px) saturate(180%)",WebkitBackdropFilter:"blur(40px) saturate(180%)",border:"1px solid var(--border)",borderRadius:20,zIndex:101,display:"flex",flexDirection:"column",animation:"scaleIn .3s cubic-bezier(0.05,0.7,0.1,1)",boxShadow:"var(--modal-shadow)",overflow:"hidden"}}>
         {/* Header */}
         <div style={{padding:"16px 20px",borderBottom:"1px solid var(--border)",display:"flex",alignItems:"center",gap:12}}>
           <div style={{width:32,height:32,borderRadius:8,background:"var(--green-dim)",display:"flex",alignItems:"center",justifyContent:"center"}}><Ic.Mail s={16}/></div>
@@ -1355,7 +1380,7 @@ function FilterSidebar({ filters, setFilters, collapsed, setCollapsed }) {
   );
 
   return (
-    <div style={{width:260,background:"var(--bg-1)",borderRight:"1px solid var(--border)",display:"flex",flexDirection:"column",flexShrink:0,overflow:"hidden"}}>
+    <div style={{width:260,background:"var(--glass-bg)",backdropFilter:"blur(20px) saturate(160%)",WebkitBackdropFilter:"blur(20px) saturate(160%)",borderRight:"1px solid var(--border)",display:"flex",flexDirection:"column",flexShrink:0,overflow:"hidden"}}>
       <div style={{padding:"12px 14px",borderBottom:"1px solid var(--border)",display:"flex",alignItems:"center",justifyContent:"space-between"}}>
         <div style={{display:"flex",alignItems:"center",gap:6,fontSize:13,fontWeight:700}}><Ic.Filter s={14}/>필터</div>
         <div style={{display:"flex",gap:4}}>
@@ -1750,7 +1775,7 @@ function KanbanPipeline({ buyers }) {
         {stages.map((st,si)=>{
           const cards = getBuyers(si);
           return (
-            <div key={st.key} style={{background:"var(--bg-2)",borderRadius:10,border:"1px solid var(--border)",overflow:"hidden",minWidth:160}}>
+            <div key={st.key} style={{background:"var(--bg-2)",borderRadius:12,border:"1px solid var(--border)",boxShadow:"var(--card-shadow)",overflow:"hidden",minWidth:160}}>
               <div style={{padding:"10px 12px",borderBottom:"1px solid var(--border)",display:"flex",alignItems:"center",gap:8}}>
                 <div style={{width:8,height:8,borderRadius:"50%",background:st.color}}/>
                 <span style={{fontSize:11,fontWeight:700,flex:1}}>{st.key}</span>
@@ -1758,7 +1783,7 @@ function KanbanPipeline({ buyers }) {
               </div>
               <div style={{padding:8,display:"grid",gap:6,minHeight:100}}>
                 {cards.map((b,i)=>(
-                  <div key={b.id||i} style={{padding:"8px 10px",borderRadius:8,background:"var(--bg-3)",border:"1px solid var(--border)",fontSize:11,transition:"all .15s",cursor:"pointer"}}
+                  <div key={b.id||i} style={{padding:"8px 10px",borderRadius:8,background:"var(--bg-3)",border:"1px solid var(--border)",fontSize:11,transition:"all .15s cubic-bezier(0.2,0,0,1)",cursor:"pointer"}}
                     onMouseEnter={e=>{e.currentTarget.style.borderColor="var(--border-h)";e.currentTarget.style.transform="translateY(-1px)"}}
                     onMouseLeave={e=>{e.currentTarget.style.borderColor="var(--border)";e.currentTarget.style.transform="none"}}>
                     <div style={{fontWeight:700,fontSize:11,marginBottom:3}}>{b.name}</div>
@@ -1787,7 +1812,7 @@ const COUNTRY_COORDS = {
   "캐나다":{x:138,y:105},"프랑스":{x:370,y:118},"싱가포르":{x:635,y:235},"태국":{x:610,y:212},
   "인도":{x:565,y:190},"브라질":{x:235,y:298},"멕시코":{x:138,y:196},
 };
-const MAP_REGION_COLORS = {"유럽":"#3B6BF5","북미":"#22D3EE","아시아":"#10B981","동남아":"#F59E0B","오세아니아":"#8B5CF6","남미":"#EF4444"};
+const MAP_REGION_COLORS = {"유럽":"#0A84FF","북미":"#32ADE6","아시아":"#30D158","동남아":"#FF9F0A","오세아니아":"#BF5AF2","남미":"#FF453A"};
 
 function WorldMapView({ buyers }) {
   const [tooltip, setTooltip] = useState(null);
@@ -1801,15 +1826,15 @@ function WorldMapView({ buyers }) {
     <div style={{position:"relative",width:"100%"}}>
       <svg viewBox="0 0 800 360" style={{width:"100%",height:"auto",background:"var(--bg-3)",borderRadius:10,display:"block"}} preserveAspectRatio="xMidYMid meet">
         {/* Grid lines */}
-        {[80,160,240,320].map(y=><line key={y} x1={0} y1={y} x2={800} y2={y} stroke="#1E2030" strokeWidth="0.6" strokeDasharray="4 8"/>)}
-        {[100,200,300,400,500,600,700].map(x=><line key={x} x1={x} y1={0} x2={x} y2={360} stroke="#1E2030" strokeWidth="0.6" strokeDasharray="4 8"/>)}
+        {[80,160,240,320].map(y=><line key={y} x1={0} y1={y} x2={800} y2={y} stroke="var(--border)" strokeWidth="0.6" strokeDasharray="4 8"/>)}
+        {[100,200,300,400,500,600,700].map(x=><line key={x} x1={x} y1={0} x2={x} y2={360} stroke="var(--border)" strokeWidth="0.6" strokeDasharray="4 8"/>)}
         {/* Continent shapes (simplified decorative) */}
-        <ellipse cx={170} cy={150} rx={95} ry={70} fill="#16171F" opacity="0.7"/>
-        <ellipse cx={240} cy={290} rx={60} ry={55} fill="#16171F" opacity="0.7"/>
-        <ellipse cx={385} cy={140} rx={65} ry={55} fill="#16171F" opacity="0.7"/>
-        <ellipse cx={500} cy={160} rx={120} ry={60} fill="#16171F" opacity="0.7"/>
-        <ellipse cx={645} cy={175} rx={55} ry={45} fill="#16171F" opacity="0.7"/>
-        <ellipse cx={670} cy={310} rx={50} ry={35} fill="#16171F" opacity="0.7"/>
+        <ellipse cx={170} cy={150} rx={95} ry={70} fill="var(--bg-2)" opacity="0.7"/>
+        <ellipse cx={240} cy={290} rx={60} ry={55} fill="var(--bg-2)" opacity="0.7"/>
+        <ellipse cx={385} cy={140} rx={65} ry={55} fill="var(--bg-2)" opacity="0.7"/>
+        <ellipse cx={500} cy={160} rx={120} ry={60} fill="var(--bg-2)" opacity="0.7"/>
+        <ellipse cx={645} cy={175} rx={55} ry={45} fill="var(--bg-2)" opacity="0.7"/>
+        <ellipse cx={670} cy={310} rx={50} ry={35} fill="var(--bg-2)" opacity="0.7"/>
         {/* Bubbles */}
         {COUNTRIES.map(country => {
           const coord = COUNTRY_COORDS[country];
@@ -1915,7 +1940,7 @@ function DashboardView({ buyers, savedSet, starred, buyerNotes }) {
     return s + (match ? parseInt(match[1]) * 1000 : 0);
   }, 0);
 
-  const cardStyle = {padding:20,borderRadius:12,background:"var(--bg-2)",border:"1px solid var(--border)"};
+  const cardStyle = {padding:20,borderRadius:12,background:"var(--bg-2)",border:"1px solid var(--border)",boxShadow:"var(--card-shadow)"};
   const kpiCardStyle = {...cardStyle, position:"relative",overflow:"hidden"};
 
   // Real-time matching indicator
@@ -2400,6 +2425,18 @@ export default function App() {
   const [notifUnread, setNotifUnread] = useState(0);
   const [quickFilter, setQuickFilter] = useState(null);
   const [toast, setToast] = useState(null);
+  // ── Apple Theme ──
+  const [isDark, setIsDark] = useState(() => {
+    try {
+      const saved = localStorage.getItem('nexport-theme');
+      if (saved) return saved === 'dark';
+    } catch(e) {}
+    return window.matchMedia?.('(prefers-color-scheme: dark)').matches ?? true;
+  });
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme', isDark ? 'dark' : 'light');
+    try { localStorage.setItem('nexport-theme', isDark ? 'dark' : 'light'); } catch(e) {}
+  }, [isDark]);
   const navReducer = (s, a) => {
     if (a.type==='NAVIGATE') { if (a.key===s.history[s.idx]) return s; return {history:[...s.history.slice(0,s.idx+1),a.key],idx:s.idx+1}; }
     if (a.type==='BACK') return s.idx>0?{...s,idx:s.idx-1}:s;
@@ -2522,6 +2559,7 @@ export default function App() {
       if (e.key==="Escape") setShowAssistant(false);
       if (e.altKey && e.key==="ArrowLeft") { e.preventDefault(); goBack(); }
       if (e.altKey && e.key==="ArrowRight") { e.preventDefault(); goForward(); }
+      if (e.key==="l" && !e.metaKey && !e.ctrlKey && !e.altKey && document.activeElement.tagName!=="INPUT" && document.activeElement.tagName!=="TEXTAREA") { setIsDark(d=>!d); }
     };
     window.addEventListener("keydown", h);
     return () => window.removeEventListener("keydown", h);
@@ -2588,7 +2626,7 @@ export default function App() {
         {/* Main Content */}
         <div style={{flex:1,display:"flex",flexDirection:"column",overflow:"hidden"}}>
           {/* Top Header */}
-          <div className="nx-header" style={{padding:"12px 20px",borderBottom:"1px solid var(--border)",background:"var(--bg-1)",display:"flex",alignItems:"center",gap:16,flexShrink:0}}>
+          <div className="nx-header" style={{padding:"12px 20px",borderBottom:"1px solid var(--border)",background:"var(--glass-bg)",backdropFilter:"blur(40px) saturate(180%)",WebkitBackdropFilter:"blur(40px) saturate(180%)",display:"flex",alignItems:"center",gap:16,flexShrink:0,position:"sticky",top:0,zIndex:100}}>
             <div style={{display:"flex",alignItems:"center",gap:10}}>
               <div style={{width:28,height:28,borderRadius:7,background:"linear-gradient(135deg,var(--blue),var(--violet))",display:"flex",alignItems:"center",justifyContent:"center"}}><Ic.Users s={14}/></div>
               <div>
@@ -2618,9 +2656,15 @@ export default function App() {
                 return <div key={tab.key} onClick={()=>navigateTo(tab.key)} style={{padding:"6px 14px",borderRadius:6,cursor:"pointer",display:"flex",alignItems:"center",gap:5,fontSize:11,fontWeight:active?700:500,transition:"all .2s",background:active?"var(--bg-1)":"transparent",color:active?"var(--t1)":"var(--t3)",boxShadow:active?"0 1px 3px rgba(0,0,0,.2)":"none"}}>{tab.icon}{tab.label}</div>;
               })}
             </div>
+            {/* Theme Toggle */}
+            <button onClick={()=>setIsDark(d=>!d)} title={isDark?"☀️ 라이트 모드로 전환":"🌙 다크 모드로 전환"}
+              style={{width:32,height:32,borderRadius:8,display:"flex",alignItems:"center",justifyContent:"center",cursor:"pointer",flexShrink:0,outline:"none",background:"var(--bg-hover)",border:"1px solid var(--border)",color:"var(--t2)",transition:"all 0.25s cubic-bezier(0.2,0,0,1)"}}
+              onMouseEnter={e=>{e.currentTarget.style.color="var(--t1)";e.currentTarget.style.borderColor="var(--border-h)"}}
+              onMouseLeave={e=>{e.currentTarget.style.color="var(--t2)";e.currentTarget.style.borderColor="var(--border)"}}
+            >{isDark?<Ic.Sun s={15}/>:<Ic.Moon s={15}/>}</button>
             {/* Bell / Notification */}
             <div style={{position:"relative",flexShrink:0}} onClick={()=>setShowNotifications(p=>!p)}>
-              <div style={{width:32,height:32,borderRadius:8,display:"flex",alignItems:"center",justifyContent:"center",cursor:"pointer",background:"var(--bg-3)",border:"1px solid var(--border)",color:"var(--t2)",transition:"all .15s"}}
+              <div style={{width:32,height:32,borderRadius:8,display:"flex",alignItems:"center",justifyContent:"center",cursor:"pointer",background:"var(--bg-hover)",border:"1px solid var(--border)",color:"var(--t2)",transition:"all .2s cubic-bezier(0.2,0,0,1)"}}
                 onMouseEnter={e=>{e.currentTarget.style.borderColor="var(--border-h)";e.currentTarget.style.color="var(--t1)"}}
                 onMouseLeave={e=>{e.currentTarget.style.borderColor="var(--border)";e.currentTarget.style.color="var(--t2)"}}
               ><Ic.Bell s={15}/></div>
@@ -2684,7 +2728,7 @@ export default function App() {
                     background:active?`var(${q.color}-dim)`:"transparent",
                     color:active?`var(${q.color})`:"var(--t2)",
                     fontSize:11,fontWeight:active?600:400,cursor:"pointer",
-                    whiteSpace:"nowrap",transition:"all .15s ease",flexShrink:0,outline:"none"}}>
+                    whiteSpace:"nowrap",transition:"all .2s cubic-bezier(0.2,0,0,1)",flexShrink:0,outline:"none"}}>
                   {q.label}
                   <span style={{fontSize:9,padding:"1px 5px",borderRadius:8,
                     background:active?`var(${q.color})`:"var(--bg-4)",
@@ -2863,8 +2907,8 @@ fi fi${Math.min(i+1,5)}`}
             <div style={{
               position:"absolute",bottom:56,left:"50%",transform:"translateX(-50%)",
               display:"flex",alignItems:"center",gap:12,padding:"10px 20px",
-              borderRadius:12,background:"var(--bg-3)",border:"1px solid var(--border-h)",
-              boxShadow:"0 12px 40px rgba(0,0,0,.5)",animation:"float .3s ease",zIndex:50
+              borderRadius:16,background:"var(--glass-bg-strong)",backdropFilter:"blur(20px) saturate(180%)",WebkitBackdropFilter:"blur(20px) saturate(180%)",border:"1px solid var(--border)",
+              boxShadow:"var(--modal-shadow)",animation:"float .3s cubic-bezier(0.05,0.7,0.1,1)",zIndex:50
             }}>
               <span style={{fontSize:12,fontWeight:700,color:"var(--blue)"}}>{selected.size}건 선택</span>
               <div style={{width:1,height:20,background:"var(--border)"}} />
