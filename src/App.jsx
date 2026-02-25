@@ -1755,15 +1755,47 @@ export default function App() {
     if (a.type==='NAVIGATE') { if (a.key===s.history[s.idx]) return s; return {history:[...s.history.slice(0,s.idx+1),a.key],idx:s.idx+1}; }
     if (a.type==='BACK') return s.idx>0?{...s,idx:s.idx-1}:s;
     if (a.type==='FORWARD') return s.idx<s.history.length-1?{...s,idx:s.idx+1}:s;
+    if (a.type==='SYNC') { const i=a.idx; return (typeof i==='number'&&i>=0&&i<s.history.length)?{...s,idx:i}:s; }
     return s;
   };
   const [nav, navDispatch] = useReducer(navReducer, {history:['buyers'],idx:0});
   const view = nav.history[nav.idx];
   const canBack = nav.idx > 0;
   const canForward = nav.idx < nav.history.length - 1;
-  const navigateTo = useCallback((key) => navDispatch({type:'NAVIGATE',key}), []);
-  const goBack = useCallback(() => navDispatch({type:'BACK'}), []);
-  const goForward = useCallback(() => navDispatch({type:'FORWARD'}), []);
+  const navRef = useRef(nav);
+  useEffect(() => { navRef.current = nav; });
+  const isProgrammaticRef = useRef(false);
+  const navigateTo = useCallback((key) => {
+    if (key === navRef.current.history[navRef.current.idx]) return;
+    const newIdx = navRef.current.idx + 1;
+    navDispatch({type:'NAVIGATE', key});
+    window.history.pushState({navView:key, navIdx:newIdx}, '');
+  }, []);
+  const goBack = useCallback(() => {
+    if (navRef.current.idx <= 0) return;
+    navDispatch({type:'BACK'});
+    isProgrammaticRef.current = true;
+    window.history.back();
+  }, []);
+  const goForward = useCallback(() => {
+    if (navRef.current.idx >= navRef.current.history.length - 1) return;
+    navDispatch({type:'FORWARD'});
+    isProgrammaticRef.current = true;
+    window.history.forward();
+  }, []);
+  useEffect(() => {
+    window.history.replaceState({navView:'buyers', navIdx:0}, '');
+    const onPop = (e) => {
+      if (isProgrammaticRef.current) { isProgrammaticRef.current = false; return; }
+      if (e.state && typeof e.state.navIdx === 'number') {
+        const cur = navRef.current.idx;
+        if (e.state.navIdx < cur) navDispatch({type:'BACK'});
+        else if (e.state.navIdx > cur) navDispatch({type:'FORWARD'});
+      }
+    };
+    window.addEventListener('popstate', onPop);
+    return () => window.removeEventListener('popstate', onPop);
+  }, []);
   const perPage = 15;
 
   // Filtering
