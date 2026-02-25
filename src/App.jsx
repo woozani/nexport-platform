@@ -72,6 +72,8 @@ const Ic = {
   Refresh:({s=14})=><svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>,
   Grid:({s=14})=><svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>,
   Bell:({s=16})=><svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>,
+  BookOpen:({s=14})=><svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>,
+  TrendUp:({s=14})=><svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>,
 };
 
 // ─────────── DATA ───────────
@@ -123,6 +125,69 @@ function generateBuyers(n) {
 }
 
 const ALL_BUYERS = generateBuyers(60);
+
+// ─────────── QUICK FILTERS ───────────
+const QUICK_FILTERS = [
+  { id:'hotIntent',   label:'🔥 고의향',  color:'--red',    test:(b)=>b.buyingIntent==='높음' },
+  { id:'topScore',    label:'⭐ 고득점',  color:'--amber',  test:(b)=>b.score>=85 },
+  { id:'newBuyer',    label:'🆕 신규',    color:'--green',  test:(b)=>b.status==='신규' },
+  { id:'negotiating', label:'🤝 협상중',  color:'--blue',   test:(b)=>b.status==='협상중' },
+  { id:'europe',      label:'🌍 유럽',    color:'--cyan',   test:(b)=>b.region==='유럽' },
+  { id:'asia',        label:'🌏 아시아',  color:'--violet', test:(b)=>b.region==='아시아'||b.region==='동남아' },
+];
+
+// ─────────── PLAYBOOKS ───────────
+const PLAYBOOKS = [
+  { id:'fasttrack',        emoji:'🚀', title:'패스트트랙 클로징',  color:'--green',
+    tag:'AI 추천',   tagColor:'--green',
+    desc:'매칭 점수 85점 이상의 신규 바이어를 빠르게 첫 접촉으로 전환하는 고속 어프로치 전략',
+    steps:['신규 바이어 자동 필터링','AI 맞춤 첫인상 이메일 발송','3일 내 팔로업 예약'],
+    filter:(b,s)=>b.score>=85&&b.status==='신규' },
+  { id:'reactivate',       emoji:'♻️', title:'협상 재활성화',       color:'--amber',
+    tag:'긴급',      tagColor:'--amber',
+    desc:'협상 단계에서 멈춰 있는 바이어의 모멘텀을 되살리는 전략적 재점화 캠페인',
+    steps:['협상중 바이어 선별','결정 지원 자료 첨부 이메일','인센티브 제안 시퀀스'],
+    filter:(b,s)=>b.status==='협상중' },
+  { id:'loi_close',        emoji:'🎯', title:'LOI 클로징 가속화',  color:'--blue',
+    tag:'고전환',    tagColor:'--blue',
+    desc:'LOI 서명 직전 바이어에게 최종 결정을 촉진하는 집중 클로징 시퀀스',
+    steps:['LOI 단계 바이어 식별','계약 초안 요약 발송','72시간 이내 응답 유도'],
+    filter:(b,s)=>b.status==='LOI' },
+  { id:'vip_care',         emoji:'💎', title:'VIP 바이어 케어',     color:'--violet',
+    tag:'관계 강화', tagColor:'--violet',
+    desc:'저장된 고의향 핵심 바이어와의 장기 관계를 깊게 유지하는 VIP 케어 전략',
+    steps:['저장 + 고의향 바이어 선별','개인화된 케어 메시지 발송','정기 체크인 일정 수립'],
+    filter:(b,s)=>s.has(b.id)&&b.buyingIntent==='높음' },
+  { id:'new_market',       emoji:'🌍', title:'신시장 탐색',         color:'--cyan',
+    tag:'성장 전략', tagColor:'--cyan',
+    desc:'아직 관계가 없는 고가치 잠재 바이어를 발굴해 새로운 시장을 개척하는 전략',
+    steps:['미저장 고득점 바이어 탐색','시장 진입 의향 타진 이메일','관심도 측정 후 세분화'],
+    filter:(b,s)=>!s.has(b.id)&&b.score>=80 },
+  { id:'pipeline_cleanup', emoji:'📊', title:'파이프라인 클린업',    color:'--red',
+    tag:'관리',      tagColor:'--red',
+    desc:'검토중 단계에서 오래 머문 바이어를 진단하고 다음 단계로 추진하는 정리 전략',
+    steps:['검토중 바이어 전체 선별','의사결정 지연 원인 파악 이메일','이탈 여부 분류 및 재배정'],
+    filter:(b,s)=>b.status==='검토중' },
+];
+
+// ─────────── LOOKALIKE ALGORITHM ───────────
+const getLookalikes = (target, buyers) => {
+  return buyers
+    .filter(b => b.id !== target.id)
+    .map(b => {
+      let sim = 0;
+      if (b.industry === target.industry) sim += 30;
+      if (b.region === target.region) sim += 20;
+      if (Math.abs(b.score - target.score) <= 15) sim += 15;
+      const certOverlap = (target.certifications||[]).filter(c=>(b.certifications||[]).includes(c)).length;
+      sim += certOverlap * 8;
+      if (b.buyingIntent === target.buyingIntent) sim += 10;
+      if (b.country === target.country) sim += 5;
+      return { ...b, similarity: sim };
+    })
+    .sort((a,b) => b.similarity - a.similarity)
+    .slice(0, 5);
+};
 
 // ─────────── SMALL COMPONENTS ───────────
 const Badge = ({children, color="var(--blue)", bg}) => (
@@ -269,8 +334,9 @@ function NotificationCenter({ notifications, unread, onMarkRead, onMarkAllRead, 
 
 
 // ─────────── BUYER DETAIL PANEL ───────────
-function BuyerDetailPanel({ buyer, onClose, onSave, isSaved, onEmailBuyer, onShowNotes }) {
+function BuyerDetailPanel({ buyer, onClose, onSave, isSaved, onEmailBuyer, onShowNotes, onDetailBuyer }) {
   if (!buyer) return null;
+  const [showLookalikes, setShowLookalikes] = useState(false);
   const cColor = (s) => s>=80?"var(--green)":s>=65?"var(--cyan)":s>=50?"var(--amber)":"var(--red)";
   const sections = [
     {label:"산업",value:buyer.industry,icon:<Ic.Grid s={13}/>},
@@ -348,11 +414,50 @@ function BuyerDetailPanel({ buyer, onClose, onSave, isSaved, onEmailBuyer, onSho
               {buyer.score<60&&" 추가적인 니즈 파악이 필요합니다."}
             </div>
           </div>
+
+          {/* ── Lookalike Section ── */}
+          {showLookalikes && (
+            <div style={{marginTop:16,padding:16,borderRadius:10,background:"var(--bg-2)",border:"1px solid rgba(139,92,246,.25)",animation:"fadeIn .3s ease"}}>
+              <div style={{fontSize:12,fontWeight:700,color:"var(--violet)",marginBottom:10,display:"flex",alignItems:"center",gap:6}}>
+                <Ic.Users s={13}/> 유사 바이어 Top 5
+                <span style={{fontSize:10,color:"var(--t3)",fontWeight:400,marginLeft:4}}>· {buyer.industry} · {buyer.region}</span>
+              </div>
+              {getLookalikes(buyer, ALL_BUYERS).map((lb,i)=>{
+                const lc = lb.score>=80?"var(--green)":lb.score>=65?"var(--cyan)":lb.score>=50?"var(--amber)":"var(--red)";
+                return (
+                  <div key={lb.id}
+                    className={`fi fi${Math.min(i+1,5)}`}
+                    onClick={()=>{ onDetailBuyer&&onDetailBuyer(lb); }}
+                    style={{display:"flex",alignItems:"center",gap:10,padding:"8px 10px",borderRadius:8,
+                      cursor:"pointer",marginBottom:i<4?6:0,border:"1px solid var(--border)",
+                      background:"var(--bg-3)",transition:"background .15s"}}
+                    onMouseEnter={e=>e.currentTarget.style.background="var(--bg-hover)"}
+                    onMouseLeave={e=>e.currentTarget.style.background="var(--bg-3)"}>
+                    <div style={{width:32,height:32,borderRadius:"50%",flexShrink:0,
+                      background:"var(--bg-4)",border:`2px solid ${lc}`,
+                      display:"flex",alignItems:"center",justifyContent:"center",
+                      fontSize:13,fontWeight:700,color:"var(--t1)"}}>
+                      {lb.name.charAt(0)}
+                    </div>
+                    <div style={{flex:1,minWidth:0}}>
+                      <div style={{fontSize:12,fontWeight:600,color:"var(--t1)",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{lb.name} {lb.flag}</div>
+                      <div style={{fontSize:10,color:"var(--t3)",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{lb.company} · {lb.industry}</div>
+                    </div>
+                    <div style={{textAlign:"right",flexShrink:0}}>
+                      <div style={{fontSize:14,fontWeight:800,fontFamily:"var(--mono)",color:lc}}>{lb.score}</div>
+                      <div style={{fontSize:9,color:"var(--t4)"}}>점</div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
         </div>
-        <div style={{padding:"12px 20px",borderTop:"1px solid var(--border)",display:"flex",gap:8,flexShrink:0}}>
-          <div onClick={()=>navigator.clipboard.writeText(buyer.email)} style={{flex:1,padding:"10px 0",borderRadius:8,background:"var(--bg-3)",border:"1px solid var(--border)",color:"var(--t2)",textAlign:"center",fontSize:12,fontWeight:600,cursor:"pointer"}}>이메일 복사</div>
-          <div onClick={()=>onEmailBuyer(buyer)} style={{flex:1,padding:"10px 0",borderRadius:8,background:"linear-gradient(135deg,var(--green),#0d9488)",color:"#fff",textAlign:"center",fontSize:12,fontWeight:600,cursor:"pointer"}}>AI 이메일 작성</div>
-          <div onClick={()=>onShowNotes(buyer)} style={{flex:1,padding:"10px 0",borderRadius:8,background:"var(--violet-dim)",border:"1px solid rgba(139,92,246,.2)",color:"var(--violet)",textAlign:"center",fontSize:12,fontWeight:600,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",gap:5}}><Ic.Tag s={12}/>노트</div>
+        <div style={{padding:"12px 20px",borderTop:"1px solid var(--border)",display:"flex",gap:6,flexShrink:0,flexWrap:"wrap"}}>
+          <div onClick={()=>navigator.clipboard.writeText(buyer.email)} style={{flex:1,minWidth:80,padding:"9px 0",borderRadius:8,background:"var(--bg-3)",border:"1px solid var(--border)",color:"var(--t2)",textAlign:"center",fontSize:11,fontWeight:600,cursor:"pointer"}}>이메일 복사</div>
+          <div onClick={()=>onEmailBuyer(buyer)} style={{flex:1,minWidth:80,padding:"9px 0",borderRadius:8,background:"linear-gradient(135deg,var(--green),#0d9488)",color:"#fff",textAlign:"center",fontSize:11,fontWeight:600,cursor:"pointer"}}>AI 이메일</div>
+          <div onClick={()=>onShowNotes(buyer)} style={{flex:1,minWidth:60,padding:"9px 0",borderRadius:8,background:"var(--violet-dim)",border:"1px solid rgba(139,92,246,.2)",color:"var(--violet)",textAlign:"center",fontSize:11,fontWeight:600,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",gap:4}}><Ic.Tag s={11}/>노트</div>
+          <div onClick={()=>setShowLookalikes(v=>!v)} style={{flex:1,minWidth:80,padding:"9px 0",borderRadius:8,background:showLookalikes?"var(--blue-dim)":"var(--bg-3)",border:`1px solid ${showLookalikes?"rgba(59,107,245,.3)":"var(--border)"}`,color:showLookalikes?"var(--blue)":"var(--t2)",textAlign:"center",fontSize:11,fontWeight:600,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",gap:4}}><Ic.Users s={11}/>유사 바이어</div>
         </div>
       </div>
     </>
@@ -1410,6 +1515,217 @@ function DetailPanel({ buyer, onClose }) {
 // ─────────── DASHBOARD ───────────
 
 // ─────────── KANBAN PIPELINE ───────────
+// ─────────── DONUT CHART ───────────
+const DonutChart = ({ data, size=110, label, sublabel }) => {
+  const total = data.reduce((s,d)=>s+d.value,0);
+  if (total===0) return (
+    <div style={{width:size,height:size,display:"flex",alignItems:"center",justifyContent:"center",flexDirection:"column"}}>
+      <div style={{fontSize:11,color:"var(--t4)"}}>데이터 없음</div>
+    </div>
+  );
+  const r=36,cx=55,cy=55,circ=2*Math.PI*r;
+  let offset=0;
+  const segments=data.map(d=>{ const pct=d.value/total; const da=pct*circ; const seg={...d,da,offset,pct}; offset+=da; return seg; });
+  return (
+    <div style={{position:"relative",width:size,height:size,flexShrink:0}}>
+      <svg width={size} height={size} viewBox="0 0 110 110">
+        <circle cx={cx} cy={cy} r={r} fill="none" stroke="var(--bg-4)" strokeWidth={10}/>
+        {segments.map((seg,i)=>(
+          <circle key={i} cx={cx} cy={cy} r={r} fill="none"
+            stroke={seg.color} strokeWidth={10}
+            strokeDasharray={`${seg.da} ${circ-seg.da}`}
+            strokeDashoffset={circ/4-seg.offset}
+            style={{transition:"stroke-dasharray .6s ease"}}/>
+        ))}
+        <text x={cx} y={cy-4} textAnchor="middle" fill="var(--t1)" fontSize="16" fontWeight="800" fontFamily="var(--mono)">{label}</text>
+        <text x={cx} y={cy+10} textAnchor="middle" fill="var(--t3)" fontSize="8" fontFamily="var(--font)">{sublabel}</text>
+      </svg>
+    </div>
+  );
+};
+
+// ─────────── PIPELINE HEALTH ───────────
+function PipelineHealth({ buyers, buyerNotes }) {
+  const intentData = [
+    {label:"높음",value:buyers.filter(b=>b.buyingIntent==="높음").length,color:"var(--green)"},
+    {label:"중간",value:buyers.filter(b=>b.buyingIntent==="중간").length,color:"var(--amber)"},
+    {label:"낮음",value:buyers.filter(b=>b.buyingIntent==="낮음").length,color:"var(--red)"},
+  ];
+  const stageData = [
+    {label:"신규",   value:buyers.filter(b=>b.status==="신규").length,   color:"var(--t3)"},
+    {label:"검토중", value:buyers.filter(b=>b.status==="검토중").length, color:"var(--blue)"},
+    {label:"협상중", value:buyers.filter(b=>b.status==="협상중").length, color:"var(--amber)"},
+    {label:"LOI",   value:buyers.filter(b=>b.status==="LOI").length,    color:"var(--violet)"},
+    {label:"계약완료",value:buyers.filter(b=>b.status==="계약완료").length,color:"var(--green)"},
+  ];
+  const regionMap={};
+  buyers.forEach(b=>{ regionMap[b.region]=(regionMap[b.region]||0)+1; });
+  const rcols={"유럽":"var(--blue)","북미":"var(--cyan)","아시아":"var(--green)","동남아":"var(--amber)","오세아니아":"var(--violet)","남미":"var(--red)"};
+  const regionData = Object.entries(regionMap).sort((a,b)=>b[1]-a[1]).map(([label,value])=>({label,value,color:rcols[label]||"var(--t3)"}));
+  const topRegion = regionData[0]||{label:"-",value:0};
+  const topStage = stageData.reduce((a,b)=>b.value>a.value?b:a,stageData[0]);
+  const riskBuyers = buyers.filter(b=>b.status==="협상중"&&(!buyerNotes||!buyerNotes.get(b.id)||buyerNotes.get(b.id).length===0));
+
+  const Legend = ({items})=>(
+    <div style={{marginTop:8}}>
+      {items.filter(d=>d.value>0).map(d=>(
+        <div key={d.label} style={{display:"flex",alignItems:"center",gap:6,marginBottom:4,fontSize:11}}>
+          <div style={{width:8,height:8,borderRadius:"50%",background:d.color,flexShrink:0}}/>
+          <span style={{color:"var(--t2)",flex:1}}>{d.label}</span>
+          <span style={{fontFamily:"var(--mono)",color:"var(--t1)",fontWeight:700}}>{d.value}</span>
+        </div>
+      ))}
+    </div>
+  );
+
+  return (
+    <div style={{padding:20,borderRadius:14,border:"1px solid var(--border)",background:"var(--bg-2)",marginBottom:20,animation:"fadeIn .4s ease"}}>
+      <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:20}}>
+        <Ic.Target s={16}/>
+        <span style={{fontSize:14,fontWeight:700,color:"var(--t1)"}}>파이프라인 건강도</span>
+        <span style={{fontSize:10,padding:"2px 7px",borderRadius:5,background:"var(--blue-dim)",color:"var(--blue)",fontWeight:600,border:"1px solid rgba(59,107,245,.15)"}}>Apollo 방식</span>
+        <span style={{marginLeft:"auto",fontSize:11,color:"var(--t3)"}}>{buyers.length}명 전체 바이어 기준</span>
+      </div>
+      <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:24,marginBottom:riskBuyers.length?16:0}}>
+        {/* 구매의향 */}
+        <div style={{display:"flex",flexDirection:"column",alignItems:"center",gap:4}}>
+          <DonutChart data={intentData} label={intentData[0].value} sublabel="고의향"/>
+          <div style={{fontSize:11,fontWeight:700,color:"var(--t1)",textAlign:"center",marginTop:4}}>구매의향 분포</div>
+          <Legend items={intentData}/>
+        </div>
+        {/* 파이프라인 단계 */}
+        <div style={{display:"flex",flexDirection:"column",alignItems:"center",gap:4}}>
+          <DonutChart data={stageData} label={topStage.value} sublabel={topStage.label}/>
+          <div style={{fontSize:11,fontWeight:700,color:"var(--t1)",textAlign:"center",marginTop:4}}>파이프라인 단계</div>
+          <Legend items={stageData}/>
+        </div>
+        {/* 지역 분포 */}
+        <div style={{display:"flex",flexDirection:"column",alignItems:"center",gap:4}}>
+          <DonutChart data={regionData} label={topRegion.value} sublabel={topRegion.label}/>
+          <div style={{fontSize:11,fontWeight:700,color:"var(--t1)",textAlign:"center",marginTop:4}}>지역 분포</div>
+          <Legend items={regionData}/>
+        </div>
+      </div>
+      {/* 리스크 알림 */}
+      {riskBuyers.length > 0 && (
+        <div style={{padding:"12px 16px",borderRadius:10,background:"var(--amber-dim)",
+          border:"1px solid rgba(245,158,11,.3)",display:"flex",alignItems:"center",gap:10}}>
+          <span style={{fontSize:18,flexShrink:0}}>⚠️</span>
+          <div>
+            <div style={{fontSize:12,fontWeight:700,color:"var(--amber)"}}>파이프라인 리스크 감지</div>
+            <div style={{fontSize:11,color:"var(--t2)",marginTop:2}}>
+              협상 중인 바이어 <strong style={{color:"var(--amber)"}}>{riskBuyers.length}명</strong>에게 아직 노트가 없습니다. 활동 로그를 남겨 관계를 유지하세요.
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ─────────── PLAYBOOK VIEW ───────────
+function PlaybookView({ buyers, savedSet, onRunPlaybook }) {
+  const [runningId, setRunningId] = useState(null);
+  return (
+    <div style={{flex:1,overflow:"auto",padding:"28px 24px"}}>
+      {/* 헤더 */}
+      <div style={{marginBottom:28}}>
+        <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:6}}>
+          <Ic.BookOpen s={20}/>
+          <h2 style={{fontSize:20,fontWeight:700,color:"var(--t1)"}}>아웃리치 플레이북</h2>
+          <span style={{fontSize:11,padding:"3px 8px",borderRadius:6,background:"var(--violet-dim)",color:"var(--violet)",fontWeight:600,border:"1px solid rgba(139,92,246,.2)"}}>Apollo 방식</span>
+        </div>
+        <p style={{fontSize:13,color:"var(--t3)",maxWidth:560,lineHeight:1.6}}>
+          단계별 바이어 접근 전략 — 플레이북을 실행하면 해당 바이어가 자동 선택됩니다. 이메일 발송, 비교 분석을 즉시 시작하세요.
+        </p>
+      </div>
+
+      {/* 플레이북 그리드 */}
+      <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(310px,1fr))",gap:16}}>
+        {PLAYBOOKS.map((pb, i) => {
+          const matching = buyers.filter(b=>pb.filter(b,savedSet));
+          const isRunning = runningId === pb.id;
+          return (
+            <div key={pb.id}
+              className={`fi fi${Math.min(i+1,5)}`}
+              style={{background:"var(--bg-2)",border:"1px solid var(--border)",borderRadius:14,
+                overflow:"hidden",transition:"border-color .2s,box-shadow .2s",position:"relative"}}
+              onMouseEnter={e=>{e.currentTarget.style.borderColor=`var(${pb.color})`;e.currentTarget.style.boxShadow=`0 0 0 1px var(${pb.color})`;}}
+              onMouseLeave={e=>{e.currentTarget.style.borderColor="var(--border)";e.currentTarget.style.boxShadow="none";}}>
+              {/* 상단 컬러 바 */}
+              <div style={{height:3,background:`var(${pb.color})`}}/>
+              <div style={{padding:"18px 20px"}}>
+                {/* 헤더: 이모지 + 제목 + 태그 */}
+                <div style={{display:"flex",alignItems:"flex-start",gap:12,marginBottom:12}}>
+                  <div style={{fontSize:28,lineHeight:1,flexShrink:0}}>{pb.emoji}</div>
+                  <div style={{flex:1}}>
+                    <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:4,flexWrap:"wrap"}}>
+                      <span style={{fontSize:14,fontWeight:700,color:"var(--t1)"}}>{pb.title}</span>
+                      <span style={{fontSize:10,padding:"2px 7px",borderRadius:10,
+                        background:`var(${pb.tagColor}-dim)`,color:`var(${pb.tagColor})`,fontWeight:600,
+                        border:`1px solid var(${pb.tagColor}-dim)`}}>
+                        {pb.tag}
+                      </span>
+                    </div>
+                    <p style={{fontSize:11,color:"var(--t3)",lineHeight:1.5,margin:0}}>{pb.desc}</p>
+                  </div>
+                </div>
+                {/* 스텝 리스트 */}
+                <div style={{marginBottom:16,paddingLeft:4}}>
+                  {pb.steps.map((step,si)=>(
+                    <div key={si} style={{display:"flex",alignItems:"center",gap:8,marginBottom:5,fontSize:11,color:"var(--t2)"}}>
+                      <div style={{width:18,height:18,borderRadius:"50%",flexShrink:0,
+                        background:`var(${pb.color}-dim)`,border:`1px solid var(${pb.color})`,
+                        display:"flex",alignItems:"center",justifyContent:"center",
+                        fontSize:9,fontWeight:700,color:`var(${pb.color})`}}>
+                        {si+1}
+                      </div>
+                      {step}
+                    </div>
+                  ))}
+                </div>
+                {/* 하단: 바이어 수 + 실행 버튼 */}
+                <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",
+                  paddingTop:12,borderTop:"1px solid var(--border)"}}>
+                  <div style={{fontSize:12,color:"var(--t2)"}}>
+                    <span style={{fontFamily:"var(--mono)",fontSize:18,fontWeight:800,
+                      color:matching.length>0?`var(${pb.color})`:"var(--t4)"}}>
+                      {matching.length}
+                    </span>
+                    <span style={{color:"var(--t3)",marginLeft:4}}>명 대상</span>
+                  </div>
+                  <button
+                    disabled={matching.length===0||isRunning}
+                    onClick={()=>{
+                      if(matching.length===0||isRunning) return;
+                      setRunningId(pb.id);
+                      setTimeout(()=>{
+                        onRunPlaybook(new Set(matching.map(b=>b.id)), pb.title, matching.length);
+                        setRunningId(null);
+                      }, 700);
+                    }}
+                    style={{padding:"8px 18px",borderRadius:8,border:"none",
+                      background:matching.length>0?`var(${pb.color})`:"var(--bg-4)",
+                      color:matching.length>0?"#fff":"var(--t4)",
+                      fontSize:12,fontWeight:600,
+                      cursor:matching.length>0&&!isRunning?"pointer":"not-allowed",
+                      display:"flex",alignItems:"center",gap:6,
+                      opacity:matching.length>0?1:0.45,
+                      transition:"opacity .2s,transform .1s",outline:"none"}}
+                    onMouseEnter={e=>matching.length>0&&!isRunning&&(e.currentTarget.style.transform="scale(1.04)")}
+                    onMouseLeave={e=>(e.currentTarget.style.transform="scale(1)")}>
+                    {isRunning ? <><LoadingSpinner size={12}/> 실행 중...</> : <><Ic.TrendUp s={12}/> 실행</>}
+                  </button>
+                </div>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
 function KanbanPipeline({ buyers }) {
   const stages = [
     { key:"신규 리드", color:"var(--blue)", dim:"var(--blue-dim)", count:12 },
@@ -1531,7 +1847,7 @@ function WorldMapView({ buyers }) {
 }
 
 
-function DashboardView({ buyers, savedSet, starred }) {
+function DashboardView({ buyers, savedSet, starred, buyerNotes }) {
   const saved = buyers.filter(b => savedSet.has(b.id));
   const totalBuyers = buyers.length;
   const savedCount = savedSet.size;
@@ -1691,8 +2007,12 @@ function DashboardView({ buyers, savedSet, starred }) {
         </div>
         <WorldMapView buyers={buyers}/>
       </div>
+      {/* Pipeline Health */}
+      <div className="fi fi2">
+        <PipelineHealth buyers={buyers} buyerNotes={buyerNotes}/>
+      </div>
       {/* KPI Cards */}
-      <div className="fi fi2" style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:16,marginBottom:24}}>
+      <div className="fi fi3" style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:16,marginBottom:24}}>
         {[
           {label:"글로벌 바이어 네트워크",value:"60,000+",sub:`실시간 매칭 가능 • ${savedCount}건 저장`,color:"var(--blue)",icon:"Users"},
           {label:"AI 매칭 정확도",value:`${avgScore}%`,sub:"딥러닝 기반 실시간 분석",color:"var(--green)",icon:"Target"},
@@ -2078,6 +2398,8 @@ export default function App() {
   const [notifications, setNotifications] = useState([]);
   const [showNotifications, setShowNotifications] = useState(false);
   const [notifUnread, setNotifUnread] = useState(0);
+  const [quickFilter, setQuickFilter] = useState(null);
+  const [toast, setToast] = useState(null);
   const navReducer = (s, a) => {
     if (a.type==='NAVIGATE') { if (a.key===s.history[s.idx]) return s; return {history:[...s.history.slice(0,s.idx+1),a.key],idx:s.idx+1}; }
     if (a.type==='BACK') return s.idx>0?{...s,idx:s.idx-1}:s;
@@ -2178,6 +2500,11 @@ export default function App() {
         return b.employees > 1000;
       }));
     }
+    // Quick filter
+    if (quickFilter) {
+      const qf = QUICK_FILTERS.find(q=>q.id===quickFilter);
+      if (qf) d = d.filter(qf.test);
+    }
     // Sort
     d.sort((a, b) => {
       let va = a[sort.field], vb = b[sort.field];
@@ -2185,7 +2512,7 @@ export default function App() {
       return sort.asc ? va - vb : vb - va;
     });
     return d;
-  }, [filters, search, tab, sort, savedSet]);
+  }, [filters, search, tab, sort, savedSet, quickFilter]);
 
   const totalPages = Math.ceil(filtered.length / perPage);
   const paged = filtered.slice((page - 1) * perPage, page * perPage);
@@ -2217,7 +2544,7 @@ export default function App() {
     ...filters.intents.map(i => ({label:`의향:${i}`,clear:()=>setFilters(p=>({...p,intents:p.intents.filter(x=>x!==i)}))})),
   ];
 
-  useEffect(() => { setPage(1); }, [filters, search, tab]);
+  useEffect(() => { setPage(1); }, [filters, search, tab, quickFilter]);
 
   const SortIcon = ({field}) => sort.field===field ? (sort.asc ? <Ic.SortAsc/> : <Ic.SortDesc/>) : <Ic.Sort/>;
 
@@ -2227,16 +2554,32 @@ export default function App() {
   const netNew = ALL_BUYERS.filter(b => !savedSet.has(b.id)).length;
   const savedCount = savedSet.size;
 
+  // App-level toast auto-dismiss
+  useEffect(()=>{ if(toast){ const t=setTimeout(()=>setToast(null),4000); return()=>clearTimeout(t); } },[toast]);
+
   return (
     <>
       <style>{CSS}</style>
       {showLanding && <LandingHero onEnter={()=>setShowLanding(false)} />}
 
+      {/* App-level Toast */}
+      {toast && (
+        <div style={{position:"fixed",top:20,right:20,zIndex:300,padding:"12px 20px",borderRadius:10,
+          minWidth:280,background:"linear-gradient(135deg,var(--green),var(--blue))",
+          color:"#fff",fontSize:13,fontWeight:600,animation:"slideIn .4s ease",
+          boxShadow:"0 10px 25px rgba(0,0,0,.35)",display:"flex",alignItems:"center",gap:8,cursor:"pointer"}}
+          onClick={()=>setToast(null)}>
+          <div style={{width:6,height:6,borderRadius:"50%",background:"#fff",animation:"pulse 1.5s infinite"}}/>
+          {toast}
+          <div style={{marginLeft:"auto",opacity:.7,fontSize:16}}>×</div>
+        </div>
+      )}
+
       {emailBuyer && <ColdEmailModal buyer={emailBuyer} onClose={()=>setEmailBuyer(null)} />}
       {showAssistant && <AIAssistant buyers={ALL_BUYERS} onClose={()=>setShowAssistant(false)} />}
       {notesBuyer && <BuyerNotesPanel buyer={notesBuyer} notes={buyerNotes.get(notesBuyer.id)||[]} onAddNote={entry=>setBuyerNotes(p=>{const n=new Map(p);n.set(notesBuyer.id,[...(n.get(notesBuyer.id)||[]),entry]);return n;})} onDeleteNote={id=>setBuyerNotes(p=>{const n=new Map(p);n.set(notesBuyer.id,(n.get(notesBuyer.id)||[]).filter(e=>e.id!==id));return n;})} onClose={()=>setNotesBuyer(null)} />}
       {showCompare && compareSet.size >= 2 && <BuyerCompareModal buyers={ALL_BUYERS.filter(b=>compareSet.has(b.id))} onClose={()=>{setShowCompare(false);setCompareSet(new Set());}} />}
-      {detailBuyer && <BuyerDetailPanel buyer={detailBuyer} onClose={()=>setDetailBuyer(null)} onSave={(b)=>{savedSet.has(b.id)?setSavedSet(p=>{const n=new Set(p);n.delete(b.id);return n}):setSavedSet(p=>new Set([...p,b.id]))}} isSaved={savedSet.has(detailBuyer.id)} onEmailBuyer={b=>setEmailBuyer(b)} onShowNotes={b=>setNotesBuyer(b)} />}
+      {detailBuyer && <BuyerDetailPanel buyer={detailBuyer} onClose={()=>setDetailBuyer(null)} onSave={(b)=>{savedSet.has(b.id)?setSavedSet(p=>{const n=new Set(p);n.delete(b.id);return n}):setSavedSet(p=>new Set([...p,b.id]))}} isSaved={savedSet.has(detailBuyer.id)} onEmailBuyer={b=>setEmailBuyer(b)} onShowNotes={b=>setNotesBuyer(b)} onDetailBuyer={b=>setDetailBuyer(b)} />}
 
       <div style={{display:"flex",height:"100vh",overflow:"hidden",background:"var(--bg-0)"}}>
         {/* Filter Sidebar */}
@@ -2269,6 +2612,7 @@ export default function App() {
                 {key:"dashboard",label:"대시보드",icon:<Ic.Bar s={12}/>},
                 {key:"emailfinder",label:"이메일",icon:<Ic.Mail s={12}/>},
                 {key:"aiMatch",label:"AI 매칭",icon:<Ic.Sparkle s={12}/>},
+                {key:"playbook",label:"플레이북",icon:<Ic.BookOpen s={12}/>},
               ].map(tab=>{
                 const active = view===tab.key;
                 return <div key={tab.key} onClick={()=>navigateTo(tab.key)} style={{padding:"6px 14px",borderRadius:6,cursor:"pointer",display:"flex",alignItems:"center",gap:5,fontSize:11,fontWeight:active?700:500,transition:"all .2s",background:active?"var(--bg-1)":"transparent",color:active?"var(--t1)":"var(--t3)",boxShadow:active?"0 1px 3px rgba(0,0,0,.2)":"none"}}>{tab.icon}{tab.label}</div>;
@@ -2294,7 +2638,7 @@ export default function App() {
             />
           )}
 
-          {view==="aiMatch" ? <AIMatchView buyers={ALL_BUYERS} /> : view==="dashboard" ? <DashboardView buyers={ALL_BUYERS} savedSet={savedSet} starred={starred} /> : view==="emailfinder" ? <EmailFinderView /> : <>
+          {view==="aiMatch" ? <AIMatchView buyers={ALL_BUYERS} /> : view==="dashboard" ? <DashboardView buyers={ALL_BUYERS} savedSet={savedSet} starred={starred} buyerNotes={buyerNotes} /> : view==="emailfinder" ? <EmailFinderView /> : view==="playbook" ? <PlaybookView buyers={ALL_BUYERS} savedSet={savedSet} onRunPlaybook={(ids,title,cnt)=>{setSelected(ids);navigateTo('buyers');setToast(`✅ "${title}" 실행 — ${cnt}명 바이어가 선택되었습니다`);}} /> : <>
           {/* Tabs + Meta */}
           <div style={{padding:"8px 20px",borderBottom:"1px solid var(--border)",background:"var(--bg-1)",display:"flex",alignItems:"center",gap:16,flexShrink:0}}>
             <div style={{display:"flex",gap:2,padding:2,background:"var(--bg-3)",borderRadius:7}}>
@@ -2325,6 +2669,39 @@ export default function App() {
             <div style={{marginLeft:"auto",fontSize:11,color:"var(--t3)",fontFamily:"var(--mono)"}}>
               {filtered.length.toLocaleString()} 결과
             </div>
+          </div>
+
+          {/* ── Quick Filter Chips (Apollo-style) ── */}
+          <div style={{display:"flex",alignItems:"center",gap:6,padding:"8px 20px",overflowX:"auto",borderBottom:"1px solid var(--border)",background:"var(--bg-1)",flexShrink:0}}>
+            <span style={{fontSize:10,color:"var(--t4)",fontWeight:600,textTransform:"uppercase",letterSpacing:".06em",whiteSpace:"nowrap",flexShrink:0}}>빠른 필터</span>
+            {QUICK_FILTERS.map(q=>{
+              const active = quickFilter===q.id;
+              const cnt = ALL_BUYERS.filter(q.test).length;
+              return (
+                <button key={q.id} onClick={()=>setQuickFilter(active?null:q.id)}
+                  style={{display:"flex",alignItems:"center",gap:5,padding:"4px 12px",borderRadius:20,
+                    border:`1.5px solid ${active?`var(${q.color})`:"var(--border)"}`,
+                    background:active?`var(${q.color}-dim)`:"transparent",
+                    color:active?`var(${q.color})`:"var(--t2)",
+                    fontSize:11,fontWeight:active?600:400,cursor:"pointer",
+                    whiteSpace:"nowrap",transition:"all .15s ease",flexShrink:0,outline:"none"}}>
+                  {q.label}
+                  <span style={{fontSize:9,padding:"1px 5px",borderRadius:8,
+                    background:active?`var(${q.color})`:"var(--bg-4)",
+                    color:active?"#fff":"var(--t3)",fontFamily:"var(--mono)",fontWeight:600}}>
+                    {cnt}
+                  </span>
+                </button>
+              );
+            })}
+            {quickFilter && (
+              <button onClick={()=>setQuickFilter(null)}
+                style={{padding:"4px 10px",borderRadius:20,border:"1.5px solid var(--red)",
+                  background:"var(--red-dim)",color:"var(--red)",fontSize:11,cursor:"pointer",
+                  display:"flex",alignItems:"center",gap:4,flexShrink:0,outline:"none"}}>
+                <Ic.X s={10}/> 초기화
+              </button>
+            )}
           </div>
 
           {/* Table */}
