@@ -70,6 +70,7 @@ const Ic = {
   Target:({s=14})=><svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>,
   Bar:({s=14})=><svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M12 20V10"/><path d="M18 20V4"/><path d="M6 20v-4"/></svg>,
   Refresh:({s=14})=><svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>,
+  Grid:({s=14})=><svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>,
 };
 
 // ─────────── DATA ───────────
@@ -203,7 +204,7 @@ function SkeletonTable({ rows=8, cols=8 }) {
 
 
 // ─────────── BUYER DETAIL PANEL ───────────
-function BuyerDetailPanel({ buyer, onClose, onSave, isSaved }) {
+function BuyerDetailPanel({ buyer, onClose, onSave, isSaved, onEmailBuyer }) {
   if (!buyer) return null;
   const cColor = (s) => s>=80?"var(--green)":s>=65?"var(--cyan)":s>=50?"var(--amber)":"var(--red)";
   const sections = [
@@ -285,7 +286,7 @@ function BuyerDetailPanel({ buyer, onClose, onSave, isSaved }) {
         </div>
         <div style={{padding:"12px 20px",borderTop:"1px solid var(--border)",display:"flex",gap:8,flexShrink:0}}>
           <div onClick={()=>navigator.clipboard.writeText(buyer.email)} style={{flex:1,padding:"10px 0",borderRadius:8,background:"var(--blue)",color:"#fff",textAlign:"center",fontSize:12,fontWeight:600,cursor:"pointer"}}>이메일 복사</div>
-          <div onClick={()=>setEmailBuyer(buyer)} style={{flex:1,padding:"10px 0",borderRadius:8,background:"linear-gradient(135deg,var(--green),#0d9488)",color:"#fff",textAlign:"center",fontSize:12,fontWeight:600,cursor:"pointer"}}>AI 이메일 작성</div>
+          <div onClick={()=>onEmailBuyer(buyer)} style={{flex:1,padding:"10px 0",borderRadius:8,background:"linear-gradient(135deg,var(--green),#0d9488)",color:"#fff",textAlign:"center",fontSize:12,fontWeight:600,cursor:"pointer"}}>AI 이메일 작성</div>
         </div>
       </div>
     </>
@@ -1592,7 +1593,7 @@ function EmailFinderView() {
       }
       const res = await fetch(url); const data = await res.json();
       if (data.error) setError(data.error); else setResults(data.data);
-    } catch(e) { setError("API 요청 실패"); }
+    } catch(e) { setError(e instanceof SyntaxError ? "응답 파싱 오류. 잠시 후 다시 시도하세요" : "네트워크 오류. 연결 상태를 확인하세요"); }
     setLoading(false);
   };
 
@@ -1828,7 +1829,7 @@ export default function App() {
 
       {emailBuyer && <ColdEmailModal buyer={emailBuyer} onClose={()=>setEmailBuyer(null)} />}
       {showAssistant && <AIAssistant buyers={ALL_BUYERS} onClose={()=>setShowAssistant(false)} />}
-      {detailBuyer && <BuyerDetailPanel buyer={detailBuyer} onClose={()=>setDetailBuyer(null)} onSave={(b)=>{savedSet.has(b.id)?setSavedSet(p=>{const n=new Set(p);n.delete(b.id);return n}):setSavedSet(p=>new Set([...p,b.id]))}} isSaved={savedSet.has(detailBuyer.id)} />}
+      {detailBuyer && <BuyerDetailPanel buyer={detailBuyer} onClose={()=>setDetailBuyer(null)} onSave={(b)=>{savedSet.has(b.id)?setSavedSet(p=>{const n=new Set(p);n.delete(b.id);return n}):setSavedSet(p=>new Set([...p,b.id]))}} isSaved={savedSet.has(detailBuyer.id)} onEmailBuyer={b=>setEmailBuyer(b)} />}
 
       <div style={{display:"flex",height:"100vh",overflow:"hidden",background:"var(--bg-0)"}}>
         {/* Filter Sidebar */}
