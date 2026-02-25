@@ -1,5 +1,8 @@
 export default async function handler(req, res) {
-  res.setHeader('Access-Control-Allow-Origin', '*');
+  const allowedOrigin = process.env.ALLOWED_ORIGIN || '';
+  const requestOrigin = req.headers.origin || '';
+  const origin = allowedOrigin && requestOrigin === allowedOrigin ? allowedOrigin : allowedOrigin;
+  res.setHeader('Access-Control-Allow-Origin', origin || requestOrigin);
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
   if (req.method === 'OPTIONS') return res.status(200).end();

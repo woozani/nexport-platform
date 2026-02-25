@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, useCallback, useRef } from "react";
+import { useState, useEffect, useMemo, useCallback, useRef, useReducer } from "react";
 
 // ─────────── STYLES ───────────
 const CSS = `
@@ -70,6 +70,7 @@ const Ic = {
   Target:({s=14})=><svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>,
   Bar:({s=14})=><svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M12 20V10"/><path d="M18 20V4"/><path d="M6 20v-4"/></svg>,
   Refresh:({s=14})=><svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>,
+  Grid:({s=14})=><svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>,
 };
 
 // ─────────── DATA ───────────
@@ -203,7 +204,7 @@ function SkeletonTable({ rows=8, cols=8 }) {
 
 
 // ─────────── BUYER DETAIL PANEL ───────────
-function BuyerDetailPanel({ buyer, onClose, onSave, isSaved }) {
+function BuyerDetailPanel({ buyer, onClose, onSave, isSaved, onEmailBuyer }) {
   if (!buyer) return null;
   const cColor = (s) => s>=80?"var(--green)":s>=65?"var(--cyan)":s>=50?"var(--amber)":"var(--red)";
   const sections = [
@@ -285,7 +286,7 @@ function BuyerDetailPanel({ buyer, onClose, onSave, isSaved }) {
         </div>
         <div style={{padding:"12px 20px",borderTop:"1px solid var(--border)",display:"flex",gap:8,flexShrink:0}}>
           <div onClick={()=>navigator.clipboard.writeText(buyer.email)} style={{flex:1,padding:"10px 0",borderRadius:8,background:"var(--blue)",color:"#fff",textAlign:"center",fontSize:12,fontWeight:600,cursor:"pointer"}}>이메일 복사</div>
-          <div onClick={()=>setEmailBuyer(buyer)} style={{flex:1,padding:"10px 0",borderRadius:8,background:"linear-gradient(135deg,var(--green),#0d9488)",color:"#fff",textAlign:"center",fontSize:12,fontWeight:600,cursor:"pointer"}}>AI 이메일 작성</div>
+          <div onClick={()=>onEmailBuyer(buyer)} style={{flex:1,padding:"10px 0",borderRadius:8,background:"linear-gradient(135deg,var(--green),#0d9488)",color:"#fff",textAlign:"center",fontSize:12,fontWeight:600,cursor:"pointer"}}>AI 이메일 작성</div>
         </div>
       </div>
     </>
@@ -1592,7 +1593,7 @@ function EmailFinderView() {
       }
       const res = await fetch(url); const data = await res.json();
       if (data.error) setError(data.error); else setResults(data.data);
-    } catch(e) { setError("API 요청 실패"); }
+    } catch(e) { setError(e instanceof SyntaxError ? "응답 파싱 오류. 잠시 후 다시 시도하세요" : "네트워크 오류. 연결 상태를 확인하세요"); }
     setLoading(false);
   };
 
@@ -1750,7 +1751,19 @@ export default function App() {
   const [savedSet, setSavedSet] = useState(new Set(ALL_BUYERS.filter(b=>b.saved).map(b=>b.id)));
   const [viewSaved, setViewSaved] = useState(null);
   const [showExport, setShowExport] = useState(false);
-  const [view, setView] = useState("buyers");
+  const navReducer = (s, a) => {
+    if (a.type==='NAVIGATE') { if (a.key===s.history[s.idx]) return s; return {history:[...s.history.slice(0,s.idx+1),a.key],idx:s.idx+1}; }
+    if (a.type==='BACK') return s.idx>0?{...s,idx:s.idx-1}:s;
+    if (a.type==='FORWARD') return s.idx<s.history.length-1?{...s,idx:s.idx+1}:s;
+    return s;
+  };
+  const [nav, navDispatch] = useReducer(navReducer, {history:['buyers'],idx:0});
+  const view = nav.history[nav.idx];
+  const canBack = nav.idx > 0;
+  const canForward = nav.idx < nav.history.length - 1;
+  const navigateTo = useCallback((key) => navDispatch({type:'NAVIGATE',key}), []);
+  const goBack = useCallback(() => navDispatch({type:'BACK'}), []);
+  const goForward = useCallback(() => navDispatch({type:'FORWARD'}), []);
   const perPage = 15;
 
   // Filtering
@@ -1789,10 +1802,15 @@ export default function App() {
   const totalPages = Math.ceil(filtered.length / perPage);
   const paged = filtered.slice((page - 1) * perPage, page * perPage);
   useEffect(() => {
-    const h = (e) => { if ((e.metaKey||e.ctrlKey) && e.key==="k") { e.preventDefault(); setShowAssistant(s=>!s); } if (e.key==="Escape") setShowAssistant(false); };
+    const h = (e) => {
+      if ((e.metaKey||e.ctrlKey) && e.key==="k") { e.preventDefault(); setShowAssistant(s=>!s); }
+      if (e.key==="Escape") setShowAssistant(false);
+      if (e.altKey && e.key==="ArrowLeft") { e.preventDefault(); goBack(); }
+      if (e.altKey && e.key==="ArrowRight") { e.preventDefault(); goForward(); }
+    };
     window.addEventListener("keydown", h);
     return () => window.removeEventListener("keydown", h);
-  }, []);
+  }, [goBack, goForward]);
 
   const allOnPageSelected = paged.length > 0 && paged.every(b => selected.has(b.id));
 
@@ -1828,7 +1846,7 @@ export default function App() {
 
       {emailBuyer && <ColdEmailModal buyer={emailBuyer} onClose={()=>setEmailBuyer(null)} />}
       {showAssistant && <AIAssistant buyers={ALL_BUYERS} onClose={()=>setShowAssistant(false)} />}
-      {detailBuyer && <BuyerDetailPanel buyer={detailBuyer} onClose={()=>setDetailBuyer(null)} onSave={(b)=>{savedSet.has(b.id)?setSavedSet(p=>{const n=new Set(p);n.delete(b.id);return n}):setSavedSet(p=>new Set([...p,b.id]))}} isSaved={savedSet.has(detailBuyer.id)} />}
+      {detailBuyer && <BuyerDetailPanel buyer={detailBuyer} onClose={()=>setDetailBuyer(null)} onSave={(b)=>{savedSet.has(b.id)?setSavedSet(p=>{const n=new Set(p);n.delete(b.id);return n}):setSavedSet(p=>new Set([...p,b.id]))}} isSaved={savedSet.has(detailBuyer.id)} onEmailBuyer={b=>setEmailBuyer(b)} />}
 
       <div style={{display:"flex",height:"100vh",overflow:"hidden",background:"var(--bg-0)"}}>
         {/* Filter Sidebar */}
@@ -1843,6 +1861,10 @@ export default function App() {
               <div>
                 <h1 className="nx-header-brand" style={{fontSize:16,fontWeight:800,letterSpacing:"-.03em",fontFamily:"var(--font)"}}>NEXPORT</h1>
               </div>
+            </div>
+            <div style={{display:"flex",alignItems:"center",gap:2}}>
+              <div onClick={canBack?goBack:undefined} title="뒤로 (Alt+←)" style={{width:26,height:26,borderRadius:6,display:"flex",alignItems:"center",justifyContent:"center",cursor:canBack?"pointer":"not-allowed",color:canBack?"var(--t1)":"var(--t4)",background:"var(--bg-3)",border:"1px solid var(--border)",opacity:canBack?1:0.35,transition:"all .15s"}}><Ic.ChevLeft s={14}/></div>
+              <div onClick={canForward?goForward:undefined} title="앞으로 (Alt+→)" style={{width:26,height:26,borderRadius:6,display:"flex",alignItems:"center",justifyContent:"center",cursor:canForward?"pointer":"not-allowed",color:canForward?"var(--t1)":"var(--t4)",background:"var(--bg-3)",border:"1px solid var(--border)",opacity:canForward?1:0.35,transition:"all .15s"}}><Ic.ChevRight s={14}/></div>
             </div>
             <div className="nx-header-search" style={{flex:1,maxWidth:420}}>
               <div style={{display:"flex",alignItems:"center",gap:8,padding:"7px 12px",borderRadius:8,background:"var(--bg-3)",border:"1px solid var(--border)"}}>
@@ -1859,7 +1881,7 @@ export default function App() {
                 {key:"aiMatch",label:"AI 매칭",icon:<Ic.Sparkle s={12}/>},
               ].map(tab=>{
                 const active = view===tab.key;
-                return <div key={tab.key} onClick={()=>setView(tab.key)} style={{padding:"6px 14px",borderRadius:6,cursor:"pointer",display:"flex",alignItems:"center",gap:5,fontSize:11,fontWeight:active?700:500,transition:"all .2s",background:active?"var(--bg-1)":"transparent",color:active?"var(--t1)":"var(--t3)",boxShadow:active?"0 1px 3px rgba(0,0,0,.2)":"none"}}>{tab.icon}{tab.label}</div>;
+                return <div key={tab.key} onClick={()=>navigateTo(tab.key)} style={{padding:"6px 14px",borderRadius:6,cursor:"pointer",display:"flex",alignItems:"center",gap:5,fontSize:11,fontWeight:active?700:500,transition:"all .2s",background:active?"var(--bg-1)":"transparent",color:active?"var(--t1)":"var(--t3)",boxShadow:active?"0 1px 3px rgba(0,0,0,.2)":"none"}}>{tab.icon}{tab.label}</div>;
               })}
             </div>
           </div>
