@@ -71,6 +71,7 @@ const Ic = {
   Bar:({s=14})=><svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M12 20V10"/><path d="M18 20V4"/><path d="M6 20v-4"/></svg>,
   Refresh:({s=14})=><svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>,
   Grid:({s=14})=><svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>,
+  Bell:({s=16})=><svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>,
 };
 
 // ─────────── DATA ───────────
@@ -203,8 +204,72 @@ function SkeletonTable({ rows=8, cols=8 }) {
 }
 
 
+// ─────────── NOTIFICATION CENTER ───────────
+function NotificationCenter({ notifications, unread, onMarkRead, onMarkAllRead, onClear, onClose }) {
+  const typeConf = {
+    match:    {icon:<Ic.Target s={13}/>,   color:"var(--amber)",   dim:"var(--amber-dim)"},
+    pipeline: {icon:<Ic.Bar s={13}/>,      color:"var(--blue)",    dim:"var(--blue-dim)"},
+    email:    {icon:<Ic.Mail s={13}/>,     color:"var(--cyan)",    dim:"var(--cyan-dim)"},
+    note:     {icon:<Ic.Tag s={13}/>,      color:"var(--violet)",  dim:"var(--violet-dim)"},
+  };
+  const relTime = (ts) => {
+    const diff = Date.now() - ts;
+    if (diff < 60000) return "방금 전";
+    if (diff < 3600000) return `${Math.floor(diff/60000)}분 전`;
+    if (diff < 86400000) return `${Math.floor(diff/3600000)}시간 전`;
+    return `${Math.floor(diff/86400000)}일 전`;
+  };
+  return (
+    <>
+      <div onClick={onClose} style={{position:"fixed",inset:0,zIndex:199}}/>
+      <div style={{position:"fixed",top:56,right:16,zIndex:200,width:340,background:"var(--bg-2)",border:"1px solid var(--border-h)",borderRadius:14,boxShadow:"0 16px 40px rgba(0,0,0,.5)",animation:"scaleIn .2s ease",transformOrigin:"top right",overflow:"hidden"}}>
+        {/* Header */}
+        <div style={{padding:"14px 16px",borderBottom:"1px solid var(--border)",display:"flex",alignItems:"center",gap:8}}>
+          <Ic.Bell s={15}/>
+          <span style={{fontSize:13,fontWeight:700,flex:1}}>알림</span>
+          {unread > 0 && <span style={{fontSize:10,fontWeight:700,padding:"2px 7px",borderRadius:10,background:"var(--red)",color:"#fff"}}>{unread}</span>}
+          {notifications.length > 0 && <>
+            <div onClick={onMarkAllRead} style={{fontSize:10,color:"var(--t3)",cursor:"pointer",padding:"2px 6px",borderRadius:5}} onMouseEnter={e=>e.currentTarget.style.color="var(--t1)"} onMouseLeave={e=>e.currentTarget.style.color="var(--t3)"}>모두 읽음</div>
+            <div onClick={onClear} style={{fontSize:10,color:"var(--t4)",cursor:"pointer",padding:"2px 6px",borderRadius:5}} onMouseEnter={e=>e.currentTarget.style.color="var(--red)"} onMouseLeave={e=>e.currentTarget.style.color="var(--t4)"}>전체 삭제</div>
+          </>}
+        </div>
+        {/* List */}
+        <div style={{maxHeight:380,overflowY:"auto"}}>
+          {notifications.length === 0 ? (
+            <div style={{textAlign:"center",padding:"36px 20px",color:"var(--t4)"}}>
+              <div style={{fontSize:24,marginBottom:8}}>🔔</div>
+              <div style={{fontSize:12}}>새로운 알림이 없습니다</div>
+            </div>
+          ) : notifications.map(n => {
+            const tc = typeConf[n.type] || typeConf.note;
+            return (
+              <div key={n.id} onClick={()=>onMarkRead(n.id)} style={{
+                padding:"12px 16px",borderBottom:"1px solid var(--border)",cursor:"pointer",
+                background:n.read?"transparent":"rgba(59,107,245,.04)",transition:"background .15s",
+                display:"flex",gap:10,alignItems:"flex-start",position:"relative"
+              }}
+                onMouseEnter={e=>e.currentTarget.style.background=n.read?"var(--bg-3)":"rgba(59,107,245,.08)"}
+                onMouseLeave={e=>e.currentTarget.style.background=n.read?"transparent":"rgba(59,107,245,.04)"}
+              >
+                {!n.read && <div style={{position:"absolute",left:6,top:"50%",transform:"translateY(-50%)",width:5,height:5,borderRadius:"50%",background:"var(--blue)"}}/>}
+                <div style={{width:28,height:28,borderRadius:8,background:tc.dim,color:tc.color,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0,marginLeft:6}}>{tc.icon}</div>
+                <div style={{flex:1,minWidth:0}}>
+                  <div style={{fontSize:12,fontWeight:n.read?500:700,color:"var(--t1)",marginBottom:2,whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>{n.title}</div>
+                  <div style={{fontSize:11,color:"var(--t3)",lineHeight:1.4}}>{n.body}</div>
+                  <div style={{fontSize:10,color:"var(--t4)",marginTop:4}}>{relTime(n.ts)}</div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    </>
+  );
+}
+
+
 // ─────────── BUYER DETAIL PANEL ───────────
-function BuyerDetailPanel({ buyer, onClose, onSave, isSaved, onEmailBuyer }) {
+function BuyerDetailPanel({ buyer, onClose, onSave, isSaved, onEmailBuyer, onShowNotes }) {
   if (!buyer) return null;
   const cColor = (s) => s>=80?"var(--green)":s>=65?"var(--cyan)":s>=50?"var(--amber)":"var(--red)";
   const sections = [
@@ -285,8 +350,188 @@ function BuyerDetailPanel({ buyer, onClose, onSave, isSaved, onEmailBuyer }) {
           </div>
         </div>
         <div style={{padding:"12px 20px",borderTop:"1px solid var(--border)",display:"flex",gap:8,flexShrink:0}}>
-          <div onClick={()=>navigator.clipboard.writeText(buyer.email)} style={{flex:1,padding:"10px 0",borderRadius:8,background:"var(--blue)",color:"#fff",textAlign:"center",fontSize:12,fontWeight:600,cursor:"pointer"}}>이메일 복사</div>
+          <div onClick={()=>navigator.clipboard.writeText(buyer.email)} style={{flex:1,padding:"10px 0",borderRadius:8,background:"var(--bg-3)",border:"1px solid var(--border)",color:"var(--t2)",textAlign:"center",fontSize:12,fontWeight:600,cursor:"pointer"}}>이메일 복사</div>
           <div onClick={()=>onEmailBuyer(buyer)} style={{flex:1,padding:"10px 0",borderRadius:8,background:"linear-gradient(135deg,var(--green),#0d9488)",color:"#fff",textAlign:"center",fontSize:12,fontWeight:600,cursor:"pointer"}}>AI 이메일 작성</div>
+          <div onClick={()=>onShowNotes(buyer)} style={{flex:1,padding:"10px 0",borderRadius:8,background:"var(--violet-dim)",border:"1px solid rgba(139,92,246,.2)",color:"var(--violet)",textAlign:"center",fontSize:12,fontWeight:600,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",gap:5}}><Ic.Tag s={12}/>노트</div>
+        </div>
+      </div>
+    </>
+  );
+}
+
+
+// ─────────── BUYER NOTES PANEL ───────────
+function BuyerNotesPanel({ buyer, notes, onAddNote, onDeleteNote, onClose }) {
+  const [inputText, setInputText] = useState("");
+  const [activeType, setActiveType] = useState("note");
+  const [hoveredId, setHoveredId] = useState(null);
+  const typeConfig = {
+    note:    {label:"메모",    icon:<Ic.Tag s={12}/>,    color:"var(--violet)", dim:"var(--violet-dim)", border:"rgba(139,92,246,.2)"},
+    call:    {label:"통화",    icon:<Ic.Phone s={12}/>,  color:"var(--green)",  dim:"var(--green-dim)",  border:"rgba(16,185,129,.2)"},
+    meeting: {label:"미팅",   icon:<Ic.Users s={12}/>,  color:"var(--blue)",   dim:"var(--blue-dim)",   border:"rgba(59,107,245,.2)"},
+    email:   {label:"이메일", icon:<Ic.Mail s={12}/>,   color:"var(--cyan)",   dim:"var(--cyan-dim)",   border:"rgba(34,211,238,.2)"},
+  };
+  const handleAdd = () => {
+    if (!inputText.trim()) return;
+    onAddNote({id:Date.now(), type:activeType, content:inputText.trim(), timestamp:Date.now()});
+    setInputText("");
+  };
+  const fmtTime = (ts) => new Date(ts).toLocaleString('ko-KR',{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'});
+  return (
+    <>
+      <div onClick={onClose} style={{position:"fixed",inset:0,background:"rgba(0,0,0,.4)",zIndex:93,backdropFilter:"blur(1px)"}}/>
+      <div style={{position:"fixed",right:0,top:0,bottom:0,width:420,maxWidth:"90vw",background:"var(--bg-1)",borderLeft:"1px solid var(--border)",zIndex:94,display:"flex",flexDirection:"column",animation:"slideInRight .25s ease",overflow:"hidden"}}>
+        <div style={{padding:"16px 20px",borderBottom:"1px solid var(--border)",display:"flex",alignItems:"center",gap:12,flexShrink:0}}>
+          <div onClick={onClose} style={{cursor:"pointer",padding:4,borderRadius:6,color:"var(--t3)"}}><Ic.X s={16}/></div>
+          <div style={{flex:1}}>
+            <div style={{fontSize:14,fontWeight:700}}>활동 로그</div>
+            <div style={{fontSize:11,color:"var(--t3)",marginTop:1}}>{buyer.name} · {buyer.company}</div>
+          </div>
+          <span style={{fontSize:10,fontFamily:"var(--mono)",padding:"2px 7px",borderRadius:4,background:"var(--violet-dim)",color:"var(--violet)",fontWeight:600}}>{notes.length}건</span>
+        </div>
+        {/* Type selector */}
+        <div style={{padding:"12px 20px",borderBottom:"1px solid var(--border)",display:"flex",gap:6,flexShrink:0}}>
+          {Object.entries(typeConfig).map(([k,v])=>(
+            <div key={k} onClick={()=>setActiveType(k)} style={{flex:1,padding:"6px 0",borderRadius:7,fontSize:11,fontWeight:600,textAlign:"center",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",gap:4,background:activeType===k?v.dim:"transparent",color:activeType===k?v.color:"var(--t3)",border:`1px solid ${activeType===k?v.border:"transparent"}`,transition:"all .15s"}}>
+              {v.icon}{v.label}
+            </div>
+          ))}
+        </div>
+        {/* Input area */}
+        <div style={{padding:"14px 20px",borderBottom:"1px solid var(--border)",flexShrink:0}}>
+          <textarea value={inputText} onChange={e=>setInputText(e.target.value)}
+            onKeyDown={e=>{if(e.key==="Enter"&&(e.metaKey||e.ctrlKey))handleAdd();}}
+            placeholder={`${typeConfig[activeType].label} 내용을 입력하세요... (Ctrl+Enter로 추가)`}
+            style={{width:"100%",minHeight:72,padding:"10px 12px",borderRadius:8,background:"var(--bg-3)",border:`1px solid ${typeConfig[activeType].border}`,color:"var(--t1)",fontSize:12,outline:"none",resize:"none",fontFamily:"var(--font)",lineHeight:1.6}}/>
+          <div onClick={handleAdd} style={{marginTop:8,padding:"8px 0",borderRadius:8,background:typeConfig[activeType].color,color:"#fff",textAlign:"center",fontSize:12,fontWeight:600,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",gap:5,opacity:inputText.trim()?1:.45,transition:"opacity .15s"}}>
+            <Ic.Plus s={12}/>{typeConfig[activeType].label} 추가
+          </div>
+        </div>
+        {/* Timeline */}
+        <div style={{flex:1,overflow:"auto",padding:"16px 20px"}}>
+          {notes.length===0 ? (
+            <div style={{textAlign:"center",padding:40,color:"var(--t4)"}}>
+              <div style={{fontSize:28,marginBottom:8}}>📝</div>
+              <div style={{fontSize:12}}>아직 기록이 없습니다</div>
+              <div style={{fontSize:11,color:"var(--t4)",marginTop:4}}>위에서 활동을 추가해보세요</div>
+            </div>
+          ) : (
+            <div style={{display:"grid",gap:10}}>
+              {[...notes].reverse().map(entry=>{
+                const tc = typeConfig[entry.type]||typeConfig.note;
+                return (
+                  <div key={entry.id} onMouseEnter={()=>setHoveredId(entry.id)} onMouseLeave={()=>setHoveredId(null)}
+                    style={{padding:"12px 14px",borderRadius:10,background:"var(--bg-2)",border:"1px solid var(--border)",borderLeft:`3px solid ${tc.color}`,position:"relative",transition:"border-color .15s"}}>
+                    <div style={{display:"flex",alignItems:"center",gap:6,marginBottom:6}}>
+                      <span style={{padding:"2px 7px",borderRadius:4,background:tc.dim,color:tc.color,fontSize:10,fontWeight:600,display:"flex",alignItems:"center",gap:3}}>{tc.icon}{tc.label}</span>
+                      <span style={{fontSize:10,color:"var(--t4)",marginLeft:"auto"}}>{fmtTime(entry.timestamp)}</span>
+                      {hoveredId===entry.id && (
+                        <div onClick={()=>onDeleteNote(entry.id)} style={{cursor:"pointer",color:"var(--t4)",padding:2,borderRadius:4,transition:"color .15s"}}
+                          onMouseEnter={e=>e.currentTarget.style.color="var(--red)"} onMouseLeave={e=>e.currentTarget.style.color="var(--t4)"}>
+                          <Ic.Trash s={12}/>
+                        </div>
+                      )}
+                    </div>
+                    <div style={{fontSize:12,color:"var(--t2)",lineHeight:1.6,whiteSpace:"pre-wrap"}}>{entry.content}</div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
+      </div>
+    </>
+  );
+}
+
+
+// ─────────── BUYER COMPARE MODAL ───────────
+function BuyerCompareModal({ buyers, onClose }) {
+  const rows = [
+    {key:"score",      label:"매칭 점수",    type:"numeric",  fmt:(b)=>`${b.score}점`},
+    {key:"country",    label:"국가",         type:"text",     fmt:(b)=>`${b.flag} ${b.country}`},
+    {key:"industry",   label:"산업군",       type:"text",     fmt:(b)=>b.industry},
+    {key:"demand",     label:"수요 품목",    type:"text",     fmt:(b)=>b.demand},
+    {key:"volume",     label:"예상 규모",    type:"volume",   fmt:(b)=>b.volume},
+    {key:"buyingIntent",label:"구매 의향",   type:"intent",   fmt:(b)=>b.buyingIntent},
+    {key:"status",     label:"파이프라인",   type:"status",   fmt:(b)=>b.status},
+    {key:"employees",  label:"직원 수",      type:"numeric",  fmt:(b)=>b.employees},
+    {key:"revenue",    label:"연매출",       type:"volume",   fmt:(b)=>b.revenue||"미기재"},
+    {key:"certifications",label:"인증",      type:"list",     fmt:(b)=>(b.certifications||[]).join(", ")||"없음"},
+  ];
+  const isBest = (row, buyer) => {
+    if (buyers.length < 2) return false;
+    const vals = buyers.map(b => {
+      if (row.type === "numeric") return parseFloat(String(b[row.key]||0).replace(/[^0-9.]/g,"")) || 0;
+      if (row.type === "volume") { const m = String(b[row.key]||"$0").match(/\$(\d+)/); return m ? parseInt(m[1]) : 0; }
+      if (row.type === "intent") return {높음:3,중간:2,낮음:1}[b[row.key]] || 0;
+      if (row.type === "status") return {계약완료:5,LOI:4,협상중:3,검토중:2,신규:1}[b[row.key]] || 0;
+      return null;
+    });
+    if (vals[0] === null) return false;
+    const myVal = vals[buyers.indexOf(buyer)];
+    return myVal !== null && myVal === Math.max(...vals) && myVal > 0;
+  };
+  const scoreColors = s => s >= 90 ? "var(--green)" : s >= 75 ? "var(--cyan)" : s >= 60 ? "var(--blue)" : "var(--amber)";
+  return (
+    <>
+      <div onClick={onClose} style={{position:"fixed",inset:0,background:"rgba(0,0,0,.65)",zIndex:102,backdropFilter:"blur(4px)"}}/>
+      <div onClick={e=>e.stopPropagation()} style={{position:"fixed",top:"50%",left:"50%",transform:"translate(-50%,-50%)",zIndex:103,background:"var(--bg-1)",border:"1px solid var(--border-h)",borderRadius:18,width:"min(960px,94vw)",maxHeight:"88vh",display:"flex",flexDirection:"column",animation:"scaleIn .25s ease",boxShadow:"0 24px 60px rgba(0,0,0,.6)"}}>
+        {/* Header */}
+        <div style={{padding:"18px 24px",borderBottom:"1px solid var(--border)",display:"flex",alignItems:"center",gap:16,flexShrink:0}}>
+          <div style={{display:"flex",alignItems:"center",gap:6,fontSize:14,fontWeight:700}}><Ic.Columns s={16}/>바이어 비교</div>
+          <div style={{display:"flex",gap:16,marginLeft:8}}>
+            {buyers.map(b=>(
+              <div key={b.id} style={{display:"flex",alignItems:"center",gap:8,padding:"4px 12px",borderRadius:8,background:"var(--bg-3)",border:"1px solid var(--border)"}}>
+                <div style={{width:26,height:26,borderRadius:"50%",background:`${scoreColors(b.score)}22`,border:`1.5px solid ${scoreColors(b.score)}`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:13}}>{b.name[0]}</div>
+                <div>
+                  <div style={{fontSize:12,fontWeight:700,color:"var(--t1)"}}>{b.name}</div>
+                  <div style={{fontSize:10,color:"var(--t3)"}}>{b.flag} {b.company}</div>
+                </div>
+              </div>
+            ))}
+          </div>
+          <div onClick={onClose} style={{marginLeft:"auto",cursor:"pointer",color:"var(--t4)",padding:4,borderRadius:6}} onMouseEnter={e=>e.currentTarget.style.color="var(--t2)"} onMouseLeave={e=>e.currentTarget.style.color="var(--t4)"}><Ic.X s={18}/></div>
+        </div>
+        {/* Table */}
+        <div style={{overflow:"auto",flex:1}}>
+          <table style={{width:"100%",borderCollapse:"collapse"}}>
+            <thead>
+              <tr style={{position:"sticky",top:0,background:"var(--bg-2)",zIndex:5}}>
+                <th style={{padding:"10px 20px",textAlign:"left",fontSize:11,fontWeight:700,color:"var(--t3)",width:140,borderBottom:"1px solid var(--border)"}}>항목</th>
+                {buyers.map(b=>(
+                  <th key={b.id} style={{padding:"10px 20px",textAlign:"center",fontSize:11,fontWeight:700,color:"var(--t1)",borderBottom:"1px solid var(--border)"}}>
+                    {b.name}
+                    <div style={{fontSize:10,color:scoreColors(b.score),fontFamily:"var(--mono)",marginTop:2}}>{b.score}점</div>
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {rows.map((row,ri)=>(
+                <tr key={row.key} style={{background:ri%2===0?"var(--bg-1)":"var(--bg-2)"}}>
+                  <td style={{padding:"12px 20px",fontSize:11,fontWeight:600,color:"var(--t3)",borderBottom:"1px solid var(--border)"}}>{row.label}</td>
+                  {buyers.map(b=>{
+                    const best = isBest(row, b);
+                    return (
+                      <td key={b.id} style={{padding:"12px 20px",textAlign:"center",borderBottom:"1px solid var(--border)",background:best?"rgba(16,185,129,.08)":"transparent",border:best?"1px solid rgba(16,185,129,.2)":undefined,transition:"background .15s"}}>
+                        <span style={{fontSize:12,fontWeight:best?700:400,color:best?"var(--green)":row.key==="score"?scoreColors(b.score):"var(--t1)"}}>
+                          {row.fmt(b)}
+                        </span>
+                        {best && <span style={{marginLeft:5,fontSize:10,color:"var(--green)",fontWeight:700}}>✓ Best</span>}
+                      </td>
+                    );
+                  })}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        {/* Footer */}
+        <div style={{padding:"12px 24px",borderTop:"1px solid var(--border)",display:"flex",alignItems:"center",gap:8,flexShrink:0}}>
+          <div style={{width:8,height:8,borderRadius:"50%",background:"var(--green)"}}/>
+          <span style={{fontSize:11,color:"var(--t3)"}}>초록색 Best 항목은 해당 지표에서 가장 높은 값을 가진 바이어입니다.</span>
+          <div onClick={onClose} style={{marginLeft:"auto",padding:"8px 20px",borderRadius:8,background:"var(--bg-3)",border:"1px solid var(--border)",color:"var(--t2)",fontSize:12,fontWeight:600,cursor:"pointer"}}>닫기</div>
         </div>
       </div>
     </>
@@ -1219,6 +1464,73 @@ function KanbanPipeline({ buyers }) {
   );
 }
 
+// ─────────── WORLD MAP VIEW ───────────
+const COUNTRY_COORDS = {
+  "독일":{x:392,y:112},"미국":{x:155,y:148},"일본":{x:672,y:145},"베트남":{x:624,y:218},
+  "스웨덴":{x:400,y:85},"네덜란드":{x:375,y:108},"영국":{x:358,y:104},"호주":{x:672,y:315},
+  "캐나다":{x:138,y:105},"프랑스":{x:370,y:118},"싱가포르":{x:635,y:235},"태국":{x:610,y:212},
+  "인도":{x:565,y:190},"브라질":{x:235,y:298},"멕시코":{x:138,y:196},
+};
+const MAP_REGION_COLORS = {"유럽":"#3B6BF5","북미":"#22D3EE","아시아":"#10B981","동남아":"#F59E0B","오세아니아":"#8B5CF6","남미":"#EF4444"};
+
+function WorldMapView({ buyers }) {
+  const [tooltip, setTooltip] = useState(null);
+  const countryStats = {};
+  buyers.forEach(b => { countryStats[b.country] = (countryStats[b.country]||0)+1; });
+  const maxCount = Math.max(1,...Object.values(countryStats));
+  const getR = (c) => 8 + ((countryStats[c]||0)/maxCount)*20;
+  const regionOf = (c) => REGIONS[c] || "기타";
+  const colorOf = (c) => MAP_REGION_COLORS[regionOf(c)] || "#5C6078";
+  return (
+    <div style={{position:"relative",width:"100%"}}>
+      <svg viewBox="0 0 800 360" style={{width:"100%",height:"auto",background:"var(--bg-3)",borderRadius:10,display:"block"}} preserveAspectRatio="xMidYMid meet">
+        {/* Grid lines */}
+        {[80,160,240,320].map(y=><line key={y} x1={0} y1={y} x2={800} y2={y} stroke="#1E2030" strokeWidth="0.6" strokeDasharray="4 8"/>)}
+        {[100,200,300,400,500,600,700].map(x=><line key={x} x1={x} y1={0} x2={x} y2={360} stroke="#1E2030" strokeWidth="0.6" strokeDasharray="4 8"/>)}
+        {/* Continent shapes (simplified decorative) */}
+        <ellipse cx={170} cy={150} rx={95} ry={70} fill="#16171F" opacity="0.7"/>
+        <ellipse cx={240} cy={290} rx={60} ry={55} fill="#16171F" opacity="0.7"/>
+        <ellipse cx={385} cy={140} rx={65} ry={55} fill="#16171F" opacity="0.7"/>
+        <ellipse cx={500} cy={160} rx={120} ry={60} fill="#16171F" opacity="0.7"/>
+        <ellipse cx={645} cy={175} rx={55} ry={45} fill="#16171F" opacity="0.7"/>
+        <ellipse cx={670} cy={310} rx={50} ry={35} fill="#16171F" opacity="0.7"/>
+        {/* Bubbles */}
+        {COUNTRIES.map(country => {
+          const coord = COUNTRY_COORDS[country];
+          if (!coord || !countryStats[country]) return null;
+          const r = getR(country);
+          const col = colorOf(country);
+          const cnt = countryStats[country];
+          return (
+            <g key={country} style={{cursor:"pointer"}}
+              onMouseEnter={()=>setTooltip({country,cnt,x:coord.x,y:coord.y})}
+              onMouseLeave={()=>setTooltip(null)}>
+              <circle cx={coord.x} cy={coord.y} r={r+7} fill={col} opacity="0.1"/>
+              <circle cx={coord.x} cy={coord.y} r={r} fill={col} opacity="0.82"/>
+              <text x={coord.x} y={coord.y+1} textAnchor="middle" dominantBaseline="middle" fontSize={r>15?13:10} style={{userSelect:"none",pointerEvents:"none"}}>{FLAGS[country]}</text>
+              <text x={coord.x} y={coord.y+r+11} textAnchor="middle" fontSize="9" fill="#9498A8" fontFamily="'JetBrains Mono',monospace" fontWeight="600" style={{pointerEvents:"none"}}>{cnt}</text>
+            </g>
+          );
+        })}
+      </svg>
+      {tooltip && (
+        <div style={{position:"absolute",left:`${(tooltip.x/800)*100}%`,top:`${(tooltip.y/360)*100}%`,transform:"translate(-50%,-120%)",pointerEvents:"none",padding:"6px 12px",borderRadius:7,background:"var(--bg-4)",border:"1px solid var(--border-h)",fontSize:11,color:"var(--t1)",whiteSpace:"nowrap",zIndex:10,animation:"scaleIn .15s ease",boxShadow:"0 4px 12px rgba(0,0,0,.4)"}}>
+          <span style={{fontWeight:700}}>{FLAGS[tooltip.country]} {tooltip.country}</span>
+          <span style={{color:"var(--t3)",marginLeft:8}}>{tooltip.cnt}명 바이어</span>
+        </div>
+      )}
+      <div style={{display:"flex",flexWrap:"wrap",gap:12,marginTop:14}}>
+        {Object.entries(MAP_REGION_COLORS).map(([region,color])=>(
+          <div key={region} style={{display:"flex",alignItems:"center",gap:5,fontSize:11,color:"var(--t3)"}}>
+            <div style={{width:8,height:8,borderRadius:"50%",background:color}}/>{region}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+
 function DashboardView({ buyers, savedSet, starred }) {
   const saved = buyers.filter(b => savedSet.has(b.id));
   const totalBuyers = buyers.length;
@@ -1371,8 +1683,16 @@ function DashboardView({ buyers, savedSet, starred }) {
           LIVE ● {new Date().toLocaleTimeString('ko-KR', {hour12:false})}
         </div>
       </div>
+      {/* World Map */}
+      <div className="fi fi1" style={{...cardStyle,marginBottom:24}}>
+        <div style={{fontSize:14,fontWeight:700,marginBottom:14,display:"flex",alignItems:"center",gap:8}}>
+          <Ic.Globe s={16}/>글로벌 바이어 분포
+          <span style={{marginLeft:"auto",fontSize:11,color:"var(--t3)"}}>{buyers.length}개 바이어 · {Object.keys((() => { const s={}; buyers.forEach(b=>{ s[b.country]=(s[b.country]||0)+1; }); return s; })()).length}개국</span>
+        </div>
+        <WorldMapView buyers={buyers}/>
+      </div>
       {/* KPI Cards */}
-      <div className="fi fi1" style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:16,marginBottom:24}}>
+      <div className="fi fi2" style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:16,marginBottom:24}}>
         {[
           {label:"글로벌 바이어 네트워크",value:"60,000+",sub:`실시간 매칭 가능 • ${savedCount}건 저장`,color:"var(--blue)",icon:"Users"},
           {label:"AI 매칭 정확도",value:`${avgScore}%`,sub:"딥러닝 기반 실시간 분석",color:"var(--green)",icon:"Target"},
@@ -1751,6 +2071,13 @@ export default function App() {
   const [savedSet, setSavedSet] = useState(new Set(ALL_BUYERS.filter(b=>b.saved).map(b=>b.id)));
   const [viewSaved, setViewSaved] = useState(null);
   const [showExport, setShowExport] = useState(false);
+  const [buyerNotes, setBuyerNotes] = useState(new Map());
+  const [notesBuyer, setNotesBuyer] = useState(null);
+  const [compareSet, setCompareSet] = useState(new Set());
+  const [showCompare, setShowCompare] = useState(false);
+  const [notifications, setNotifications] = useState([]);
+  const [showNotifications, setShowNotifications] = useState(false);
+  const [notifUnread, setNotifUnread] = useState(0);
   const navReducer = (s, a) => {
     if (a.type==='NAVIGATE') { if (a.key===s.history[s.idx]) return s; return {history:[...s.history.slice(0,s.idx+1),a.key],idx:s.idx+1}; }
     if (a.type==='BACK') return s.idx>0?{...s,idx:s.idx-1}:s;
@@ -1796,6 +2123,35 @@ export default function App() {
     window.addEventListener('popstate', onPop);
     return () => window.removeEventListener('popstate', onPop);
   }, []);
+
+  // Seed notifications on mount
+  useEffect(() => {
+    const seed = [
+      {id:1, type:"match",    title:"새 고가치 바이어 매칭",  body:"Pacific Trade Corp (점수 94) — 즉시 접촉 권장",        ts:Date.now()-180000, read:false},
+      {id:2, type:"match",    title:"AI 매칭 완료",           body:"귀사 프로필과 87% 이상 일치 바이어 12명 발견",          ts:Date.now()-900000, read:false},
+      {id:3, type:"pipeline", title:"파이프라인 업데이트",     body:"TechParts GmbH → 협상중 단계 진입",                   ts:Date.now()-3600000, read:true},
+      {id:4, type:"email",    title:"이메일 확인 완료",        body:"Osaka Precision 담당자 이메일 검증 성공",              ts:Date.now()-7200000, read:true},
+    ];
+    setNotifications(seed);
+    setNotifUnread(seed.filter(n=>!n.read).length);
+  }, []);
+
+  // Auto-notify when high-value buyer is saved
+  useEffect(() => {
+    const highValue = ALL_BUYERS.filter(b=>savedSet.has(b.id)&&b.score>=85);
+    if (highValue.length > 0) {
+      setNotifications(p => {
+        const ids = new Set(p.map(n=>n.id));
+        const newOnes = highValue
+          .filter(b=>!ids.has(`save-${b.id}`))
+          .map(b=>({id:`save-${b.id}`,type:"match",title:"고가치 바이어 저장됨",body:`${b.name} (${b.score}점) 저장 — 빠른 접촉을 권장합니다`,ts:Date.now(),read:false}));
+        if (newOnes.length===0) return p;
+        setNotifUnread(u=>u+newOnes.length);
+        return [...newOnes,...p];
+      });
+    }
+  }, [savedSet]);
+
   const perPage = 15;
 
   // Filtering
@@ -1878,7 +2234,9 @@ export default function App() {
 
       {emailBuyer && <ColdEmailModal buyer={emailBuyer} onClose={()=>setEmailBuyer(null)} />}
       {showAssistant && <AIAssistant buyers={ALL_BUYERS} onClose={()=>setShowAssistant(false)} />}
-      {detailBuyer && <BuyerDetailPanel buyer={detailBuyer} onClose={()=>setDetailBuyer(null)} onSave={(b)=>{savedSet.has(b.id)?setSavedSet(p=>{const n=new Set(p);n.delete(b.id);return n}):setSavedSet(p=>new Set([...p,b.id]))}} isSaved={savedSet.has(detailBuyer.id)} onEmailBuyer={b=>setEmailBuyer(b)} />}
+      {notesBuyer && <BuyerNotesPanel buyer={notesBuyer} notes={buyerNotes.get(notesBuyer.id)||[]} onAddNote={entry=>setBuyerNotes(p=>{const n=new Map(p);n.set(notesBuyer.id,[...(n.get(notesBuyer.id)||[]),entry]);return n;})} onDeleteNote={id=>setBuyerNotes(p=>{const n=new Map(p);n.set(notesBuyer.id,(n.get(notesBuyer.id)||[]).filter(e=>e.id!==id));return n;})} onClose={()=>setNotesBuyer(null)} />}
+      {showCompare && compareSet.size >= 2 && <BuyerCompareModal buyers={ALL_BUYERS.filter(b=>compareSet.has(b.id))} onClose={()=>{setShowCompare(false);setCompareSet(new Set());}} />}
+      {detailBuyer && <BuyerDetailPanel buyer={detailBuyer} onClose={()=>setDetailBuyer(null)} onSave={(b)=>{savedSet.has(b.id)?setSavedSet(p=>{const n=new Set(p);n.delete(b.id);return n}):setSavedSet(p=>new Set([...p,b.id]))}} isSaved={savedSet.has(detailBuyer.id)} onEmailBuyer={b=>setEmailBuyer(b)} onShowNotes={b=>setNotesBuyer(b)} />}
 
       <div style={{display:"flex",height:"100vh",overflow:"hidden",background:"var(--bg-0)"}}>
         {/* Filter Sidebar */}
@@ -1916,7 +2274,25 @@ export default function App() {
                 return <div key={tab.key} onClick={()=>navigateTo(tab.key)} style={{padding:"6px 14px",borderRadius:6,cursor:"pointer",display:"flex",alignItems:"center",gap:5,fontSize:11,fontWeight:active?700:500,transition:"all .2s",background:active?"var(--bg-1)":"transparent",color:active?"var(--t1)":"var(--t3)",boxShadow:active?"0 1px 3px rgba(0,0,0,.2)":"none"}}>{tab.icon}{tab.label}</div>;
               })}
             </div>
+            {/* Bell / Notification */}
+            <div style={{position:"relative",flexShrink:0}} onClick={()=>setShowNotifications(p=>!p)}>
+              <div style={{width:32,height:32,borderRadius:8,display:"flex",alignItems:"center",justifyContent:"center",cursor:"pointer",background:"var(--bg-3)",border:"1px solid var(--border)",color:"var(--t2)",transition:"all .15s"}}
+                onMouseEnter={e=>{e.currentTarget.style.borderColor="var(--border-h)";e.currentTarget.style.color="var(--t1)"}}
+                onMouseLeave={e=>{e.currentTarget.style.borderColor="var(--border)";e.currentTarget.style.color="var(--t2)"}}
+              ><Ic.Bell s={15}/></div>
+              {notifUnread > 0 && (
+                <div style={{position:"absolute",top:-4,right:-4,minWidth:16,height:16,borderRadius:8,background:"var(--red)",color:"#fff",fontSize:9,fontWeight:700,display:"flex",alignItems:"center",justifyContent:"center",padding:"0 4px",animation:"pulse 2s infinite",pointerEvents:"none"}}>{notifUnread}</div>
+              )}
+            </div>
           </div>
+          {showNotifications && (
+            <NotificationCenter notifications={notifications} unread={notifUnread}
+              onMarkRead={id=>{ setNotifications(p=>p.map(n=>n.id===id?{...n,read:true}:n)); setNotifUnread(p=>Math.max(0,p-1)); }}
+              onMarkAllRead={()=>{ setNotifications(p=>p.map(n=>({...n,read:true}))); setNotifUnread(0); }}
+              onClear={()=>{ setNotifications([]); setNotifUnread(0); }}
+              onClose={()=>setShowNotifications(false)}
+            />
+          )}
 
           {view==="aiMatch" ? <AIMatchView buyers={ALL_BUYERS} /> : view==="dashboard" ? <DashboardView buyers={ALL_BUYERS} savedSet={savedSet} starred={starred} /> : view==="emailfinder" ? <EmailFinderView /> : <>
           {/* Tabs + Meta */}
@@ -2130,6 +2506,17 @@ fi fi${Math.min(i+1,5)}`}
                   onMouseLeave={e=>{e.currentTarget.style.background="transparent";e.currentTarget.style.color="var(--t2)"}}
                 ><Icon s={13}/>{label}</div>
               ))}
+              {selected.size >= 2 && selected.size <= 3 && <>
+                <div style={{width:1,height:20,background:"var(--border)"}} />
+                <div onClick={()=>{setCompareSet(new Set(selected));setShowCompare(true);}} style={{
+                  display:"flex",alignItems:"center",gap:5,padding:"6px 14px",borderRadius:6,
+                  cursor:"pointer",fontSize:11,fontWeight:700,color:"var(--violet)",
+                  background:"var(--violet-dim)",border:"1px solid rgba(139,92,246,.25)",transition:"all .15s"
+                }}
+                  onMouseEnter={e=>{e.currentTarget.style.background="rgba(139,92,246,.25)"}}
+                  onMouseLeave={e=>{e.currentTarget.style.background="var(--violet-dim)"}}
+                ><Ic.Columns s={13}/>비교</div>
+              </>}
               <div style={{width:1,height:20,background:"var(--border)"}} />
               <div onClick={()=>setSelected(new Set())} style={{cursor:"pointer",color:"var(--t4)",padding:4}}><Ic.X s={14}/></div>
             </div>
