@@ -1751,7 +1751,9 @@ export default function App() {
   const [savedSet, setSavedSet] = useState(new Set(ALL_BUYERS.filter(b=>b.saved).map(b=>b.id)));
   const [viewSaved, setViewSaved] = useState(null);
   const [showExport, setShowExport] = useState(false);
-  const [view, setView] = useState("buyers");
+  const [navHistory, setNavHistory] = useState(["buyers"]);
+  const [historyIdx, setHistoryIdx] = useState(0);
+  const view = navHistory[historyIdx];
   const perPage = 15;
 
   // Filtering
@@ -1790,12 +1792,27 @@ export default function App() {
   const totalPages = Math.ceil(filtered.length / perPage);
   const paged = filtered.slice((page - 1) * perPage, page * perPage);
   useEffect(() => {
-    const h = (e) => { if ((e.metaKey||e.ctrlKey) && e.key==="k") { e.preventDefault(); setShowAssistant(s=>!s); } if (e.key==="Escape") setShowAssistant(false); };
+    const h = (e) => {
+      if ((e.metaKey||e.ctrlKey) && e.key==="k") { e.preventDefault(); setShowAssistant(s=>!s); }
+      if (e.key==="Escape") setShowAssistant(false);
+      if (e.altKey && e.key==="ArrowLeft") { e.preventDefault(); goBack(); }
+      if (e.altKey && e.key==="ArrowRight") { e.preventDefault(); goForward(); }
+    };
     window.addEventListener("keydown", h);
     return () => window.removeEventListener("keydown", h);
-  }, []);
+  }, [goBack, goForward]);
 
   const allOnPageSelected = paged.length > 0 && paged.every(b => selected.has(b.id));
+
+  const canBack = historyIdx > 0;
+  const canForward = historyIdx < navHistory.length - 1;
+  const navigateTo = useCallback((key) => {
+    if (key === view) return;
+    setNavHistory(h => [...h.slice(0, historyIdx + 1), key]);
+    setHistoryIdx(i => i + 1);
+  }, [view, historyIdx]);
+  const goBack = useCallback(() => { if (canBack) setHistoryIdx(i => i - 1); }, [canBack]);
+  const goForward = useCallback(() => { if (canForward) setHistoryIdx(i => i + 1); }, [canForward]);
 
   const toggleSort = (field) => setSort(p => p.field === field ? { field, asc: !p.asc } : { field, asc: false });
   const toggleSelect = (id) => setSelected(p => { const n = new Set(p); n.has(id) ? n.delete(id) : n.add(id); return n; });
@@ -1845,6 +1862,10 @@ export default function App() {
                 <h1 className="nx-header-brand" style={{fontSize:16,fontWeight:800,letterSpacing:"-.03em",fontFamily:"var(--font)"}}>NEXPORT</h1>
               </div>
             </div>
+            <div style={{display:"flex",alignItems:"center",gap:2}}>
+              <div onClick={goBack} title="뒤로 (Alt+←)" style={{width:26,height:26,borderRadius:6,display:"flex",alignItems:"center",justifyContent:"center",cursor:canBack?"pointer":"default",color:canBack?"var(--t2)":"var(--t4)",background:canBack?"var(--bg-3)":"transparent",border:`1px solid ${canBack?"var(--border)":"transparent"}`,transition:"all .15s"}}><Ic.ChevLeft s={14}/></div>
+              <div onClick={goForward} title="앞으로 (Alt+→)" style={{width:26,height:26,borderRadius:6,display:"flex",alignItems:"center",justifyContent:"center",cursor:canForward?"pointer":"default",color:canForward?"var(--t2)":"var(--t4)",background:canForward?"var(--bg-3)":"transparent",border:`1px solid ${canForward?"var(--border)":"transparent"}`,transition:"all .15s"}}><Ic.ChevRight s={14}/></div>
+            </div>
             <div className="nx-header-search" style={{flex:1,maxWidth:420}}>
               <div style={{display:"flex",alignItems:"center",gap:8,padding:"7px 12px",borderRadius:8,background:"var(--bg-3)",border:"1px solid var(--border)"}}>
                 <Ic.Search s={14}/>
@@ -1860,7 +1881,7 @@ export default function App() {
                 {key:"aiMatch",label:"AI 매칭",icon:<Ic.Sparkle s={12}/>},
               ].map(tab=>{
                 const active = view===tab.key;
-                return <div key={tab.key} onClick={()=>setView(tab.key)} style={{padding:"6px 14px",borderRadius:6,cursor:"pointer",display:"flex",alignItems:"center",gap:5,fontSize:11,fontWeight:active?700:500,transition:"all .2s",background:active?"var(--bg-1)":"transparent",color:active?"var(--t1)":"var(--t3)",boxShadow:active?"0 1px 3px rgba(0,0,0,.2)":"none"}}>{tab.icon}{tab.label}</div>;
+                return <div key={tab.key} onClick={()=>navigateTo(tab.key)} style={{padding:"6px 14px",borderRadius:6,cursor:"pointer",display:"flex",alignItems:"center",gap:5,fontSize:11,fontWeight:active?700:500,transition:"all .2s",background:active?"var(--bg-1)":"transparent",color:active?"var(--t1)":"var(--t3)",boxShadow:active?"0 1px 3px rgba(0,0,0,.2)":"none"}}>{tab.icon}{tab.label}</div>;
               })}
             </div>
           </div>
