@@ -2357,7 +2357,7 @@ export default function App() {
                   const isSel = selected.has(b.id);
                   const isSaved = savedSet.has(b.id);
                   return (
-                    <tr key={b.id} onClick={()=>setDetailBuyer(b)} style={{cursor:"pointer"}} className={`
+                    <tr key={b.id} className={`
 
 .nx-loading-overlay{position:absolute;inset:0;background:rgba(6,7,10,.6);display:flex;align-items:center;justify-content:center;z-index:20;backdrop-filter:blur(2px)}
 .nx-empty-bounce{animation:fadeIn .4s ease}
@@ -2415,7 +2415,7 @@ export default function App() {
 }
 
 fi fi${Math.min(i+1,5)}`}
-                      onClick={()=>setDetail(b)}
+                      onClick={()=>setDetailBuyer(b)}
                       style={{cursor:"pointer",borderBottom:"1px solid var(--border)",background:isSel?"var(--blue-dim)":"transparent",transition:"background .12s"}}
                       onMouseEnter={e=>{if(!isSel)e.currentTarget.style.background="var(--bg-hover)"}}
                       onMouseLeave={e=>{if(!isSel)e.currentTarget.style.background=isSel?"var(--blue-dim)":"transparent"}}
