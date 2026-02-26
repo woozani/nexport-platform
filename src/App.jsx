@@ -1816,54 +1816,115 @@ const MAP_REGION_COLORS = {"유럽":"#0A84FF","북미":"#32ADE6","아시아":"#3
 
 function WorldMapView({ buyers }) {
   const [tooltip, setTooltip] = useState(null);
+  const [hovered, setHovered] = useState(null);
   const countryStats = {};
   buyers.forEach(b => { countryStats[b.country] = (countryStats[b.country]||0)+1; });
   const maxCount = Math.max(1,...Object.values(countryStats));
-  const getR = (c) => 8 + ((countryStats[c]||0)/maxCount)*20;
+  const getR = (c) => 9 + ((countryStats[c]||0)/maxCount)*18;
   const regionOf = (c) => REGIONS[c] || "기타";
   const colorOf = (c) => MAP_REGION_COLORS[regionOf(c)] || "#5C6078";
+  const regionTotals = {};
+  Object.entries(countryStats).forEach(([c,n]) => { const r=regionOf(c); regionTotals[r]=(regionTotals[r]||0)+n; });
   return (
     <div style={{position:"relative",width:"100%"}}>
-      <svg viewBox="0 0 800 360" style={{width:"100%",height:"auto",background:"var(--bg-3)",borderRadius:10,display:"block"}} preserveAspectRatio="xMidYMid meet">
-        {/* Grid lines */}
-        {[80,160,240,320].map(y=><line key={y} x1={0} y1={y} x2={800} y2={y} stroke="var(--border)" strokeWidth="0.6" strokeDasharray="4 8"/>)}
-        {[100,200,300,400,500,600,700].map(x=><line key={x} x1={x} y1={0} x2={x} y2={360} stroke="var(--border)" strokeWidth="0.6" strokeDasharray="4 8"/>)}
-        {/* Continent shapes (simplified decorative) */}
-        <ellipse cx={170} cy={150} rx={95} ry={70} fill="var(--bg-2)" opacity="0.7"/>
-        <ellipse cx={240} cy={290} rx={60} ry={55} fill="var(--bg-2)" opacity="0.7"/>
-        <ellipse cx={385} cy={140} rx={65} ry={55} fill="var(--bg-2)" opacity="0.7"/>
-        <ellipse cx={500} cy={160} rx={120} ry={60} fill="var(--bg-2)" opacity="0.7"/>
-        <ellipse cx={645} cy={175} rx={55} ry={45} fill="var(--bg-2)" opacity="0.7"/>
-        <ellipse cx={670} cy={310} rx={50} ry={35} fill="var(--bg-2)" opacity="0.7"/>
-        {/* Bubbles */}
-        {COUNTRIES.map(country => {
-          const coord = COUNTRY_COORDS[country];
-          if (!coord || !countryStats[country]) return null;
-          const r = getR(country);
-          const col = colorOf(country);
-          const cnt = countryStats[country];
-          return (
-            <g key={country} style={{cursor:"pointer"}}
-              onMouseEnter={()=>setTooltip({country,cnt,x:coord.x,y:coord.y})}
-              onMouseLeave={()=>setTooltip(null)}>
-              <circle cx={coord.x} cy={coord.y} r={r+7} fill={col} opacity="0.1"/>
-              <circle cx={coord.x} cy={coord.y} r={r} fill={col} opacity="0.82"/>
-              <text x={coord.x} y={coord.y+1} textAnchor="middle" dominantBaseline="middle" fontSize={r>15?13:10} style={{userSelect:"none",pointerEvents:"none"}}>{FLAGS[country]}</text>
-              <text x={coord.x} y={coord.y+r+11} textAnchor="middle" fontSize="9" fill="#9498A8" fontFamily="'JetBrains Mono',monospace" fontWeight="600" style={{pointerEvents:"none"}}>{cnt}</text>
-            </g>
-          );
-        })}
-      </svg>
-      {tooltip && (
-        <div style={{position:"absolute",left:`${(tooltip.x/800)*100}%`,top:`${(tooltip.y/360)*100}%`,transform:"translate(-50%,-120%)",pointerEvents:"none",padding:"6px 12px",borderRadius:7,background:"var(--bg-4)",border:"1px solid var(--border-h)",fontSize:11,color:"var(--t1)",whiteSpace:"nowrap",zIndex:10,animation:"scaleIn .15s ease",boxShadow:"0 4px 12px rgba(0,0,0,.4)"}}>
-          <span style={{fontWeight:700}}>{FLAGS[tooltip.country]} {tooltip.country}</span>
-          <span style={{color:"var(--t3)",marginLeft:8}}>{tooltip.cnt}명 바이어</span>
-        </div>
-      )}
-      <div style={{display:"flex",flexWrap:"wrap",gap:12,marginTop:14}}>
+      <div style={{position:"relative",borderRadius:14,overflow:"hidden",border:"1px solid var(--border)",boxShadow:"var(--card-shadow)"}}>
+        <svg viewBox="0 0 800 340" style={{width:"100%",height:"auto",display:"block"}} preserveAspectRatio="xMidYMid meet">
+          <defs>
+            <radialGradient id="wm-ocean" cx="50%" cy="45%" r="75%">
+              <stop offset="0%" stopColor="var(--bg-2)"/>
+              <stop offset="100%" stopColor="var(--bg-1)"/>
+            </radialGradient>
+            <radialGradient id="wm-eu" cx="40%" cy="35%" r="65%"><stop offset="0%" stopColor="#0A84FF" stopOpacity="0.95"/><stop offset="100%" stopColor="#0A84FF" stopOpacity="0.6"/></radialGradient>
+            <radialGradient id="wm-na" cx="40%" cy="35%" r="65%"><stop offset="0%" stopColor="#32ADE6" stopOpacity="0.95"/><stop offset="100%" stopColor="#32ADE6" stopOpacity="0.6"/></radialGradient>
+            <radialGradient id="wm-as" cx="40%" cy="35%" r="65%"><stop offset="0%" stopColor="#30D158" stopOpacity="0.95"/><stop offset="100%" stopColor="#30D158" stopOpacity="0.6"/></radialGradient>
+            <radialGradient id="wm-se" cx="40%" cy="35%" r="65%"><stop offset="0%" stopColor="#FF9F0A" stopOpacity="0.95"/><stop offset="100%" stopColor="#FF9F0A" stopOpacity="0.6"/></radialGradient>
+            <radialGradient id="wm-oc" cx="40%" cy="35%" r="65%"><stop offset="0%" stopColor="#BF5AF2" stopOpacity="0.95"/><stop offset="100%" stopColor="#BF5AF2" stopOpacity="0.6"/></radialGradient>
+            <radialGradient id="wm-sa" cx="40%" cy="35%" r="65%"><stop offset="0%" stopColor="#FF453A" stopOpacity="0.95"/><stop offset="100%" stopColor="#FF453A" stopOpacity="0.6"/></radialGradient>
+            <filter id="wm-glow" x="-50%" y="-50%" width="200%" height="200%">
+              <feGaussianBlur stdDeviation="3" result="blur"/>
+              <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+            </filter>
+          </defs>
+
+          {/* Ocean bg */}
+          <rect width="800" height="340" fill="url(#wm-ocean)"/>
+
+          {/* Subtle grid */}
+          {[68,136,204,272].map(y=><line key={y} x1={0} y1={y} x2={800} y2={y} stroke="var(--border)" strokeWidth="0.5" strokeDasharray="3 14" opacity="0.4"/>)}
+          {[100,200,300,400,500,600,700].map(x=><line key={x} x1={x} y1={0} x2={x} y2={340} stroke="var(--border)" strokeWidth="0.5" strokeDasharray="3 14" opacity="0.4"/>)}
+          {/* Equator */}
+          <line x1={0} y1={170} x2={800} y2={170} stroke="var(--border)" strokeWidth="0.8" opacity="0.35"/>
+
+          {/* Continent shapes — refined paths */}
+          {/* North America */}
+          <path d="M58,72 L80,62 L130,58 L185,62 L220,82 L228,105 L232,155 L210,195 L185,215 L155,218 L118,195 L88,165 L65,138 L55,105 Z" fill="var(--bg-3)" opacity="0.9"/>
+          {/* South America */}
+          <path d="M168,242 L205,235 L248,242 L270,258 L272,290 L265,318 L242,338 L210,340 L185,328 L164,305 L158,278 L162,258 Z" fill="var(--bg-3)" opacity="0.85"/>
+          {/* Europe */}
+          <path d="M318,55 L358,50 L398,52 L422,68 L428,90 L420,118 L400,138 L368,145 L335,140 L312,120 L308,90 Z" fill="var(--bg-3)" opacity="0.9"/>
+          {/* Africa */}
+          <path d="M332,148 L398,144 L428,162 L438,192 L432,248 L415,285 L385,305 L355,302 L330,278 L318,245 L318,195 Z" fill="var(--bg-3)" opacity="0.8"/>
+          {/* Asia (main) */}
+          <path d="M432,50 L520,44 L600,48 L660,58 L695,88 L705,130 L698,170 L668,192 L610,200 L540,195 L482,178 L440,148 L422,108 L425,72 Z" fill="var(--bg-3)" opacity="0.9"/>
+          {/* SE Asia */}
+          <path d="M605,178 L648,172 L678,182 L692,205 L685,235 L662,248 L635,242 L612,222 L598,200 Z" fill="var(--bg-3)" opacity="0.8"/>
+          {/* Australia */}
+          <path d="M628,258 L688,252 L730,260 L748,285 L745,318 L722,338 L688,342 L654,332 L630,310 L622,284 Z" fill="var(--bg-3)" opacity="0.9"/>
+
+          {/* Country bubbles */}
+          {COUNTRIES.map(country => {
+            const coord = COUNTRY_COORDS[country];
+            if (!coord || !countryStats[country]) return null;
+            const r = getR(country);
+            const col = colorOf(country);
+            const cnt = countryStats[country];
+            const reg = regionOf(country);
+            const gradId = {"유럽":"wm-eu","북미":"wm-na","아시아":"wm-as","동남아":"wm-se","오세아니아":"wm-oc","남미":"wm-sa"}[reg]||"wm-as";
+            const isHov = hovered === country;
+            const isTop = cnt >= maxCount * 0.75;
+            return (
+              <g key={country} style={{cursor:"pointer"}} filter={isTop?"url(#wm-glow)":undefined}
+                onMouseEnter={()=>{setTooltip({country,cnt,x:coord.x,y:coord.y});setHovered(country);}}
+                onMouseLeave={()=>{setTooltip(null);setHovered(null);}}>
+                {/* Outer pulse halo */}
+                <circle cx={coord.x} cy={coord.y} r={r+10} fill={col} opacity={isTop?0.08:0.04}/>
+                {/* Hover ring */}
+                {isHov && <circle cx={coord.x} cy={coord.y} r={r+5} fill="none" stroke={col} strokeWidth="1.5" opacity="0.6"/>}
+                {/* Main bubble */}
+                <circle cx={coord.x} cy={coord.y} r={r} fill={`url(#${gradId})`}/>
+                {/* Inner rim */}
+                <circle cx={coord.x} cy={coord.y} r={r} fill="none" stroke="rgba(255,255,255,0.2)" strokeWidth="1"/>
+                {/* Glint highlight */}
+                <circle cx={coord.x - r*0.22} cy={coord.y - r*0.22} r={r*0.32} fill="white" opacity="0.14"/>
+                {/* Flag */}
+                <text x={coord.x} y={coord.y+1} textAnchor="middle" dominantBaseline="middle" fontSize={r>15?12:9} style={{userSelect:"none",pointerEvents:"none"}}>{FLAGS[country]}</text>
+                {/* Count pill */}
+                <rect x={coord.x-9} y={coord.y+r+3} width={18} height={12} rx={6} fill="var(--bg-0)" opacity="0.7"/>
+                <text x={coord.x} y={coord.y+r+11} textAnchor="middle" fontSize="8" fill="var(--t1)" fontFamily="var(--mono)" fontWeight="700" opacity="0.9" style={{pointerEvents:"none"}}>{cnt}</text>
+              </g>
+            );
+          })}
+        </svg>
+
+        {/* Glassmorphism tooltip */}
+        {tooltip && (
+          <div style={{position:"absolute",left:`${(tooltip.x/800)*100}%`,top:`${(tooltip.y/340)*100}%`,transform:"translate(-50%,-140%)",pointerEvents:"none",zIndex:20,animation:"scaleIn .15s cubic-bezier(0.05,0.7,0.1,1)"}}>
+            <div style={{padding:"8px 14px",borderRadius:10,background:"var(--glass-bg-strong)",backdropFilter:"blur(24px)",WebkitBackdropFilter:"blur(24px)",border:"1px solid var(--border-h)",boxShadow:"var(--modal-shadow)",whiteSpace:"nowrap"}}>
+              <div style={{fontSize:12,fontWeight:700,color:"var(--t1)",marginBottom:2}}>{FLAGS[tooltip.country]} {tooltip.country}</div>
+              <div style={{fontSize:11,color:"var(--t3)"}}>바이어 <span style={{color:"var(--blue)",fontWeight:700,fontFamily:"var(--mono)"}}>{tooltip.cnt}</span>명</div>
+            </div>
+            <div style={{width:8,height:8,background:"var(--glass-bg-strong)",border:"1px solid var(--border-h)",borderTop:"none",borderLeft:"none",transform:"rotate(45deg)",margin:"-5px auto 0",backdropFilter:"blur(24px)"}}/>
+          </div>
+        )}
+      </div>
+
+      {/* Legend */}
+      <div style={{display:"flex",flexWrap:"wrap",gap:6,marginTop:12}}>
         {Object.entries(MAP_REGION_COLORS).map(([region,color])=>(
-          <div key={region} style={{display:"flex",alignItems:"center",gap:5,fontSize:11,color:"var(--t3)"}}>
-            <div style={{width:8,height:8,borderRadius:"50%",background:color}}/>{region}
+          <div key={region} style={{display:"flex",alignItems:"center",gap:5,padding:"3px 10px 3px 7px",borderRadius:20,background:"var(--bg-2)",border:"1px solid var(--border)",fontSize:11,color:"var(--t2)",transition:"all .15s"}}>
+            <div style={{width:7,height:7,borderRadius:"50%",background:color,flexShrink:0}}/>
+            <span>{region}</span>
+            {regionTotals[region]>0 && <span style={{color:"var(--t4)",fontFamily:"var(--mono)",fontSize:9,marginLeft:2}}>{regionTotals[region]}</span>}
           </div>
         ))}
       </div>
