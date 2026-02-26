@@ -2336,9 +2336,16 @@ function EmailFinderView() {
         if (!domain.trim()||!firstName.trim()||!lastName.trim()) { setError("도메인, 이름, 성을 모두 입력하세요"); setLoading(false); return; }
         url = `/api/hunter?action=email-finder&domain=${encodeURIComponent(domain.trim())}&first_name=${encodeURIComponent(firstName.trim())}&last_name=${encodeURIComponent(lastName.trim())}`;
       }
-      const res = await fetch(url); const data = await res.json();
-      if (data.error) setError(data.error); else setResults(data.data);
-    } catch(e) { setError(e instanceof SyntaxError ? "응답 파싱 오류. 잠시 후 다시 시도하세요" : "네트워크 오류. 연결 상태를 확인하세요"); }
+      const res = await fetch(url);
+      const text = await res.text();
+      let data;
+      try { data = JSON.parse(text); } catch(pe) {
+        setError("API 서버가 응답하지 않습니다. 배포 환경에서는 Vercel HUNTER_API_KEY 환경변수를, 로컬에서는 .env 파일에 HUNTER_API_KEY를 설정하세요.");
+        setLoading(false); return;
+      }
+      if (data.error) setError(data.error);
+      else { setResults(data.data); if (data.data?._isMock) setError("⚠️ HUNTER_API_KEY 미설정 — 데모 데이터를 표시 중입니다."); }
+    } catch(e) { setError("네트워크 오류. 연결 상태를 확인하세요: " + e.message); }
     setLoading(false);
   };
 
