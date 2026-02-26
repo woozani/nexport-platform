@@ -56,6 +56,12 @@ input,textarea,select,button{font-family:inherit}
 @keyframes float{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
 @keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
 @keyframes slideInRight{from{opacity:0;transform:translateX(100%)}to{opacity:1;transform:translateX(0)}}
+@keyframes typingCursor{0%,100%{opacity:1}50%{opacity:0}}
+@keyframes floatCard{0%,100%{transform:translateY(0) rotate(-1.5deg)}50%{transform:translateY(-14px) rotate(-1.5deg)}}
+@keyframes glowPulse{0%,100%{box-shadow:0 4px 20px rgba(10,132,255,.4)}50%{box-shadow:0 8px 48px rgba(10,132,255,.7),0 0 80px rgba(10,132,255,.2)}}
+@keyframes stepLine{from{width:0;opacity:0}to{width:100%;opacity:1}}
+@keyframes staggerUp{from{opacity:0;transform:translateY(28px)}to{opacity:1;transform:translateY(0)}}
+@keyframes shimmerBg{0%{background-position:-400px 0}100%{background-position:400px 0}}
 .fi{animation:fadeIn .4s cubic-bezier(0.2,0,0,1) forwards;opacity:0}
 .fi1{animation-delay:.04s}.fi2{animation-delay:.08s}.fi3{animation-delay:.12s}.fi4{animation-delay:.16s}.fi5{animation-delay:.2s}
 `;
@@ -670,93 +676,273 @@ function BuyerCompareModal({ buyers, onClose }) {
 }
 
 
+// ─────────── LANDING HELPERS ───────────
+function useInView(threshold=0.15) {
+  const ref = useRef(null);
+  const [inView, setInView] = useState(false);
+  useEffect(() => {
+    const obs = new IntersectionObserver(([e]) => { if(e.isIntersecting) setInView(true); }, {threshold});
+    if(ref.current) obs.observe(ref.current);
+    return () => obs.disconnect();
+  }, []);
+  return [ref, inView];
+}
+
+function CountUp({end, suffix="", duration=1200}) {
+  const [ref, inView] = useInView(0.3);
+  const [val, setVal] = useState(0);
+  useEffect(() => {
+    if(!inView) return;
+    const start = performance.now();
+    const tick = (now) => {
+      const p = Math.min((now - start) / duration, 1);
+      setVal(Math.floor(p * end));
+      if(p < 1) requestAnimationFrame(tick);
+      else setVal(end);
+    };
+    requestAnimationFrame(tick);
+  }, [inView, end, duration]);
+  return <span ref={ref}>{val}{suffix}</span>;
+}
+
 // ─────────── LANDING HERO ───────────
 function LandingHero({ onEnter }) {
   const [visible, setVisible] = useState(false);
-  useEffect(() => { setTimeout(() => setVisible(true), 100); }, []);
-  const stats = [
-    { val: "60+", label: "글로벌 바이어", color: "var(--blue)" },
-    { val: "15개국", label: "커버리지", color: "var(--cyan)" },
-    { val: "AI", label: "매칭 엔진", color: "var(--green)" },
-    { val: "실시간", label: "이메일 파인더", color: "var(--violet)" },
-  ];
+  useEffect(() => { setTimeout(() => setVisible(true), 80); }, []);
+
+  // ── 타이핑 애니메이션 ──
+  const QUERIES = ["자동차 부품 독일 바이어", "PCB 제조 미국 바이어", "플라스틱 사출 유럽 바이어", "의료기기 일본 바이어"];
+  const [qIdx, setQIdx] = useState(0);
+  const [typed, setTyped] = useState("");
+  const [isTyping, setIsTyping] = useState(true);
+  useEffect(() => {
+    const target = QUERIES[qIdx];
+    if(isTyping) {
+      if(typed.length < target.length) {
+        const t = setTimeout(() => setTyped(target.slice(0, typed.length+1)), 65);
+        return () => clearTimeout(t);
+      } else {
+        const t = setTimeout(() => setIsTyping(false), 1800);
+        return () => clearTimeout(t);
+      }
+    } else {
+      if(typed.length > 0) {
+        const t = setTimeout(() => setTyped(typed.slice(0,-1)), 28);
+        return () => clearTimeout(t);
+      } else {
+        setQIdx(i => (i+1) % QUERIES.length);
+        setIsTyping(true);
+      }
+    }
+  }, [typed, isTyping, qIdx]);
+
+  // ── How it Works inView ──
+  const [howRef, howInView] = useInView(0.2);
+  // ── Features inView ──
+  const [featRef, featInView] = useInView(0.15);
+
   const features = [
-    { icon: <Ic.Search s={18}/>, title: "바이어 탐색", desc: "60개국 산업·인증·지역별 고급 필터링으로 최적의 바이어를 찾으세요", color: "var(--blue)", dim: "var(--blue-dim)" },
-    { icon: <Ic.Mail s={18}/>, title: "이메일 파인더", desc: "Hunter.io 기반 실시간 바이어 이메일 검색 및 검증", color: "var(--cyan)", dim: "var(--cyan-dim)" },
-    { icon: <Ic.Bar s={18}/>, title: "대시보드", desc: "파이프라인 관리, KPI 지표, 전환율 분석을 한눈에", color: "var(--amber)", dim: "var(--amber-dim)" },
-    { icon: <Ic.Sparkle s={18}/>, title: "AI 매칭", desc: "제조사 프로필 기반 TOP 15 바이어 자동 추천", color: "var(--green)", dim: "var(--green-dim)" },
+    { icon: <Ic.Search s={20}/>, title: "바이어 탐색", desc: "60개국 산업·인증·지역별 고급 필터링으로 최적의 바이어를 즉시 발굴하세요", color: "var(--blue)", dim: "var(--blue-dim)" },
+    { icon: <Ic.Mail s={20}/>, title: "이메일 파인더", desc: "Hunter.io 기반 실시간 바이어 이메일 검색 및 검증으로 직통 연락처 확보", color: "var(--cyan)", dim: "var(--cyan-dim)" },
+    { icon: <Ic.Bar s={20}/>, title: "세일즈 대시보드", desc: "파이프라인 관리, KPI 지표, 전환율 분석을 한눈에 모니터링", color: "var(--amber)", dim: "var(--amber-dim)" },
+    { icon: <Ic.Sparkle s={20}/>, title: "AI 매칭", desc: "제조사 프로필 기반 TOP 15 바이어 자동 추천 — 매칭 근거까지 설명", color: "var(--green)", dim: "var(--green-dim)" },
   ];
+
+  const steps = [
+    { num:"①", icon:<Ic.Search s={22}/>, title:"바이어 발굴", desc:"60개국 산업별 고급 필터링으로 최적 바이어 검색", color:"var(--blue)", dim:"var(--blue-dim)" },
+    { num:"②", icon:<Ic.Mail s={22}/>, title:"이메일 확보", desc:"Hunter.io 기반 직통 연락처를 5분 내 즉시 발굴", color:"var(--cyan)", dim:"var(--cyan-dim)" },
+    { num:"③", icon:<Ic.Sparkle s={22}/>, title:"AI 매칭", desc:"제조사 프로필 분석 후 TOP 15 바이어 자동 추천", color:"var(--violet)", dim:"var(--violet-dim)" },
+  ];
+
+  const mockBuyers = [
+    { name:"Sarah Chen", company:"Pacific Trade Corp", flag:"🇺🇸", score:98, email:"sarah@pacifictrade.com" },
+    { name:"Hans Mueller", company:"TechParts GmbH", flag:"🇩🇪", score:97, email:"hans@techparts.de" },
+    { name:"Akiko Sato", company:"Lyon Aerospace", flag:"🇸🇪", score:96, email:"akiko@lyonaero..." },
+  ];
+
   return (
-    <div style={{position:"fixed",inset:0,zIndex:100,background:"var(--bg-0)",overflow:"auto"}}>
-      {/* Ambient glow */}
-      <div style={{position:"fixed",top:"-20%",left:"10%",width:"50vw",height:"50vw",borderRadius:"50%",background:"radial-gradient(circle,rgba(10,132,255,0.08) 0%,transparent 70%)",pointerEvents:"none"}}/>
-      <div style={{position:"fixed",bottom:"-10%",right:"5%",width:"40vw",height:"40vw",borderRadius:"50%",background:"radial-gradient(circle,rgba(191,90,242,0.06) 0%,transparent 70%)",pointerEvents:"none"}}/>
+    <div style={{position:"fixed",inset:0,zIndex:100,background:"var(--bg-0)",overflowY:"auto",overflowX:"hidden"}}>
+      {/* Ambient glows */}
+      <div style={{position:"fixed",top:"-15%",left:"5%",width:"55vw",height:"55vw",borderRadius:"50%",background:"radial-gradient(circle,rgba(10,132,255,0.07) 0%,transparent 65%)",pointerEvents:"none",zIndex:0}}/>
+      <div style={{position:"fixed",bottom:"-5%",right:"0%",width:"45vw",height:"45vw",borderRadius:"50%",background:"radial-gradient(circle,rgba(191,90,242,0.05) 0%,transparent 65%)",pointerEvents:"none",zIndex:0}}/>
 
-      <div style={{maxWidth:960,margin:"0 auto",padding:"0 24px"}}>
-        {/* Nav */}
-        <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"20px 0",opacity:visible?1:0,transform:visible?"none":"translateY(-10px)",transition:"all .6s ease"}}>
+      {/* ① STICKY NAV */}
+      <div style={{position:"sticky",top:0,zIndex:200,background:"var(--glass-bg)",backdropFilter:"blur(20px) saturate(180%)",WebkitBackdropFilter:"blur(20px) saturate(180%)",borderBottom:"1px solid var(--border)",opacity:visible?1:0,transition:"opacity .5s ease"}}>
+        <div style={{maxWidth:1080,margin:"0 auto",padding:"0 28px",display:"flex",alignItems:"center",justifyContent:"space-between",height:60}}>
           <div style={{display:"flex",alignItems:"center",gap:10}}>
-            <div style={{width:32,height:32,borderRadius:8,background:"linear-gradient(135deg,var(--blue),var(--violet))",display:"flex",alignItems:"center",justifyContent:"center"}}><Ic.Users s={16}/></div>
-            <span style={{fontSize:18,fontWeight:800,letterSpacing:"-.03em"}}>NEXPORT</span>
+            <div style={{width:32,height:32,borderRadius:9,background:"linear-gradient(135deg,var(--blue),var(--violet))",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}><Ic.Users s={16}/></div>
+            <span style={{fontSize:17,fontWeight:800,letterSpacing:"-.03em",color:"var(--t1)"}}>NEXPORT</span>
           </div>
-          <div onClick={onEnter} style={{padding:"8px 20px",borderRadius:8,background:"var(--blue)",color:"#fff",fontSize:12,fontWeight:600,cursor:"pointer",transition:"opacity .2s"}}
-            onMouseEnter={e=>e.currentTarget.style.opacity=".85"} onMouseLeave={e=>e.currentTarget.style.opacity="1"}>플랫폼 시작</div>
+          <div style={{display:"flex",alignItems:"center",gap:8}}>
+            <div onClick={onEnter} style={{padding:"7px 18px",borderRadius:8,border:"1px solid var(--border)",color:"var(--t2)",fontSize:12,fontWeight:600,cursor:"pointer",transition:"all .18s"}}
+              onMouseEnter={e=>e.currentTarget.style.borderColor="var(--border-h)"} onMouseLeave={e=>e.currentTarget.style.borderColor="var(--border)"}>로그인</div>
+            <div onClick={onEnter} style={{padding:"7px 18px",borderRadius:8,background:"var(--blue)",color:"#fff",fontSize:12,fontWeight:600,cursor:"pointer",transition:"all .18s"}}
+              onMouseEnter={e=>e.currentTarget.style.opacity=".88"} onMouseLeave={e=>e.currentTarget.style.opacity="1"}>플랫폼 시작 →</div>
+          </div>
         </div>
+      </div>
 
-        {/* Hero */}
-        <div style={{textAlign:"center",padding:"60px 0 40px",opacity:visible?1:0,transform:visible?"none":"translateY(20px)",transition:"all .8s ease .1s"}}>
-          <div style={{display:"inline-block",padding:"5px 14px",borderRadius:20,background:"var(--blue-dim)",border:"1px solid rgba(59,107,245,.15)",fontSize:11,fontWeight:600,color:"var(--blue)",marginBottom:20,letterSpacing:".02em"}}>AI-Powered Export Platform</div>
-          <h1 style={{fontSize:44,fontWeight:900,lineHeight:1.2,letterSpacing:"-.03em",marginBottom:16,fontFamily:"var(--font)"}}>
-            <span style={{color:"var(--t1)"}}>한국 제조업체의</span><br/>
-            <span style={{background:"linear-gradient(135deg,var(--blue),var(--cyan))",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent"}}>글로벌 수출을 AI로</span>
+      <div style={{maxWidth:1080,margin:"0 auto",padding:"0 28px",position:"relative",zIndex:1}}>
+
+        {/* ② HERO */}
+        <div style={{textAlign:"center",padding:"80px 0 48px",opacity:visible?1:0,transform:visible?"none":"translateY(24px)",transition:"all .75s cubic-bezier(0.2,0,0,1) .05s"}}>
+          <div style={{display:"inline-flex",alignItems:"center",gap:6,padding:"5px 14px",borderRadius:20,background:"var(--blue-dim)",border:"1px solid rgba(10,132,255,.25)",fontSize:11,fontWeight:600,color:"var(--blue)",marginBottom:24,letterSpacing:".04em"}}>
+            <span style={{width:6,height:6,borderRadius:"50%",background:"var(--blue)",display:"inline-block",animation:"pulse 1.5s infinite"}}/>
+            AI-Powered Export Platform
+          </div>
+          <h1 style={{fontSize:52,fontWeight:900,lineHeight:1.15,letterSpacing:"-.04em",marginBottom:20}}>
+            <span style={{color:"var(--t1)"}}>수출 바이어 발굴,</span><br/>
+            <span style={{background:"linear-gradient(120deg,var(--blue),var(--cyan) 60%)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent",backgroundClip:"text"}}>AI로 10배 빠르게</span>
           </h1>
-          <p style={{fontSize:16,color:"var(--t3)",maxWidth:520,margin:"0 auto",lineHeight:1.7}}>
-            바이어 발굴부터 이메일 검색, AI 매칭까지.<br/>수출의 모든 과정을 하나의 플랫폼에서.
+          <p style={{fontSize:17,color:"var(--t2)",maxWidth:560,margin:"0 auto 36px",lineHeight:1.75}}>
+            바이어 발굴부터 이메일 확보, AI 매칭까지.<br/>수출의 모든 과정을 하나의 플랫폼에서.
           </p>
-          <div style={{display:"flex",gap:12,justifyContent:"center",marginTop:32}}>
-            <div onClick={onEnter} style={{padding:"12px 32px",borderRadius:10,background:"var(--blue)",color:"#fff",fontSize:14,fontWeight:700,cursor:"pointer",transition:"all .25s cubic-bezier(0.2,0,0,1)",boxShadow:"0 4px 20px rgba(10,132,255,0.35)"}}
-              onMouseEnter={e=>{e.currentTarget.style.transform="translateY(-2px)";e.currentTarget.style.boxShadow="0 8px 32px rgba(10,132,255,0.45)"}}
-              onMouseLeave={e=>{e.currentTarget.style.transform="none";e.currentTarget.style.boxShadow="0 4px 20px rgba(10,132,255,0.35)"}}>
+
+          {/* 타이핑 검색창 */}
+          <div style={{maxWidth:580,margin:"0 auto 32px",display:"flex",alignItems:"center",gap:0,borderRadius:14,border:"1px solid var(--border-h)",background:"var(--bg-2)",overflow:"hidden",boxShadow:"var(--card-shadow)"}}>
+            <div style={{padding:"0 16px",color:"var(--t3)",display:"flex",alignItems:"center"}}><Ic.Search s={16}/></div>
+            <div style={{flex:1,padding:"14px 0",fontSize:15,color:"var(--t1)",textAlign:"left",fontFamily:"var(--font)",minHeight:22}}>
+              {typed}
+              <span style={{display:"inline-block",width:2,height:"1em",background:"var(--blue)",marginLeft:1,verticalAlign:"text-bottom",animation:"typingCursor 1s step-end infinite"}}/>
+            </div>
+            <div onClick={onEnter} style={{padding:"10px 20px",margin:6,borderRadius:9,background:"var(--blue)",color:"#fff",fontSize:13,fontWeight:700,cursor:"pointer",whiteSpace:"nowrap",transition:"all .18s",flexShrink:0}}
+              onMouseEnter={e=>e.currentTarget.style.opacity=".88"} onMouseLeave={e=>e.currentTarget.style.opacity="1"}>바이어 찾기 →</div>
+          </div>
+
+          <div style={{display:"flex",gap:12,justifyContent:"center",flexWrap:"wrap"}}>
+            <div onClick={onEnter} style={{padding:"13px 34px",borderRadius:10,background:"var(--blue)",color:"#fff",fontSize:14,fontWeight:700,cursor:"pointer",animation:"glowPulse 3s ease-in-out infinite",transition:"transform .2s"}}
+              onMouseEnter={e=>e.currentTarget.style.transform="translateY(-2px)"} onMouseLeave={e=>e.currentTarget.style.transform="none"}>
               무료로 시작하기
             </div>
-            <div onClick={onEnter} style={{padding:"12px 32px",borderRadius:10,background:"var(--bg-3)",border:"1px solid var(--border)",color:"var(--t1)",fontSize:14,fontWeight:600,cursor:"pointer",transition:"all .2s"}}
+            <div onClick={onEnter} style={{padding:"13px 34px",borderRadius:10,background:"var(--bg-2)",border:"1px solid var(--border)",color:"var(--t1)",fontSize:14,fontWeight:600,cursor:"pointer",transition:"all .18s"}}
               onMouseEnter={e=>e.currentTarget.style.borderColor="var(--border-h)"} onMouseLeave={e=>e.currentTarget.style.borderColor="var(--border)"}>
               데모 보기
             </div>
           </div>
         </div>
 
-        {/* Stats Row */}
-        <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:12,padding:"20px 0 50px",opacity:visible?1:0,transform:visible?"none":"translateY(20px)",transition:"all .8s ease .3s"}}>
-          {stats.map((s,i)=>(
-            <div key={i} style={{textAlign:"center",padding:"20px 12px",borderRadius:12,background:"var(--bg-2)",border:"1px solid var(--border)"}}>
-              <div style={{fontSize:28,fontWeight:800,fontFamily:"var(--mono)",color:s.color,letterSpacing:"-.02em"}}>{s.val}</div>
-              <div style={{fontSize:11,color:"var(--t3)",marginTop:4,fontWeight:500}}>{s.label}</div>
+        {/* ③ PRODUCT PREVIEW CARD */}
+        <div style={{display:"flex",justifyContent:"center",padding:"0 0 72px",opacity:visible?1:0,transform:visible?"none":"translateY(30px)",transition:"all .9s cubic-bezier(0.2,0,0,1) .2s"}}>
+          <div style={{width:"100%",maxWidth:720,borderRadius:16,overflow:"hidden",boxShadow:"var(--modal-shadow)",border:"1px solid var(--border)",background:"var(--bg-1)",animation:"floatCard 5s ease-in-out infinite",position:"relative"}}>
+            {/* 가짜 윈도우 헤더 */}
+            <div style={{padding:"10px 16px",background:"var(--bg-2)",borderBottom:"1px solid var(--border)",display:"flex",alignItems:"center",gap:8}}>
+              <div style={{display:"flex",gap:6}}>{["#FF5F57","#FFBD2E","#28C940"].map((c,i)=><div key={i} style={{width:10,height:10,borderRadius:"50%",background:c}}/>)}</div>
+              <div style={{flex:1,textAlign:"center",fontSize:11,color:"var(--t3)",fontFamily:"var(--mono)"}}>nexport.io/buyers</div>
             </div>
-          ))}
+            {/* 테이블 헤더 */}
+            <div style={{display:"grid",gridTemplateColumns:"2fr 1.2fr 0.8fr 2fr",gap:0,padding:"10px 20px",background:"var(--bg-2)",borderBottom:"1px solid var(--border)"}}>
+              {["바이어","기업명","점수","이메일"].map(h=><div key={h} style={{fontSize:11,fontWeight:600,color:"var(--t3)",letterSpacing:".04em"}}>{h}</div>)}
+            </div>
+            {/* 테이블 행 */}
+            {mockBuyers.map((b,i)=>(
+              <div key={i} style={{display:"grid",gridTemplateColumns:"2fr 1.2fr 0.8fr 2fr",gap:0,padding:"13px 20px",borderBottom:"1px solid var(--border)",alignItems:"center",background:i%2===0?"transparent":"rgba(120,120,128,0.03)"}}>
+                <div style={{display:"flex",alignItems:"center",gap:8}}>
+                  <div style={{width:28,height:28,borderRadius:"50%",background:`linear-gradient(135deg,var(--blue),var(--violet))`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:10,fontWeight:700,color:"#fff",flexShrink:0}}>{b.name[0]}</div>
+                  <div>
+                    <div style={{fontSize:13,fontWeight:600,color:"var(--t1)"}}>{b.name}</div>
+                    <div style={{fontSize:10,color:"var(--t3)"}}>{b.company}</div>
+                  </div>
+                </div>
+                <div style={{fontSize:12,color:"var(--t2)"}}>{b.flag} {b.company.split(" ")[0]}</div>
+                <div style={{display:"flex",alignItems:"center",gap:5}}>
+                  <div style={{width:28,height:28,borderRadius:"50%",background:"var(--green-dim)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:12,fontWeight:800,color:"var(--green)"}}>{b.score}</div>
+                </div>
+                <div style={{fontSize:11,color:"var(--t3)",fontFamily:"var(--mono)"}}>{b.email}</div>
+              </div>
+            ))}
+            {/* 더 보기 */}
+            <div style={{padding:"12px 20px",textAlign:"center",fontSize:12,color:"var(--t3)"}}>
+              <span style={{color:"var(--blue)",fontWeight:600,cursor:"pointer"}} onClick={onEnter}>+ 57개 바이어 더 보기</span>
+            </div>
+            {/* 하단 fade overlay */}
+            <div style={{position:"absolute",bottom:0,left:0,right:0,height:60,background:"linear-gradient(transparent,var(--bg-1))",pointerEvents:"none"}}/>
+          </div>
         </div>
 
-        {/* Features Grid */}
-        <div style={{opacity:visible?1:0,transform:visible?"none":"translateY(20px)",transition:"all .8s ease .5s"}}>
-          <div style={{textAlign:"center",marginBottom:32}}>
-            <div style={{fontSize:11,fontWeight:700,color:"var(--blue)",textTransform:"uppercase",letterSpacing:".1em",marginBottom:8}}>Features</div>
-            <h2 style={{fontSize:28,fontWeight:800,letterSpacing:"-.02em"}}>핵심 기능</h2>
+        {/* ④ HOW IT WORKS */}
+        <div ref={howRef} style={{padding:"0 0 80px"}}>
+          <div style={{textAlign:"center",marginBottom:48,opacity:howInView?1:0,transform:howInView?"none":"translateY(20px)",transition:"all .6s cubic-bezier(0.2,0,0,1)"}}>
+            <div style={{fontSize:11,fontWeight:700,color:"var(--blue)",textTransform:"uppercase",letterSpacing:".12em",marginBottom:10}}>How it works</div>
+            <h2 style={{fontSize:32,fontWeight:800,letterSpacing:"-.03em",color:"var(--t1)"}}>NEXPORT로 수출 바이어를 찾는 방법</h2>
+            <p style={{fontSize:15,color:"var(--t3)",marginTop:10}}>단 3단계로 검증된 글로벌 바이어와 연결하세요</p>
           </div>
-          <div style={{display:"grid",gridTemplateColumns:"repeat(2,1fr)",gap:14,paddingBottom:60}}>
-            {features.map((f,i)=>(
-              <div key={i} style={{padding:24,borderRadius:12,background:"var(--bg-2)",border:"1px solid var(--border)",boxShadow:"var(--card-shadow)",transition:"all .25s cubic-bezier(0.2,0,0,1)",cursor:"default"}}
-                onMouseEnter={e=>{e.currentTarget.style.borderColor="var(--border-h)";e.currentTarget.style.transform="translateY(-3px)";e.currentTarget.style.boxShadow="var(--glass-shadow)"}}
-                onMouseLeave={e=>{e.currentTarget.style.borderColor="var(--border)";e.currentTarget.style.transform="none";e.currentTarget.style.boxShadow="var(--card-shadow)"}}>
-                <div style={{width:40,height:40,borderRadius:10,background:f.dim,display:"flex",alignItems:"center",justifyContent:"center",marginBottom:14,color:f.color}}>{f.icon}</div>
-                <div style={{fontSize:15,fontWeight:700,marginBottom:6}}>{f.title}</div>
-                <div style={{fontSize:12,color:"var(--t3)",lineHeight:1.6}}>{f.desc}</div>
+          <div style={{display:"grid",gridTemplateColumns:"1fr auto 1fr auto 1fr",gap:0,alignItems:"start"}}>
+            {steps.map((s,i) => (
+              <>
+                <div key={`step-${i}`} style={{textAlign:"center",padding:"0 12px",opacity:howInView?1:0,animation:howInView?`staggerUp .6s cubic-bezier(0.2,0,0,1) ${i*200}ms both`:"none"}}>
+                  <div style={{width:56,height:56,borderRadius:16,background:s.dim,display:"flex",alignItems:"center",justifyContent:"center",margin:"0 auto 16px",color:s.color,border:`1px solid ${s.color}33`}}>
+                    {s.icon}
+                  </div>
+                  <div style={{fontSize:11,fontWeight:700,color:s.color,letterSpacing:".06em",marginBottom:6}}>{s.num}</div>
+                  <div style={{fontSize:16,fontWeight:700,color:"var(--t1)",marginBottom:8}}>{s.title}</div>
+                  <div style={{fontSize:13,color:"var(--t3)",lineHeight:1.65}}>{s.desc}</div>
+                </div>
+                {i < steps.length-1 && (
+                  <div key={`line-${i}`} style={{display:"flex",alignItems:"center",paddingTop:28}}>
+                    <div style={{height:2,width:howInView?60:0,background:`linear-gradient(90deg,${steps[i].color},${steps[i+1].color})`,borderRadius:2,transition:`width .8s cubic-bezier(0.2,0,0,1) ${i*200+300}ms`,opacity:howInView?1:0}}/>
+                    <div style={{color:"var(--t4)",fontSize:16,marginLeft:4,opacity:howInView?1:0,transition:`opacity .4s ${i*200+400}ms`}}>→</div>
+                  </div>
+                )}
+              </>
+            ))}
+          </div>
+        </div>
+
+        {/* ⑤ STATS BAR */}
+        <div style={{margin:"0 0 80px",padding:"36px 0",borderRadius:16,background:"var(--bg-2)",border:"1px solid var(--border)"}}>
+          <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:0}}>
+            {[
+              {end:60,suffix:"개국+",label:"글로벌 바이어 DB",color:"var(--blue)"},
+              {end:98,suffix:"%",label:"이메일 정확도",color:"var(--green)"},
+              {end:5,suffix:"분 내",label:"바이어 발굴 시간",color:"var(--amber)"},
+              {end:15,suffix:"개국",label:"국가 커버리지",color:"var(--cyan)"},
+            ].map((s,i)=>(
+              <div key={i} style={{textAlign:"center",padding:"8px 16px",borderRight:i<3?"1px solid var(--border)":"none"}}>
+                <div style={{fontSize:36,fontWeight:900,fontFamily:"var(--mono)",color:s.color,letterSpacing:"-.02em",lineHeight:1.1}}>
+                  <CountUp end={s.end} suffix={s.suffix} duration={1400}/>
+                </div>
+                <div style={{fontSize:12,color:"var(--t3)",marginTop:6,fontWeight:500}}>{s.label}</div>
               </div>
             ))}
           </div>
         </div>
 
+        {/* ⑥ FEATURES GRID */}
+        <div ref={featRef} style={{padding:"0 0 80px"}}>
+          <div style={{textAlign:"center",marginBottom:40,opacity:featInView?1:0,transform:featInView?"none":"translateY(16px)",transition:"all .6s cubic-bezier(0.2,0,0,1)"}}>
+            <div style={{fontSize:11,fontWeight:700,color:"var(--blue)",textTransform:"uppercase",letterSpacing:".12em",marginBottom:10}}>Features</div>
+            <h2 style={{fontSize:32,fontWeight:800,letterSpacing:"-.03em",color:"var(--t1)"}}>수출 전 과정을 하나의 플랫폼에서</h2>
+          </div>
+          <div style={{display:"grid",gridTemplateColumns:"repeat(2,1fr)",gap:16}}>
+            {features.map((f,i)=>(
+              <div key={i} style={{padding:"28px 28px 24px",borderRadius:14,background:"var(--bg-2)",border:"1px solid var(--border)",boxShadow:"var(--card-shadow)",transition:"all .25s cubic-bezier(0.2,0,0,1)",cursor:"default",opacity:featInView?1:0,animation:featInView?`staggerUp .55s cubic-bezier(0.2,0,0,1) ${i*110}ms both`:"none",position:"relative",overflow:"hidden"}}
+                onMouseEnter={e=>{e.currentTarget.style.borderColor=f.color+"55";e.currentTarget.style.transform="translateY(-4px)";e.currentTarget.style.boxShadow="var(--glass-shadow)"}}
+                onMouseLeave={e=>{e.currentTarget.style.borderColor="var(--border)";e.currentTarget.style.transform="none";e.currentTarget.style.boxShadow="var(--card-shadow)"}}>
+                <div style={{width:46,height:46,borderRadius:12,background:f.dim,display:"flex",alignItems:"center",justifyContent:"center",marginBottom:16,color:f.color,border:`1px solid ${f.color}22`}}>{f.icon}</div>
+                <div style={{fontSize:16,fontWeight:700,color:"var(--t1)",marginBottom:8}}>{f.title}</div>
+                <div style={{fontSize:13,color:"var(--t3)",lineHeight:1.65}}>{f.desc}</div>
+                <div style={{position:"absolute",bottom:20,right:20,fontSize:16,color:f.color,opacity:.5}}>→</div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* ⑦ BOTTOM CTA */}
+        <div style={{margin:"0 0 60px",padding:"56px 40px",borderRadius:20,background:"linear-gradient(135deg,rgba(10,132,255,.09),rgba(191,90,242,.06))",border:"1px solid rgba(10,132,255,.18)",textAlign:"center",position:"relative",overflow:"hidden"}}>
+          <div style={{position:"absolute",top:"50%",left:"50%",transform:"translate(-50%,-50%)",width:"60%",height:"60%",borderRadius:"50%",background:"radial-gradient(circle,rgba(10,132,255,.07) 0%,transparent 70%)",pointerEvents:"none"}}/>
+          <div style={{position:"relative"}}>
+            <h2 style={{fontSize:36,fontWeight:900,letterSpacing:"-.03em",color:"var(--t1)",marginBottom:12}}>지금 NEXPORT를 시작하세요</h2>
+            <p style={{fontSize:16,color:"var(--t2)",marginBottom:36,lineHeight:1.7}}>바이어 발굴에 소비하던 시간을 계약에 투자하세요.<br/>AI가 검증된 글로벌 바이어를 5분 내에 찾아드립니다.</p>
+            <div onClick={onEnter} style={{display:"inline-block",padding:"15px 44px",borderRadius:12,background:"var(--blue)",color:"#fff",fontSize:16,fontWeight:700,cursor:"pointer",animation:"glowPulse 2.5s ease-in-out infinite",transition:"transform .2s"}}
+              onMouseEnter={e=>e.currentTarget.style.transform="translateY(-3px)"} onMouseLeave={e=>e.currentTarget.style.transform="none"}>
+              무료로 시작하기 →
+            </div>
+            <div style={{marginTop:14,fontSize:12,color:"var(--t4)"}}>신용카드 불필요 · 즉시 시작 · 60개국 바이어 DB 즉시 접근</div>
+          </div>
+        </div>
+
         {/* Footer */}
-        <div style={{textAlign:"center",padding:"30px 0",borderTop:"1px solid var(--border)",opacity:visible?1:0,transition:"all .8s ease .7s"}}>
+        <div style={{textAlign:"center",padding:"24px 0 40px",borderTop:"1px solid var(--border)"}}>
           <div style={{fontSize:11,color:"var(--t4)"}}>© 2026 NEXPORT. AI 기반 수출 바이어 매칭 플랫폼</div>
         </div>
       </div>
