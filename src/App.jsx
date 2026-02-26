@@ -2600,6 +2600,7 @@ export default function App() {
       <style>{CSS}</style>
       {showLanding && <LandingHero onEnter={()=>setShowLanding(false)} />}
 
+      {!showLanding && (<>
       {/* App-level Toast */}
       {toast && (
         <div style={{position:"fixed",top:20,right:20,zIndex:300,padding:"12px 20px",borderRadius:10,
@@ -2975,6 +2976,7 @@ fi fi${Math.min(i+1,5)}`}
           </div>
         </div>
       )}
+      </>)}
     </>
   );
 }
