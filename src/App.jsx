@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo, useCallback, useRef, useReducer } from "react";
+import { ComposableMap, Geographies, Geography, Marker } from "react-simple-maps";
 
 // ─────────── STYLES ───────────
 const CSS = `
@@ -1814,8 +1815,22 @@ const COUNTRY_COORDS = {
 };
 const MAP_REGION_COLORS = {"유럽":"#0A84FF","북미":"#32ADE6","아시아":"#30D158","동남아":"#FF9F0A","오세아니아":"#BF5AF2","남미":"#FF453A"};
 
+// ISO 3166-1 numeric → Korean name
+const ISO_KR = {276:"독일",840:"미국",392:"일본",704:"베트남",752:"스웨덴",528:"네덜란드",826:"영국",36:"호주",124:"캐나다",250:"프랑스",702:"싱가포르",764:"태국",356:"인도",76:"브라질",484:"멕시코"};
+// Country geographic centers [lng, lat]
+const COUNTRY_GEO = {
+  "독일":[10.45,51.17],"미국":[-98,38],"일본":[138,36],"베트남":[108,14],
+  "스웨덴":[18,62],"네덜란드":[5.3,52.3],"영국":[-2,54],"호주":[134,-26],
+  "캐나다":[-96,56],"프랑스":[2.2,46.2],"싱가포르":[103.8,1.35],"태국":[101,15],
+  "인도":[79,21],"브라질":[-52,-10],"멕시코":[-102,24],
+};
+const GEO_URL = "https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json";
+
 function WorldMapView({ buyers }) {
-  const [hovered, setHovered] = useState(null);
+  const [hoveredCountry, setHoveredCountry] = useState(null);
+  const [hoveredRegion, setHoveredRegion] = useState(null);
+  const [tooltip, setTooltip] = useState(null);
+
   const countryStats = {};
   buyers.forEach(b => { countryStats[b.country] = (countryStats[b.country]||0)+1; });
   const regionOf = (c) => REGIONS[c] || "기타";
@@ -1828,118 +1843,115 @@ function WorldMapView({ buyers }) {
     regionTopC[r].push({country:c,count:n});
   });
   Object.keys(regionTopC).forEach(r => regionTopC[r].sort((a,b)=>b.count-a.count));
-  const RCOLS = {"북미":"#32ADE6","유럽":"#0A84FF","아시아":"#30D158","동남아":"#FF9F0A","오세아니아":"#BF5AF2","남미":"#FF453A"};
-  const BW=142, BH=78;
-  const CONTS = [
-    {id:"na",region:"북미",
-     path:"M88,35 L118,28 L148,25 L175,32 L198,38 L225,48 L248,72 L258,98 L252,132 L235,162 L205,188 L175,208 L148,215 L118,205 L92,182 L68,155 L52,122 L48,88 L58,62 L72,45Z",
-     lblx:152,lbly:122,label:"NORTH AMERICA",
-     cb:{bx:5,by:5},lx:168,ly:130},
-    {id:"sa",region:"남미",
-     path:"M148,252 L188,242 L232,248 L258,268 L270,298 L268,335 L252,368 L225,385 L190,390 L160,372 L143,342 L140,305 L146,275Z",
-     lblx:200,lbly:315,label:"S. AMERICA",
-     cb:{bx:5,by:258},lx:192,ly:308},
-    {id:"eu",region:"유럽",
-     path:"M398,42 L435,38 L468,42 L495,55 L508,72 L505,95 L488,112 L460,122 L432,118 L408,102 L395,78Z",
-     lblx:448,lbly:80,label:"EUROPE",
-     cb:{bx:312,by:5},lx:448,ly:78},
-    {id:"af",region:null,
-     path:"M408,148 L475,142 L518,152 L542,175 L548,218 L540,268 L518,312 L488,348 L452,358 L415,342 L395,302 L388,258 L392,198Z",
-     lblx:467,lbly:252,label:"AFRICA"},
-    {id:"as",region:"아시아",
-     path:"M438,48 L520,42 L605,46 L665,56 L698,88 L708,128 L698,168 L668,192 L608,198 L545,192 L485,178 L445,148 L425,112 L428,72Z",
-     lblx:572,lbly:120,label:"ASIA",
-     cb:{bx:648,by:5},lx:608,ly:112},
-    {id:"sea",region:"동남아",
-     path:"M598,178 L645,172 L678,182 L692,205 L685,232 L660,245 L632,238 L610,218 L598,198Z",
-     lblx:644,lbly:210,label:"SE ASIA",
-     cb:{bx:648,by:175},lx:648,ly:208},
-    {id:"oc",region:"오세아니아",
-     path:"M628,258 L688,252 L730,260 L748,285 L745,318 L722,338 L688,342 L654,332 L630,310 L622,284Z",
-     lblx:686,lbly:300,label:"OCEANIA",
-     cb:{bx:648,by:300},lx:688,ly:298},
-  ];
+  const RCOLS = MAP_REGION_COLORS;
+  const maxCount = Math.max(...Object.values(countryStats), 1);
+
+  const markers = Object.entries(countryStats).map(([name, count]) => ({
+    name, count, coords: COUNTRY_GEO[name], region: regionOf(name),
+  })).filter(m => m.coords);
+
   return (
     <div style={{position:"relative",width:"100%"}}>
-      <div style={{borderRadius:14,overflow:"hidden",border:"1px solid var(--border)",boxShadow:"var(--card-shadow)"}}>
-        <svg viewBox="0 0 800 400" style={{width:"100%",height:"auto",display:"block"}} preserveAspectRatio="xMidYMid meet">
-          <defs>
-            <radialGradient id="wm-ocean" cx="50%" cy="45%" r="75%">
-              <stop offset="0%" stopColor="var(--bg-2)"/>
-              <stop offset="100%" stopColor="var(--bg-1)"/>
-            </radialGradient>
-            <filter id="wm-cb-shadow" x="-25%" y="-25%" width="150%" height="150%">
-              <feDropShadow dx="0" dy="3" stdDeviation="5" floodColor="#000" floodOpacity="0.55"/>
-            </filter>
-          </defs>
-          <rect width="800" height="400" fill="url(#wm-ocean)"/>
-          {[80,160,240,320].map(y=><line key={y} x1={0} y1={y} x2={800} y2={y} stroke="var(--border)" strokeWidth="0.5" strokeDasharray="3 12" opacity="0.28"/>)}
-          {[100,200,300,400,500,600,700].map(x=><line key={x} x1={x} y1={0} x2={x} y2={400} stroke="var(--border)" strokeWidth="0.5" strokeDasharray="3 12" opacity="0.28"/>)}
-          <line x1={0} y1={200} x2={800} y2={200} stroke="var(--border)" strokeWidth="0.8" opacity="0.22"/>
-          {CONTS.map(c => {
-            const col = c.region ? (RCOLS[c.region]||"#636366") : "#636366";
-            const isHov = hovered===c.region && !!c.region;
+      <div style={{borderRadius:14,overflow:"hidden",border:"1px solid var(--border)",
+        boxShadow:"var(--card-shadow)",background:"var(--bg-1)",position:"relative"}}>
+        <ComposableMap
+          projection="geoMercator"
+          projectionConfig={{scale:130, center:[10, 15]}}
+          width={800} height={420}
+          style={{width:"100%",height:"auto",display:"block"}}
+        >
+          <Geographies geography={GEO_URL}>
+            {({ geographies }) => geographies.map(geo => {
+              const isoNum = parseInt(geo.id);
+              const name = ISO_KR[isoNum];
+              const region = name ? regionOf(name) : null;
+              const col = region && RCOLS[region] ? RCOLS[region] : null;
+              const count = name ? (countryStats[name]||0) : 0;
+              const isActive = hoveredCountry===name || hoveredRegion===region;
+              const hasData = count > 0;
+              return (
+                <Geography
+                  key={geo.rsmKey}
+                  geography={geo}
+                  fill={col
+                    ? (isActive ? col+"cc" : hasData ? col+"66" : col+"30")
+                    : "var(--bg-3)"}
+                  stroke="var(--bg-0)"
+                  strokeWidth={0.3}
+                  style={{default:{outline:"none",transition:"fill .18s"},
+                    hover:{outline:"none"},pressed:{outline:"none"}}}
+                  onMouseEnter={(e)=>{
+                    if(name){
+                      setHoveredCountry(name);
+                      setTooltip({
+                        name, count, region, col,
+                        tops:(regionTopC[region]||[]).slice(0,3),
+                        total:regionTotals[region]||0,
+                        x:e.clientX, y:e.clientY,
+                      });
+                    }
+                  }}
+                  onMouseMove={(e)=>{
+                    if(tooltip) setTooltip(t=>t?{...t,x:e.clientX,y:e.clientY}:null);
+                  }}
+                  onMouseLeave={()=>{setHoveredCountry(null);setTooltip(null);}}
+                />
+              );
+            })}
+          </Geographies>
+          {markers.map(m => {
+            const col = RCOLS[m.region]||"#888";
+            const r = 5 + (m.count/maxCount)*12;
+            const isActive = hoveredCountry===m.name || hoveredRegion===m.region;
             return (
-              <g key={c.id}
-                onMouseEnter={()=>c.region && setHovered(c.region)}
-                onMouseLeave={()=>setHovered(null)}
-                style={{cursor:c.region?"pointer":"default"}}>
-                <path d={c.path} fill={col}
-                  fillOpacity={isHov?0.88:(c.region?0.62:0.32)}
-                  stroke={col} strokeWidth={isHov?1.5:0.8}
-                  strokeOpacity={isHov?0.95:(c.region?0.45:0.18)}
-                  style={{transition:"fill-opacity .2s"}}/>
-                {c.label && (
-                  <text x={c.lblx} y={c.lbly} textAnchor="middle"
-                    fontSize="7" fontWeight="700"
-                    style={{fill:"rgba(255,255,255,0.65)",pointerEvents:"none",letterSpacing:"0.12em"}}>
-                    {c.label}
-                  </text>
-                )}
-              </g>
+              <Marker key={m.name} coordinates={m.coords}>
+                <circle r={r} fill={col} fillOpacity={isActive?0.95:0.78}
+                  stroke="#fff" strokeWidth={isActive?2:1.2}
+                  style={{cursor:"pointer",filter:isActive?`drop-shadow(0 0 6px ${col})`:"none",
+                    transition:"all .18s"}}/>
+                <text textAnchor="middle" y={-r-4}
+                  style={{fontSize:8.5,fill:"var(--t1)",fontWeight:700,
+                    textShadow:"0 1px 3px rgba(0,0,0,0.9)",pointerEvents:"none"}}>
+                  {m.count}
+                </text>
+              </Marker>
             );
           })}
-          {CONTS.filter(c=>c.cb&&c.region&&regionTotals[c.region]).map(c => {
-            const col = RCOLS[c.region];
-            const bx=c.cb.bx, by=c.cb.by;
-            const bcx=bx+BW/2, bcy=by+BH/2;
-            const total=regionTotals[c.region]||0;
-            const tops=(regionTopC[c.region]||[]).slice(0,2);
-            const pct=Math.round((total/buyers.length)*100);
-            return (
-              <g key={`cb-${c.id}`}>
-                <line x1={bcx} y1={bcy} x2={c.lx} y2={c.ly}
-                  stroke={col} strokeWidth="1" strokeOpacity="0.55" strokeDasharray="5 4"/>
-                <circle cx={c.lx} cy={c.ly} r={7} fill={col} fillOpacity="0.15"/>
-                <circle cx={c.lx} cy={c.ly} r={3.5} fill={col} fillOpacity="0.9"/>
-                <rect x={bx} y={by} width={BW} height={BH} rx={8}
-                  fill="var(--bg-3)" fillOpacity="0.96"
-                  stroke={col} strokeWidth="0.8" strokeOpacity="0.5"
-                  filter="url(#wm-cb-shadow)"/>
-                <rect x={bx+0.5} y={by+0.5} width={BW-1} height={3} rx={8} fill={col} fillOpacity="0.85"/>
-                <text x={bx+9} y={by+18} fontSize="9.5" fontWeight="700"
-                  style={{fill:"var(--t1)"}}>{c.region}</text>
-                <text x={bx+9} y={by+31} fontSize="8.5"
-                  style={{fill:"var(--t2)"}}>바이어 <tspan style={{fill:col,fontWeight:"700"}}>{total}명</tspan>  ·  {pct}%</text>
-                {tops[0] && <text x={bx+9} y={by+44} fontSize="8"
-                  style={{fill:"var(--t3)"}}>{FLAGS[tops[0].country]||"🌍"} {tops[0].country} <tspan style={{fill:"var(--t2)"}}>{tops[0].count}명</tspan></text>}
-                {tops[1] && <text x={bx+9} y={by+56} fontSize="8"
-                  style={{fill:"var(--t3)"}}>{FLAGS[tops[1].country]||"🌍"} {tops[1].country} <tspan style={{fill:"var(--t2)"}}>{tops[1].count}명</tspan></text>}
-                <text x={bx+9} y={by+70} fontSize="7.5"
-                  style={{fill:"var(--t4)"}}>수출 비중 {pct}% 차지</text>
-              </g>
-            );
-          })}
-        </svg>
+        </ComposableMap>
+        {tooltip && (
+          <div style={{position:"fixed",left:tooltip.x+14,top:tooltip.y-10,
+            background:"var(--glass-bg-strong)",backdropFilter:"blur(20px)",
+            WebkitBackdropFilter:"blur(20px)",
+            border:`1px solid ${tooltip.col||"var(--border)"}`,
+            borderRadius:10,padding:"10px 14px",pointerEvents:"none",zIndex:9999,
+            boxShadow:"var(--modal-shadow)",minWidth:160}}>
+            <div style={{display:"flex",alignItems:"center",gap:6,marginBottom:6}}>
+              <span style={{fontSize:15}}>{FLAGS[tooltip.name]||"🌍"}</span>
+              <span style={{fontSize:12,fontWeight:700,color:"var(--t1)"}}>{tooltip.name}</span>
+              <span style={{marginLeft:"auto",fontSize:11,fontWeight:700,color:tooltip.col}}>{tooltip.count}명</span>
+            </div>
+            <div style={{fontSize:10,color:"var(--t3)",marginBottom:4}}>
+              리전: <span style={{color:tooltip.col,fontWeight:600}}>{tooltip.region}</span>
+              {" · "}총 {tooltip.total}명
+            </div>
+            {tooltip.tops.map(t=>(
+              <div key={t.country} style={{display:"flex",alignItems:"center",gap:5,marginTop:3}}>
+                <span style={{fontSize:11}}>{FLAGS[t.country]||"🌍"}</span>
+                <span style={{fontSize:10,color:"var(--t2)"}}>{t.country}</span>
+                <span style={{marginLeft:"auto",fontSize:10,color:tooltip.col,fontWeight:600}}>{t.count}명</span>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
       <div style={{display:"flex",flexWrap:"wrap",gap:6,marginTop:12}}>
         {Object.entries(RCOLS).map(([region,color])=>(
           <div key={region}
-            onMouseEnter={()=>setHovered(region)}
-            onMouseLeave={()=>setHovered(null)}
+            onMouseEnter={()=>setHoveredRegion(region)}
+            onMouseLeave={()=>setHoveredRegion(null)}
             style={{display:"flex",alignItems:"center",gap:5,padding:"4px 11px 4px 8px",
-              borderRadius:20,background:hovered===region?"var(--bg-3)":"var(--bg-2)",
-              border:`1px solid ${hovered===region?color:"var(--border)"}`,
+              borderRadius:20,background:hoveredRegion===region?"var(--bg-3)":"var(--bg-2)",
+              border:`1px solid ${hoveredRegion===region?color:"var(--border)"}`,
               cursor:"pointer",transition:"all .15s cubic-bezier(0.2,0,0,1)"}}>
             <div style={{width:7,height:7,borderRadius:"50%",background:color,flexShrink:0}}/>
             <span style={{fontSize:11,color:"var(--t2)",fontWeight:500}}>{region}</span>
