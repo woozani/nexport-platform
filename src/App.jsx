@@ -62,7 +62,7 @@ input,textarea,select,button{font-family:inherit}
 @keyframes stepLine{from{width:0;opacity:0}to{width:100%;opacity:1}}
 @keyframes staggerUp{from{opacity:0;transform:translateY(28px)}to{opacity:1;transform:translateY(0)}}
 @keyframes shimmerBg{0%{background-position:-400px 0}100%{background-position:400px 0}}
-@media(max-width:768px){.hiw-grid{display:flex!important;flex-direction:column!important;gap:20px!important}.hiw-connector{display:none!important}}
+@media(max-width:768px){.hiw-grid{display:flex!important;flex-direction:column!important;gap:16px!important;align-items:stretch!important}.hiw-grid>div{width:100%!important;box-sizing:border-box!important;padding:24px 20px!important;text-align:center!important;background:var(--bg-2);border-radius:16px;border:1px solid var(--border)}.hiw-connector{display:none!important}}
 .fi{animation:fadeIn .4s cubic-bezier(0.2,0,0,1) forwards;opacity:0}
 .fi1{animation-delay:.04s}.fi2{animation-delay:.08s}.fi3{animation-delay:.12s}.fi4{animation-delay:.16s}.fi5{animation-delay:.2s}
 `;
@@ -907,10 +907,10 @@ function LandingHero({ onEnter, isMobile }) {
         <div ref={howRef} style={{padding:"0 0 80px"}}>
           <div style={{textAlign:"center",marginBottom:48,opacity:howInView?1:0,transform:howInView?"none":"translateY(20px)",transition:"all .6s cubic-bezier(0.2,0,0,1)"}}>
             <div style={{fontSize:11,fontWeight:700,color:"var(--blue)",textTransform:"uppercase",letterSpacing:".12em",marginBottom:10}}>How it works</div>
-            <h2 style={{fontSize:32,fontWeight:800,letterSpacing:"-.03em",color:"var(--t1)"}}>NEXPORT로 수출 바이어를 찾는 방법</h2>
-            <p style={{fontSize:15,color:"var(--t3)",marginTop:10}}>단 3단계로 검증된 글로벌 바이어와 연결하세요</p>
+            <h2 style={{fontSize:isMobile?22:32,fontWeight:800,letterSpacing:"-.03em",color:"var(--t1)"}}>NEXPORT로 수출 바이어를 찾는 방법</h2>
+            <p style={{fontSize:isMobile?13:15,color:"var(--t3)",marginTop:10}}>단 3단계로 검증된 글로벌 바이어와 연결하세요</p>
           </div>
-          <div className="hiw-grid" style={{display:"grid",gridTemplateColumns:"1fr auto 1fr auto 1fr",gap:0,alignItems:"start"}}>
+          <div className="hiw-grid" style={{display:isMobile?"flex":"grid",flexDirection:isMobile?"column":undefined,gridTemplateColumns:isMobile?undefined:"1fr auto 1fr auto 1fr",gap:isMobile?"16px":0,alignItems:isMobile?"stretch":"start"}}>
             {steps.map((s,i) => (
               <>
                 <div key={`step-${i}`} style={{textAlign:"center",padding:"0 12px",opacity:howInView?1:0,animation:howInView?`staggerUp .6s cubic-bezier(0.2,0,0,1) ${i*200}ms both`:"none"}}>
