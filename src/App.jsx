@@ -1815,116 +1815,135 @@ const COUNTRY_COORDS = {
 const MAP_REGION_COLORS = {"유럽":"#0A84FF","북미":"#32ADE6","아시아":"#30D158","동남아":"#FF9F0A","오세아니아":"#BF5AF2","남미":"#FF453A"};
 
 function WorldMapView({ buyers }) {
-  const [tooltip, setTooltip] = useState(null);
   const [hovered, setHovered] = useState(null);
   const countryStats = {};
   buyers.forEach(b => { countryStats[b.country] = (countryStats[b.country]||0)+1; });
-  const maxCount = Math.max(1,...Object.values(countryStats));
-  const getR = (c) => 9 + ((countryStats[c]||0)/maxCount)*18;
   const regionOf = (c) => REGIONS[c] || "기타";
-  const colorOf = (c) => MAP_REGION_COLORS[regionOf(c)] || "#5C6078";
   const regionTotals = {};
-  Object.entries(countryStats).forEach(([c,n]) => { const r=regionOf(c); regionTotals[r]=(regionTotals[r]||0)+n; });
+  const regionTopC = {};
+  Object.entries(countryStats).forEach(([c,n]) => {
+    const r = regionOf(c);
+    regionTotals[r] = (regionTotals[r]||0)+n;
+    if (!regionTopC[r]) regionTopC[r] = [];
+    regionTopC[r].push({country:c,count:n});
+  });
+  Object.keys(regionTopC).forEach(r => regionTopC[r].sort((a,b)=>b.count-a.count));
+  const RCOLS = {"북미":"#32ADE6","유럽":"#0A84FF","아시아":"#30D158","동남아":"#FF9F0A","오세아니아":"#BF5AF2","남미":"#FF453A"};
+  const BW=142, BH=78;
+  const CONTS = [
+    {id:"na",region:"북미",
+     path:"M88,35 L118,28 L148,25 L175,32 L198,38 L225,48 L248,72 L258,98 L252,132 L235,162 L205,188 L175,208 L148,215 L118,205 L92,182 L68,155 L52,122 L48,88 L58,62 L72,45Z",
+     lblx:152,lbly:122,label:"NORTH AMERICA",
+     cb:{bx:5,by:5},lx:168,ly:130},
+    {id:"sa",region:"남미",
+     path:"M148,252 L188,242 L232,248 L258,268 L270,298 L268,335 L252,368 L225,385 L190,390 L160,372 L143,342 L140,305 L146,275Z",
+     lblx:200,lbly:315,label:"S. AMERICA",
+     cb:{bx:5,by:258},lx:192,ly:308},
+    {id:"eu",region:"유럽",
+     path:"M398,42 L435,38 L468,42 L495,55 L508,72 L505,95 L488,112 L460,122 L432,118 L408,102 L395,78Z",
+     lblx:448,lbly:80,label:"EUROPE",
+     cb:{bx:312,by:5},lx:448,ly:78},
+    {id:"af",region:null,
+     path:"M408,148 L475,142 L518,152 L542,175 L548,218 L540,268 L518,312 L488,348 L452,358 L415,342 L395,302 L388,258 L392,198Z",
+     lblx:467,lbly:252,label:"AFRICA"},
+    {id:"as",region:"아시아",
+     path:"M438,48 L520,42 L605,46 L665,56 L698,88 L708,128 L698,168 L668,192 L608,198 L545,192 L485,178 L445,148 L425,112 L428,72Z",
+     lblx:572,lbly:120,label:"ASIA",
+     cb:{bx:648,by:5},lx:608,ly:112},
+    {id:"sea",region:"동남아",
+     path:"M598,178 L645,172 L678,182 L692,205 L685,232 L660,245 L632,238 L610,218 L598,198Z",
+     lblx:644,lbly:210,label:"SE ASIA",
+     cb:{bx:648,by:175},lx:648,ly:208},
+    {id:"oc",region:"오세아니아",
+     path:"M628,258 L688,252 L730,260 L748,285 L745,318 L722,338 L688,342 L654,332 L630,310 L622,284Z",
+     lblx:686,lbly:300,label:"OCEANIA",
+     cb:{bx:648,by:300},lx:688,ly:298},
+  ];
   return (
     <div style={{position:"relative",width:"100%"}}>
-      <div style={{position:"relative",borderRadius:14,overflow:"hidden",border:"1px solid var(--border)",boxShadow:"var(--card-shadow)"}}>
-        <svg viewBox="0 0 800 340" style={{width:"100%",height:"auto",display:"block"}} preserveAspectRatio="xMidYMid meet">
+      <div style={{borderRadius:14,overflow:"hidden",border:"1px solid var(--border)",boxShadow:"var(--card-shadow)"}}>
+        <svg viewBox="0 0 800 400" style={{width:"100%",height:"auto",display:"block"}} preserveAspectRatio="xMidYMid meet">
           <defs>
             <radialGradient id="wm-ocean" cx="50%" cy="45%" r="75%">
               <stop offset="0%" stopColor="var(--bg-2)"/>
               <stop offset="100%" stopColor="var(--bg-1)"/>
             </radialGradient>
-            <radialGradient id="wm-eu" cx="40%" cy="35%" r="65%"><stop offset="0%" stopColor="#0A84FF" stopOpacity="0.95"/><stop offset="100%" stopColor="#0A84FF" stopOpacity="0.6"/></radialGradient>
-            <radialGradient id="wm-na" cx="40%" cy="35%" r="65%"><stop offset="0%" stopColor="#32ADE6" stopOpacity="0.95"/><stop offset="100%" stopColor="#32ADE6" stopOpacity="0.6"/></radialGradient>
-            <radialGradient id="wm-as" cx="40%" cy="35%" r="65%"><stop offset="0%" stopColor="#30D158" stopOpacity="0.95"/><stop offset="100%" stopColor="#30D158" stopOpacity="0.6"/></radialGradient>
-            <radialGradient id="wm-se" cx="40%" cy="35%" r="65%"><stop offset="0%" stopColor="#FF9F0A" stopOpacity="0.95"/><stop offset="100%" stopColor="#FF9F0A" stopOpacity="0.6"/></radialGradient>
-            <radialGradient id="wm-oc" cx="40%" cy="35%" r="65%"><stop offset="0%" stopColor="#BF5AF2" stopOpacity="0.95"/><stop offset="100%" stopColor="#BF5AF2" stopOpacity="0.6"/></radialGradient>
-            <radialGradient id="wm-sa" cx="40%" cy="35%" r="65%"><stop offset="0%" stopColor="#FF453A" stopOpacity="0.95"/><stop offset="100%" stopColor="#FF453A" stopOpacity="0.6"/></radialGradient>
-            <filter id="wm-glow" x="-50%" y="-50%" width="200%" height="200%">
-              <feGaussianBlur stdDeviation="3" result="blur"/>
-              <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+            <filter id="wm-cb-shadow" x="-25%" y="-25%" width="150%" height="150%">
+              <feDropShadow dx="0" dy="3" stdDeviation="5" floodColor="#000" floodOpacity="0.55"/>
             </filter>
           </defs>
-
-          {/* Ocean bg */}
-          <rect width="800" height="340" fill="url(#wm-ocean)"/>
-
-          {/* Subtle grid */}
-          {[68,136,204,272].map(y=><line key={y} x1={0} y1={y} x2={800} y2={y} stroke="var(--border)" strokeWidth="0.5" strokeDasharray="3 14" opacity="0.4"/>)}
-          {[100,200,300,400,500,600,700].map(x=><line key={x} x1={x} y1={0} x2={x} y2={340} stroke="var(--border)" strokeWidth="0.5" strokeDasharray="3 14" opacity="0.4"/>)}
-          {/* Equator */}
-          <line x1={0} y1={170} x2={800} y2={170} stroke="var(--border)" strokeWidth="0.8" opacity="0.35"/>
-
-          {/* Continent shapes — refined paths */}
-          {/* North America */}
-          <path d="M58,72 L80,62 L130,58 L185,62 L220,82 L228,105 L232,155 L210,195 L185,215 L155,218 L118,195 L88,165 L65,138 L55,105 Z" fill="var(--bg-3)" opacity="0.9"/>
-          {/* South America */}
-          <path d="M168,242 L205,235 L248,242 L270,258 L272,290 L265,318 L242,338 L210,340 L185,328 L164,305 L158,278 L162,258 Z" fill="var(--bg-3)" opacity="0.85"/>
-          {/* Europe */}
-          <path d="M318,55 L358,50 L398,52 L422,68 L428,90 L420,118 L400,138 L368,145 L335,140 L312,120 L308,90 Z" fill="var(--bg-3)" opacity="0.9"/>
-          {/* Africa */}
-          <path d="M332,148 L398,144 L428,162 L438,192 L432,248 L415,285 L385,305 L355,302 L330,278 L318,245 L318,195 Z" fill="var(--bg-3)" opacity="0.8"/>
-          {/* Asia (main) */}
-          <path d="M432,50 L520,44 L600,48 L660,58 L695,88 L705,130 L698,170 L668,192 L610,200 L540,195 L482,178 L440,148 L422,108 L425,72 Z" fill="var(--bg-3)" opacity="0.9"/>
-          {/* SE Asia */}
-          <path d="M605,178 L648,172 L678,182 L692,205 L685,235 L662,248 L635,242 L612,222 L598,200 Z" fill="var(--bg-3)" opacity="0.8"/>
-          {/* Australia */}
-          <path d="M628,258 L688,252 L730,260 L748,285 L745,318 L722,338 L688,342 L654,332 L630,310 L622,284 Z" fill="var(--bg-3)" opacity="0.9"/>
-
-          {/* Country bubbles */}
-          {COUNTRIES.map(country => {
-            const coord = COUNTRY_COORDS[country];
-            if (!coord || !countryStats[country]) return null;
-            const r = getR(country);
-            const col = colorOf(country);
-            const cnt = countryStats[country];
-            const reg = regionOf(country);
-            const gradId = {"유럽":"wm-eu","북미":"wm-na","아시아":"wm-as","동남아":"wm-se","오세아니아":"wm-oc","남미":"wm-sa"}[reg]||"wm-as";
-            const isHov = hovered === country;
-            const isTop = cnt >= maxCount * 0.75;
+          <rect width="800" height="400" fill="url(#wm-ocean)"/>
+          {[80,160,240,320].map(y=><line key={y} x1={0} y1={y} x2={800} y2={y} stroke="var(--border)" strokeWidth="0.5" strokeDasharray="3 12" opacity="0.28"/>)}
+          {[100,200,300,400,500,600,700].map(x=><line key={x} x1={x} y1={0} x2={x} y2={400} stroke="var(--border)" strokeWidth="0.5" strokeDasharray="3 12" opacity="0.28"/>)}
+          <line x1={0} y1={200} x2={800} y2={200} stroke="var(--border)" strokeWidth="0.8" opacity="0.22"/>
+          {CONTS.map(c => {
+            const col = c.region ? (RCOLS[c.region]||"#636366") : "#636366";
+            const isHov = hovered===c.region && !!c.region;
             return (
-              <g key={country} style={{cursor:"pointer"}} filter={isTop?"url(#wm-glow)":undefined}
-                onMouseEnter={()=>{setTooltip({country,cnt,x:coord.x,y:coord.y});setHovered(country);}}
-                onMouseLeave={()=>{setTooltip(null);setHovered(null);}}>
-                {/* Outer pulse halo */}
-                <circle cx={coord.x} cy={coord.y} r={r+10} fill={col} opacity={isTop?0.08:0.04}/>
-                {/* Hover ring */}
-                {isHov && <circle cx={coord.x} cy={coord.y} r={r+5} fill="none" stroke={col} strokeWidth="1.5" opacity="0.6"/>}
-                {/* Main bubble */}
-                <circle cx={coord.x} cy={coord.y} r={r} fill={`url(#${gradId})`}/>
-                {/* Inner rim */}
-                <circle cx={coord.x} cy={coord.y} r={r} fill="none" stroke="rgba(255,255,255,0.2)" strokeWidth="1"/>
-                {/* Glint highlight */}
-                <circle cx={coord.x - r*0.22} cy={coord.y - r*0.22} r={r*0.32} fill="white" opacity="0.14"/>
-                {/* Flag */}
-                <text x={coord.x} y={coord.y+1} textAnchor="middle" dominantBaseline="middle" fontSize={r>15?12:9} style={{userSelect:"none",pointerEvents:"none"}}>{FLAGS[country]}</text>
-                {/* Count pill */}
-                <rect x={coord.x-9} y={coord.y+r+3} width={18} height={12} rx={6} fill="var(--bg-0)" opacity="0.7"/>
-                <text x={coord.x} y={coord.y+r+11} textAnchor="middle" fontSize="8" fill="var(--t1)" fontFamily="var(--mono)" fontWeight="700" opacity="0.9" style={{pointerEvents:"none"}}>{cnt}</text>
+              <g key={c.id}
+                onMouseEnter={()=>c.region && setHovered(c.region)}
+                onMouseLeave={()=>setHovered(null)}
+                style={{cursor:c.region?"pointer":"default"}}>
+                <path d={c.path} fill={col}
+                  fillOpacity={isHov?0.88:(c.region?0.62:0.32)}
+                  stroke={col} strokeWidth={isHov?1.5:0.8}
+                  strokeOpacity={isHov?0.95:(c.region?0.45:0.18)}
+                  style={{transition:"fill-opacity .2s"}}/>
+                {c.label && (
+                  <text x={c.lblx} y={c.lbly} textAnchor="middle"
+                    fontSize="7" fontWeight="700"
+                    style={{fill:"rgba(255,255,255,0.65)",pointerEvents:"none",letterSpacing:"0.12em"}}>
+                    {c.label}
+                  </text>
+                )}
+              </g>
+            );
+          })}
+          {CONTS.filter(c=>c.cb&&c.region&&regionTotals[c.region]).map(c => {
+            const col = RCOLS[c.region];
+            const bx=c.cb.bx, by=c.cb.by;
+            const bcx=bx+BW/2, bcy=by+BH/2;
+            const total=regionTotals[c.region]||0;
+            const tops=(regionTopC[c.region]||[]).slice(0,2);
+            const pct=Math.round((total/buyers.length)*100);
+            return (
+              <g key={`cb-${c.id}`}>
+                <line x1={bcx} y1={bcy} x2={c.lx} y2={c.ly}
+                  stroke={col} strokeWidth="1" strokeOpacity="0.55" strokeDasharray="5 4"/>
+                <circle cx={c.lx} cy={c.ly} r={7} fill={col} fillOpacity="0.15"/>
+                <circle cx={c.lx} cy={c.ly} r={3.5} fill={col} fillOpacity="0.9"/>
+                <rect x={bx} y={by} width={BW} height={BH} rx={8}
+                  fill="var(--bg-3)" fillOpacity="0.96"
+                  stroke={col} strokeWidth="0.8" strokeOpacity="0.5"
+                  filter="url(#wm-cb-shadow)"/>
+                <rect x={bx+0.5} y={by+0.5} width={BW-1} height={3} rx={8} fill={col} fillOpacity="0.85"/>
+                <text x={bx+9} y={by+18} fontSize="9.5" fontWeight="700"
+                  style={{fill:"var(--t1)"}}>{c.region}</text>
+                <text x={bx+9} y={by+31} fontSize="8.5"
+                  style={{fill:"var(--t2)"}}>바이어 <tspan style={{fill:col,fontWeight:"700"}}>{total}명</tspan>  ·  {pct}%</text>
+                {tops[0] && <text x={bx+9} y={by+44} fontSize="8"
+                  style={{fill:"var(--t3)"}}>{FLAGS[tops[0].country]||"🌍"} {tops[0].country} <tspan style={{fill:"var(--t2)"}}>{tops[0].count}명</tspan></text>}
+                {tops[1] && <text x={bx+9} y={by+56} fontSize="8"
+                  style={{fill:"var(--t3)"}}>{FLAGS[tops[1].country]||"🌍"} {tops[1].country} <tspan style={{fill:"var(--t2)"}}>{tops[1].count}명</tspan></text>}
+                <text x={bx+9} y={by+70} fontSize="7.5"
+                  style={{fill:"var(--t4)"}}>수출 비중 {pct}% 차지</text>
               </g>
             );
           })}
         </svg>
-
-        {/* Glassmorphism tooltip */}
-        {tooltip && (
-          <div style={{position:"absolute",left:`${(tooltip.x/800)*100}%`,top:`${(tooltip.y/340)*100}%`,transform:"translate(-50%,-140%)",pointerEvents:"none",zIndex:20,animation:"scaleIn .15s cubic-bezier(0.05,0.7,0.1,1)"}}>
-            <div style={{padding:"8px 14px",borderRadius:10,background:"var(--glass-bg-strong)",backdropFilter:"blur(24px)",WebkitBackdropFilter:"blur(24px)",border:"1px solid var(--border-h)",boxShadow:"var(--modal-shadow)",whiteSpace:"nowrap"}}>
-              <div style={{fontSize:12,fontWeight:700,color:"var(--t1)",marginBottom:2}}>{FLAGS[tooltip.country]} {tooltip.country}</div>
-              <div style={{fontSize:11,color:"var(--t3)"}}>바이어 <span style={{color:"var(--blue)",fontWeight:700,fontFamily:"var(--mono)"}}>{tooltip.cnt}</span>명</div>
-            </div>
-            <div style={{width:8,height:8,background:"var(--glass-bg-strong)",border:"1px solid var(--border-h)",borderTop:"none",borderLeft:"none",transform:"rotate(45deg)",margin:"-5px auto 0",backdropFilter:"blur(24px)"}}/>
-          </div>
-        )}
       </div>
-
-      {/* Legend */}
       <div style={{display:"flex",flexWrap:"wrap",gap:6,marginTop:12}}>
-        {Object.entries(MAP_REGION_COLORS).map(([region,color])=>(
-          <div key={region} style={{display:"flex",alignItems:"center",gap:5,padding:"3px 10px 3px 7px",borderRadius:20,background:"var(--bg-2)",border:"1px solid var(--border)",fontSize:11,color:"var(--t2)",transition:"all .15s"}}>
+        {Object.entries(RCOLS).map(([region,color])=>(
+          <div key={region}
+            onMouseEnter={()=>setHovered(region)}
+            onMouseLeave={()=>setHovered(null)}
+            style={{display:"flex",alignItems:"center",gap:5,padding:"4px 11px 4px 8px",
+              borderRadius:20,background:hovered===region?"var(--bg-3)":"var(--bg-2)",
+              border:`1px solid ${hovered===region?color:"var(--border)"}`,
+              cursor:"pointer",transition:"all .15s cubic-bezier(0.2,0,0,1)"}}>
             <div style={{width:7,height:7,borderRadius:"50%",background:color,flexShrink:0}}/>
-            <span>{region}</span>
-            {regionTotals[region]>0 && <span style={{color:"var(--t4)",fontFamily:"var(--mono)",fontSize:9,marginLeft:2}}>{regionTotals[region]}</span>}
+            <span style={{fontSize:11,color:"var(--t2)",fontWeight:500}}>{region}</span>
+            <span style={{fontSize:9,color,fontFamily:"var(--mono)",fontWeight:600,marginLeft:2}}>{regionTotals[region]||0}</span>
           </div>
         ))}
       </div>
