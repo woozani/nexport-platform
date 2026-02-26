@@ -62,6 +62,7 @@ input,textarea,select,button{font-family:inherit}
 @keyframes stepLine{from{width:0;opacity:0}to{width:100%;opacity:1}}
 @keyframes staggerUp{from{opacity:0;transform:translateY(28px)}to{opacity:1;transform:translateY(0)}}
 @keyframes shimmerBg{0%{background-position:-400px 0}100%{background-position:400px 0}}
+@media(max-width:768px){.hiw-grid{display:flex!important;flex-direction:column!important;gap:20px!important}.hiw-connector{display:none!important}}
 .fi{animation:fadeIn .4s cubic-bezier(0.2,0,0,1) forwards;opacity:0}
 .fi1{animation-delay:.04s}.fi2{animation-delay:.08s}.fi3{animation-delay:.12s}.fi4{animation-delay:.16s}.fi5{animation-delay:.2s}
 `;
@@ -705,8 +706,51 @@ function CountUp({end, suffix="", duration=1200}) {
   return <span ref={ref}>{val}{suffix}</span>;
 }
 
+// ─────────── MOBILE HELPERS ───────────
+function useIsMobile() {
+  const [isMobile, setIsMobile] = useState(() => window.innerWidth <= 768);
+  useEffect(() => {
+    const handler = () => setIsMobile(window.innerWidth <= 768);
+    window.addEventListener('resize', handler);
+    return () => window.removeEventListener('resize', handler);
+  }, []);
+  return isMobile;
+}
+
+function MobileDesktopBanner({ onClose }) {
+  return (
+    <>
+      <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,.65)",zIndex:299,backdropFilter:"blur(8px)"}} onClick={onClose}/>
+      <div style={{position:"fixed",left:"50%",top:"50%",transform:"translate(-50%,-50%)",
+        zIndex:300,width:"calc(100% - 48px)",maxWidth:360,
+        background:"var(--bg-1)",borderRadius:24,border:"1px solid var(--border)",
+        padding:"40px 28px",textAlign:"center",animation:"scaleIn .3s ease"}}>
+        <div style={{fontSize:48,marginBottom:20}}>💻</div>
+        <h2 style={{fontSize:22,fontWeight:800,color:"var(--t1)",marginBottom:12,letterSpacing:"-.02em"}}>
+          데스크탑에서 이용해 주세요
+        </h2>
+        <p style={{fontSize:14,color:"var(--t2)",lineHeight:1.8,marginBottom:32}}>
+          NEXPORT 플랫폼은 바이어 탐색,<br/>
+          이메일 발굴, AI 매칭 등<br/>
+          데스크탑 환경에 최적화되어 있습니다.<br/>
+          PC에서 접속하시면 최고의<br/>
+          경험을 제공해 드립니다.
+        </p>
+        <div onClick={onClose}
+          style={{padding:"13px 0",borderRadius:12,background:"var(--blue)",
+            color:"#fff",fontSize:15,fontWeight:700,cursor:"pointer",
+            transition:"opacity .15s"}}
+          onMouseEnter={e=>e.currentTarget.style.opacity=".85"}
+          onMouseLeave={e=>e.currentTarget.style.opacity="1"}>
+          ← 돌아가기
+        </div>
+      </div>
+    </>
+  );
+}
+
 // ─────────── LANDING HERO ───────────
-function LandingHero({ onEnter }) {
+function LandingHero({ onEnter, isMobile }) {
   const [visible, setVisible] = useState(false);
   useEffect(() => { setTimeout(() => setVisible(true), 80); }, []);
 
@@ -768,7 +812,7 @@ function LandingHero({ onEnter }) {
 
       {/* ① STICKY NAV */}
       <div style={{position:"sticky",top:0,zIndex:200,background:"var(--glass-bg)",backdropFilter:"blur(20px) saturate(180%)",WebkitBackdropFilter:"blur(20px) saturate(180%)",borderBottom:"1px solid var(--border)",opacity:visible?1:0,transition:"opacity .5s ease"}}>
-        <div style={{maxWidth:1080,margin:"0 auto",padding:"0 28px",display:"flex",alignItems:"center",justifyContent:"space-between",height:60}}>
+        <div style={{maxWidth:1080,margin:"0 auto",padding:isMobile?"0 16px":"0 28px",display:"flex",alignItems:"center",justifyContent:"space-between",height:60}}>
           <div style={{display:"flex",alignItems:"center",gap:10}}>
             <div style={{width:32,height:32,borderRadius:9,background:"linear-gradient(135deg,var(--blue),var(--violet))",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}><Ic.Users s={16}/></div>
             <span style={{fontSize:17,fontWeight:800,letterSpacing:"-.03em",color:"var(--t1)"}}>NEXPORT</span>
@@ -782,7 +826,7 @@ function LandingHero({ onEnter }) {
         </div>
       </div>
 
-      <div style={{maxWidth:1080,margin:"0 auto",padding:"0 28px",position:"relative",zIndex:1}}>
+      <div style={{maxWidth:1080,margin:"0 auto",padding:isMobile?"0 16px":"0 28px",position:"relative",zIndex:1}}>
 
         {/* ② HERO */}
         <div style={{textAlign:"center",padding:"80px 0 48px",opacity:visible?1:0,transform:visible?"none":"translateY(24px)",transition:"all .75s cubic-bezier(0.2,0,0,1) .05s"}}>
@@ -790,22 +834,22 @@ function LandingHero({ onEnter }) {
             <span style={{width:6,height:6,borderRadius:"50%",background:"var(--blue)",display:"inline-block",animation:"pulse 1.5s infinite"}}/>
             AI-Powered Export Platform
           </div>
-          <h1 style={{fontSize:52,fontWeight:900,lineHeight:1.15,letterSpacing:"-.04em",marginBottom:20}}>
+          <h1 style={{fontSize:isMobile?"clamp(30px,8vw,40px)":52,fontWeight:900,lineHeight:1.15,letterSpacing:"-.04em",marginBottom:20}}>
             <span style={{color:"var(--t1)"}}>수출 바이어 발굴,</span><br/>
             <span style={{background:"linear-gradient(120deg,var(--blue),var(--cyan) 60%)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent",backgroundClip:"text"}}>AI로 10배 빠르게</span>
           </h1>
-          <p style={{fontSize:17,color:"var(--t2)",maxWidth:560,margin:"0 auto 36px",lineHeight:1.75}}>
+          <p style={{fontSize:isMobile?14:17,color:"var(--t2)",maxWidth:560,margin:"0 auto 36px",lineHeight:1.75}}>
             바이어 발굴부터 이메일 확보, AI 매칭까지.<br/>수출의 모든 과정을 하나의 플랫폼에서.
           </p>
 
           {/* 타이핑 검색창 */}
-          <div style={{maxWidth:580,margin:"0 auto 32px",display:"flex",alignItems:"center",gap:0,borderRadius:14,border:"1px solid var(--border-h)",background:"var(--bg-2)",overflow:"hidden",boxShadow:"var(--card-shadow)"}}>
+          <div style={{maxWidth:580,margin:"0 auto 32px",display:"flex",alignItems:"center",flexDirection:isMobile?"column":"row",gap:0,borderRadius:14,border:"1px solid var(--border-h)",background:"var(--bg-2)",overflow:"hidden",boxShadow:"var(--card-shadow)"}}>
             <div style={{padding:"0 16px",color:"var(--t3)",display:"flex",alignItems:"center"}}><Ic.Search s={16}/></div>
             <div style={{flex:1,padding:"14px 0",fontSize:15,color:"var(--t1)",textAlign:"left",fontFamily:"var(--font)",minHeight:22}}>
               {typed}
               <span style={{display:"inline-block",width:2,height:"1em",background:"var(--blue)",marginLeft:1,verticalAlign:"text-bottom",animation:"typingCursor 1s step-end infinite"}}/>
             </div>
-            <div onClick={onEnter} style={{padding:"10px 20px",margin:6,borderRadius:9,background:"var(--blue)",color:"#fff",fontSize:13,fontWeight:700,cursor:"pointer",whiteSpace:"nowrap",transition:"all .18s",flexShrink:0}}
+            <div onClick={onEnter} style={{padding:"10px 20px",margin:6,borderRadius:9,background:"var(--blue)",color:"#fff",fontSize:13,fontWeight:700,cursor:"pointer",whiteSpace:"nowrap",transition:"all .18s",flexShrink:0,width:isMobile?"calc(100% - 12px)":undefined,textAlign:isMobile?"center":undefined}}
               onMouseEnter={e=>e.currentTarget.style.opacity=".88"} onMouseLeave={e=>e.currentTarget.style.opacity="1"}>바이어 찾기 →</div>
           </div>
 
@@ -821,8 +865,8 @@ function LandingHero({ onEnter }) {
           </div>
         </div>
 
-        {/* ③ PRODUCT PREVIEW CARD */}
-        <div style={{display:"flex",justifyContent:"center",padding:"0 0 72px",opacity:visible?1:0,transform:visible?"none":"translateY(30px)",transition:"all .9s cubic-bezier(0.2,0,0,1) .2s"}}>
+        {/* ③ PRODUCT PREVIEW CARD — 데스크탑 전용 */}
+        {!isMobile && <div style={{display:"flex",justifyContent:"center",padding:"0 0 72px",opacity:visible?1:0,transform:visible?"none":"translateY(30px)",transition:"all .9s cubic-bezier(0.2,0,0,1) .2s"}}>
           <div style={{width:"100%",maxWidth:720,borderRadius:16,overflow:"hidden",boxShadow:"var(--modal-shadow)",border:"1px solid var(--border)",background:"var(--bg-1)",animation:"floatCard 5s ease-in-out infinite",position:"relative"}}>
             {/* 가짜 윈도우 헤더 */}
             <div style={{padding:"10px 16px",background:"var(--bg-2)",borderBottom:"1px solid var(--border)",display:"flex",alignItems:"center",gap:8}}>
@@ -857,7 +901,7 @@ function LandingHero({ onEnter }) {
             {/* 하단 fade overlay */}
             <div style={{position:"absolute",bottom:0,left:0,right:0,height:60,background:"linear-gradient(transparent,var(--bg-1))",pointerEvents:"none"}}/>
           </div>
-        </div>
+        </div>}
 
         {/* ④ HOW IT WORKS */}
         <div ref={howRef} style={{padding:"0 0 80px"}}>
@@ -866,7 +910,7 @@ function LandingHero({ onEnter }) {
             <h2 style={{fontSize:32,fontWeight:800,letterSpacing:"-.03em",color:"var(--t1)"}}>NEXPORT로 수출 바이어를 찾는 방법</h2>
             <p style={{fontSize:15,color:"var(--t3)",marginTop:10}}>단 3단계로 검증된 글로벌 바이어와 연결하세요</p>
           </div>
-          <div style={{display:"grid",gridTemplateColumns:"1fr auto 1fr auto 1fr",gap:0,alignItems:"start"}}>
+          <div className="hiw-grid" style={{display:"grid",gridTemplateColumns:"1fr auto 1fr auto 1fr",gap:0,alignItems:"start"}}>
             {steps.map((s,i) => (
               <>
                 <div key={`step-${i}`} style={{textAlign:"center",padding:"0 12px",opacity:howInView?1:0,animation:howInView?`staggerUp .6s cubic-bezier(0.2,0,0,1) ${i*200}ms both`:"none"}}>
@@ -878,7 +922,7 @@ function LandingHero({ onEnter }) {
                   <div style={{fontSize:13,color:"var(--t3)",lineHeight:1.65}}>{s.desc}</div>
                 </div>
                 {i < steps.length-1 && (
-                  <div key={`line-${i}`} style={{display:"flex",alignItems:"center",paddingTop:28}}>
+                  <div key={`line-${i}`} className="hiw-connector" style={{display:"flex",alignItems:"center",paddingTop:28}}>
                     <div style={{height:2,width:howInView?60:0,background:`linear-gradient(90deg,${steps[i].color},${steps[i+1].color})`,borderRadius:2,transition:`width .8s cubic-bezier(0.2,0,0,1) ${i*200+300}ms`,opacity:howInView?1:0}}/>
                     <div style={{color:"var(--t4)",fontSize:16,marginLeft:4,opacity:howInView?1:0,transition:`opacity .4s ${i*200+400}ms`}}>→</div>
                   </div>
@@ -890,24 +934,53 @@ function LandingHero({ onEnter }) {
 
         {/* ⑤ STATS BAR */}
         <div style={{margin:"0 0 80px",padding:"36px 0",borderRadius:16,background:"var(--bg-2)",border:"1px solid var(--border)"}}>
-          <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:0}}>
+          <div style={{display:"grid",gridTemplateColumns:isMobile?"repeat(2,1fr)":"repeat(4,1fr)",gap:0}}>
             {[
               {end:60,suffix:"개국+",label:"글로벌 바이어 DB",color:"var(--blue)"},
               {end:98,suffix:"%",label:"이메일 정확도",color:"var(--green)"},
               {end:5,suffix:"분 내",label:"바이어 발굴 시간",color:"var(--amber)"},
               {end:15,suffix:"개국",label:"국가 커버리지",color:"var(--cyan)"},
             ].map((s,i)=>(
-              <div key={i} style={{textAlign:"center",padding:"8px 16px",borderRight:i<3?"1px solid var(--border)":"none"}}>
-                <div style={{fontSize:36,fontWeight:900,fontFamily:"var(--mono)",color:s.color,letterSpacing:"-.02em",lineHeight:1.1}}>
+              <div key={i} style={{textAlign:"center",padding:"16px 12px",
+                borderRight:isMobile?(i%2===0?"1px solid var(--border)":"none"):(i<3?"1px solid var(--border)":"none"),
+                borderBottom:isMobile&&i<2?"1px solid var(--border)":"none"}}>
+                <div style={{fontSize:isMobile?28:36,fontWeight:900,fontFamily:"var(--mono)",color:s.color,letterSpacing:"-.02em",lineHeight:1.1}}>
                   <CountUp end={s.end} suffix={s.suffix} duration={1400}/>
                 </div>
-                <div style={{fontSize:12,color:"var(--t3)",marginTop:6,fontWeight:500}}>{s.label}</div>
+                <div style={{fontSize:11,color:"var(--t3)",marginTop:6,fontWeight:500}}>{s.label}</div>
               </div>
             ))}
           </div>
         </div>
 
-        {/* ⑥ FEATURES GRID */}
+        {/* ⑤-M MISSION / VISION — 모바일 전용 */}
+        {isMobile && (
+          <div style={{padding:"0 0 60px",textAlign:"center"}}>
+            <div style={{fontSize:11,fontWeight:700,color:"var(--blue)",textTransform:"uppercase",letterSpacing:".1em",marginBottom:28}}>
+              Our Purpose
+            </div>
+            {[
+              { label:"Mission",
+                text:'"한국 제조업체가 세계 어디서나 검증된 바이어를 5분 안에 찾을 수 있는 세상"' },
+              { label:"Vision",
+                text:'"AI로 수출 장벽을 없애, 모든 중소기업이 글로벌 플레이어가 되는 미래"' }
+            ].map((item,i)=>(
+              <div key={i} style={{marginBottom:i===0?16:0,padding:"28px 22px",
+                borderRadius:16,background:"var(--bg-2)",border:"1px solid var(--border)",
+                textAlign:"left",animation:howInView?`staggerUp .5s ease ${i*150}ms both`:"none"}}>
+                <div style={{fontSize:10,fontWeight:700,color:"var(--t3)",textTransform:"uppercase",
+                  letterSpacing:".1em",marginBottom:10}}>{item.label}</div>
+                <p style={{fontSize:16,fontWeight:600,color:"var(--t1)",
+                  lineHeight:1.75,fontFamily:"var(--serif)",fontStyle:"italic",margin:0}}>
+                  {item.text}
+                </p>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* ⑥ FEATURES GRID — 데스크탑 전용 */}
+        {!isMobile &&
         <div ref={featRef} style={{padding:"0 0 80px"}}>
           <div style={{textAlign:"center",marginBottom:40,opacity:featInView?1:0,transform:featInView?"none":"translateY(16px)",transition:"all .6s cubic-bezier(0.2,0,0,1)"}}>
             <div style={{fontSize:11,fontWeight:700,color:"var(--blue)",textTransform:"uppercase",letterSpacing:".12em",marginBottom:10}}>Features</div>
@@ -925,15 +998,15 @@ function LandingHero({ onEnter }) {
               </div>
             ))}
           </div>
-        </div>
+        </div>}
 
         {/* ⑦ BOTTOM CTA */}
-        <div style={{margin:"0 0 60px",padding:"56px 40px",borderRadius:20,background:"linear-gradient(135deg,rgba(10,132,255,.09),rgba(191,90,242,.06))",border:"1px solid rgba(10,132,255,.18)",textAlign:"center",position:"relative",overflow:"hidden"}}>
+        <div style={{margin:"0 0 60px",padding:isMobile?"40px 20px":"56px 40px",borderRadius:20,background:"linear-gradient(135deg,rgba(10,132,255,.09),rgba(191,90,242,.06))",border:"1px solid rgba(10,132,255,.18)",textAlign:"center",position:"relative",overflow:"hidden"}}>
           <div style={{position:"absolute",top:"50%",left:"50%",transform:"translate(-50%,-50%)",width:"60%",height:"60%",borderRadius:"50%",background:"radial-gradient(circle,rgba(10,132,255,.07) 0%,transparent 70%)",pointerEvents:"none"}}/>
           <div style={{position:"relative"}}>
-            <h2 style={{fontSize:36,fontWeight:900,letterSpacing:"-.03em",color:"var(--t1)",marginBottom:12}}>지금 NEXPORT를 시작하세요</h2>
-            <p style={{fontSize:16,color:"var(--t2)",marginBottom:36,lineHeight:1.7}}>바이어 발굴에 소비하던 시간을 계약에 투자하세요.<br/>AI가 검증된 글로벌 바이어를 5분 내에 찾아드립니다.</p>
-            <div onClick={onEnter} style={{display:"inline-block",padding:"15px 44px",borderRadius:12,background:"var(--blue)",color:"#fff",fontSize:16,fontWeight:700,cursor:"pointer",animation:"glowPulse 2.5s ease-in-out infinite",transition:"transform .2s"}}
+            <h2 style={{fontSize:isMobile?26:36,fontWeight:900,letterSpacing:"-.03em",color:"var(--t1)",marginBottom:12}}>지금 NEXPORT를 시작하세요</h2>
+            <p style={{fontSize:isMobile?14:16,color:"var(--t2)",marginBottom:32,lineHeight:1.7}}>바이어 발굴에 소비하던 시간을 계약에 투자하세요.<br/>AI가 검증된 글로벌 바이어를 5분 내에 찾아드립니다.</p>
+            <div onClick={onEnter} style={{display:"inline-block",padding:isMobile?"14px 32px":"15px 44px",borderRadius:12,background:"var(--blue)",color:"#fff",fontSize:isMobile?14:16,fontWeight:700,cursor:"pointer",animation:"glowPulse 2.5s ease-in-out infinite",transition:"transform .2s"}}
               onMouseEnter={e=>e.currentTarget.style.transform="translateY(-3px)"} onMouseLeave={e=>e.currentTarget.style.transform="none"}>
               무료로 시작하기 →
             </div>
@@ -2692,6 +2765,8 @@ export default function App() {
   const [showAssistant, setShowAssistant] = useState(false);
   const [emailBuyer, setEmailBuyer] = useState(null);
   const [showLanding, setShowLanding] = useState(true);
+  const isMobile = useIsMobile();
+  const [showMobileBanner, setShowMobileBanner] = useState(false);
   const [tab, setTab] = useState("전체");
   const [sort, setSort] = useState({field:"score",asc:false});
   const [selected, setSelected] = useState(new Set());
@@ -2883,9 +2958,13 @@ export default function App() {
   return (
     <>
       <style>{CSS}</style>
-      {showLanding && <LandingHero onEnter={()=>setShowLanding(false)} />}
+      {showLanding && <LandingHero
+        onEnter={() => isMobile ? setShowMobileBanner(true) : setShowLanding(false)}
+        isMobile={isMobile}
+      />}
+      {showMobileBanner && <MobileDesktopBanner onClose={() => setShowMobileBanner(false)} />}
 
-      {!showLanding && (<>
+      {!showLanding && !isMobile && (<>
       {/* App-level Toast */}
       {toast && (
         <div style={{position:"fixed",top:20,right:20,zIndex:300,padding:"12px 20px",borderRadius:10,
