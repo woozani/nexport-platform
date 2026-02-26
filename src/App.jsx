@@ -1815,55 +1815,135 @@ const COUNTRY_COORDS = {
 const MAP_REGION_COLORS = {"유럽":"#0A84FF","북미":"#32ADE6","아시아":"#30D158","동남아":"#FF9F0A","오세아니아":"#BF5AF2","남미":"#FF453A"};
 
 function WorldMapView({ buyers }) {
-  const [tooltip, setTooltip] = useState(null);
+  const [hovered, setHovered] = useState(null);
   const countryStats = {};
   buyers.forEach(b => { countryStats[b.country] = (countryStats[b.country]||0)+1; });
-  const maxCount = Math.max(1,...Object.values(countryStats));
-  const getR = (c) => 8 + ((countryStats[c]||0)/maxCount)*20;
   const regionOf = (c) => REGIONS[c] || "기타";
-  const colorOf = (c) => MAP_REGION_COLORS[regionOf(c)] || "#5C6078";
+  const regionTotals = {};
+  const regionTopC = {};
+  Object.entries(countryStats).forEach(([c,n]) => {
+    const r = regionOf(c);
+    regionTotals[r] = (regionTotals[r]||0)+n;
+    if (!regionTopC[r]) regionTopC[r] = [];
+    regionTopC[r].push({country:c,count:n});
+  });
+  Object.keys(regionTopC).forEach(r => regionTopC[r].sort((a,b)=>b.count-a.count));
+  const RCOLS = {"북미":"#32ADE6","유럽":"#0A84FF","아시아":"#30D158","동남아":"#FF9F0A","오세아니아":"#BF5AF2","남미":"#FF453A"};
+  const BW=142, BH=78;
+  const CONTS = [
+    {id:"na",region:"북미",
+     path:"M88,35 L118,28 L148,25 L175,32 L198,38 L225,48 L248,72 L258,98 L252,132 L235,162 L205,188 L175,208 L148,215 L118,205 L92,182 L68,155 L52,122 L48,88 L58,62 L72,45Z",
+     lblx:152,lbly:122,label:"NORTH AMERICA",
+     cb:{bx:5,by:5},lx:168,ly:130},
+    {id:"sa",region:"남미",
+     path:"M148,252 L188,242 L232,248 L258,268 L270,298 L268,335 L252,368 L225,385 L190,390 L160,372 L143,342 L140,305 L146,275Z",
+     lblx:200,lbly:315,label:"S. AMERICA",
+     cb:{bx:5,by:258},lx:192,ly:308},
+    {id:"eu",region:"유럽",
+     path:"M398,42 L435,38 L468,42 L495,55 L508,72 L505,95 L488,112 L460,122 L432,118 L408,102 L395,78Z",
+     lblx:448,lbly:80,label:"EUROPE",
+     cb:{bx:312,by:5},lx:448,ly:78},
+    {id:"af",region:null,
+     path:"M408,148 L475,142 L518,152 L542,175 L548,218 L540,268 L518,312 L488,348 L452,358 L415,342 L395,302 L388,258 L392,198Z",
+     lblx:467,lbly:252,label:"AFRICA"},
+    {id:"as",region:"아시아",
+     path:"M438,48 L520,42 L605,46 L665,56 L698,88 L708,128 L698,168 L668,192 L608,198 L545,192 L485,178 L445,148 L425,112 L428,72Z",
+     lblx:572,lbly:120,label:"ASIA",
+     cb:{bx:648,by:5},lx:608,ly:112},
+    {id:"sea",region:"동남아",
+     path:"M598,178 L645,172 L678,182 L692,205 L685,232 L660,245 L632,238 L610,218 L598,198Z",
+     lblx:644,lbly:210,label:"SE ASIA",
+     cb:{bx:648,by:175},lx:648,ly:208},
+    {id:"oc",region:"오세아니아",
+     path:"M628,258 L688,252 L730,260 L748,285 L745,318 L722,338 L688,342 L654,332 L630,310 L622,284Z",
+     lblx:686,lbly:300,label:"OCEANIA",
+     cb:{bx:648,by:300},lx:688,ly:298},
+  ];
   return (
     <div style={{position:"relative",width:"100%"}}>
-      <svg viewBox="0 0 800 360" style={{width:"100%",height:"auto",background:"var(--bg-3)",borderRadius:10,display:"block"}} preserveAspectRatio="xMidYMid meet">
-        {/* Grid lines */}
-        {[80,160,240,320].map(y=><line key={y} x1={0} y1={y} x2={800} y2={y} stroke="var(--border)" strokeWidth="0.6" strokeDasharray="4 8"/>)}
-        {[100,200,300,400,500,600,700].map(x=><line key={x} x1={x} y1={0} x2={x} y2={360} stroke="var(--border)" strokeWidth="0.6" strokeDasharray="4 8"/>)}
-        {/* Continent shapes (simplified decorative) */}
-        <ellipse cx={170} cy={150} rx={95} ry={70} fill="var(--bg-2)" opacity="0.7"/>
-        <ellipse cx={240} cy={290} rx={60} ry={55} fill="var(--bg-2)" opacity="0.7"/>
-        <ellipse cx={385} cy={140} rx={65} ry={55} fill="var(--bg-2)" opacity="0.7"/>
-        <ellipse cx={500} cy={160} rx={120} ry={60} fill="var(--bg-2)" opacity="0.7"/>
-        <ellipse cx={645} cy={175} rx={55} ry={45} fill="var(--bg-2)" opacity="0.7"/>
-        <ellipse cx={670} cy={310} rx={50} ry={35} fill="var(--bg-2)" opacity="0.7"/>
-        {/* Bubbles */}
-        {COUNTRIES.map(country => {
-          const coord = COUNTRY_COORDS[country];
-          if (!coord || !countryStats[country]) return null;
-          const r = getR(country);
-          const col = colorOf(country);
-          const cnt = countryStats[country];
-          return (
-            <g key={country} style={{cursor:"pointer"}}
-              onMouseEnter={()=>setTooltip({country,cnt,x:coord.x,y:coord.y})}
-              onMouseLeave={()=>setTooltip(null)}>
-              <circle cx={coord.x} cy={coord.y} r={r+7} fill={col} opacity="0.1"/>
-              <circle cx={coord.x} cy={coord.y} r={r} fill={col} opacity="0.82"/>
-              <text x={coord.x} y={coord.y+1} textAnchor="middle" dominantBaseline="middle" fontSize={r>15?13:10} style={{userSelect:"none",pointerEvents:"none"}}>{FLAGS[country]}</text>
-              <text x={coord.x} y={coord.y+r+11} textAnchor="middle" fontSize="9" fill="#9498A8" fontFamily="'JetBrains Mono',monospace" fontWeight="600" style={{pointerEvents:"none"}}>{cnt}</text>
-            </g>
-          );
-        })}
-      </svg>
-      {tooltip && (
-        <div style={{position:"absolute",left:`${(tooltip.x/800)*100}%`,top:`${(tooltip.y/360)*100}%`,transform:"translate(-50%,-120%)",pointerEvents:"none",padding:"6px 12px",borderRadius:7,background:"var(--bg-4)",border:"1px solid var(--border-h)",fontSize:11,color:"var(--t1)",whiteSpace:"nowrap",zIndex:10,animation:"scaleIn .15s ease",boxShadow:"0 4px 12px rgba(0,0,0,.4)"}}>
-          <span style={{fontWeight:700}}>{FLAGS[tooltip.country]} {tooltip.country}</span>
-          <span style={{color:"var(--t3)",marginLeft:8}}>{tooltip.cnt}명 바이어</span>
-        </div>
-      )}
-      <div style={{display:"flex",flexWrap:"wrap",gap:12,marginTop:14}}>
-        {Object.entries(MAP_REGION_COLORS).map(([region,color])=>(
-          <div key={region} style={{display:"flex",alignItems:"center",gap:5,fontSize:11,color:"var(--t3)"}}>
-            <div style={{width:8,height:8,borderRadius:"50%",background:color}}/>{region}
+      <div style={{borderRadius:14,overflow:"hidden",border:"1px solid var(--border)",boxShadow:"var(--card-shadow)"}}>
+        <svg viewBox="0 0 800 400" style={{width:"100%",height:"auto",display:"block"}} preserveAspectRatio="xMidYMid meet">
+          <defs>
+            <radialGradient id="wm-ocean" cx="50%" cy="45%" r="75%">
+              <stop offset="0%" stopColor="var(--bg-2)"/>
+              <stop offset="100%" stopColor="var(--bg-1)"/>
+            </radialGradient>
+            <filter id="wm-cb-shadow" x="-25%" y="-25%" width="150%" height="150%">
+              <feDropShadow dx="0" dy="3" stdDeviation="5" floodColor="#000" floodOpacity="0.55"/>
+            </filter>
+          </defs>
+          <rect width="800" height="400" fill="url(#wm-ocean)"/>
+          {[80,160,240,320].map(y=><line key={y} x1={0} y1={y} x2={800} y2={y} stroke="var(--border)" strokeWidth="0.5" strokeDasharray="3 12" opacity="0.28"/>)}
+          {[100,200,300,400,500,600,700].map(x=><line key={x} x1={x} y1={0} x2={x} y2={400} stroke="var(--border)" strokeWidth="0.5" strokeDasharray="3 12" opacity="0.28"/>)}
+          <line x1={0} y1={200} x2={800} y2={200} stroke="var(--border)" strokeWidth="0.8" opacity="0.22"/>
+          {CONTS.map(c => {
+            const col = c.region ? (RCOLS[c.region]||"#636366") : "#636366";
+            const isHov = hovered===c.region && !!c.region;
+            return (
+              <g key={c.id}
+                onMouseEnter={()=>c.region && setHovered(c.region)}
+                onMouseLeave={()=>setHovered(null)}
+                style={{cursor:c.region?"pointer":"default"}}>
+                <path d={c.path} fill={col}
+                  fillOpacity={isHov?0.88:(c.region?0.62:0.32)}
+                  stroke={col} strokeWidth={isHov?1.5:0.8}
+                  strokeOpacity={isHov?0.95:(c.region?0.45:0.18)}
+                  style={{transition:"fill-opacity .2s"}}/>
+                {c.label && (
+                  <text x={c.lblx} y={c.lbly} textAnchor="middle"
+                    fontSize="7" fontWeight="700"
+                    style={{fill:"rgba(255,255,255,0.65)",pointerEvents:"none",letterSpacing:"0.12em"}}>
+                    {c.label}
+                  </text>
+                )}
+              </g>
+            );
+          })}
+          {CONTS.filter(c=>c.cb&&c.region&&regionTotals[c.region]).map(c => {
+            const col = RCOLS[c.region];
+            const bx=c.cb.bx, by=c.cb.by;
+            const bcx=bx+BW/2, bcy=by+BH/2;
+            const total=regionTotals[c.region]||0;
+            const tops=(regionTopC[c.region]||[]).slice(0,2);
+            const pct=Math.round((total/buyers.length)*100);
+            return (
+              <g key={`cb-${c.id}`}>
+                <line x1={bcx} y1={bcy} x2={c.lx} y2={c.ly}
+                  stroke={col} strokeWidth="1" strokeOpacity="0.55" strokeDasharray="5 4"/>
+                <circle cx={c.lx} cy={c.ly} r={7} fill={col} fillOpacity="0.15"/>
+                <circle cx={c.lx} cy={c.ly} r={3.5} fill={col} fillOpacity="0.9"/>
+                <rect x={bx} y={by} width={BW} height={BH} rx={8}
+                  fill="var(--bg-3)" fillOpacity="0.96"
+                  stroke={col} strokeWidth="0.8" strokeOpacity="0.5"
+                  filter="url(#wm-cb-shadow)"/>
+                <rect x={bx+0.5} y={by+0.5} width={BW-1} height={3} rx={8} fill={col} fillOpacity="0.85"/>
+                <text x={bx+9} y={by+18} fontSize="9.5" fontWeight="700"
+                  style={{fill:"var(--t1)"}}>{c.region}</text>
+                <text x={bx+9} y={by+31} fontSize="8.5"
+                  style={{fill:"var(--t2)"}}>바이어 <tspan style={{fill:col,fontWeight:"700"}}>{total}명</tspan>  ·  {pct}%</text>
+                {tops[0] && <text x={bx+9} y={by+44} fontSize="8"
+                  style={{fill:"var(--t3)"}}>{FLAGS[tops[0].country]||"🌍"} {tops[0].country} <tspan style={{fill:"var(--t2)"}}>{tops[0].count}명</tspan></text>}
+                {tops[1] && <text x={bx+9} y={by+56} fontSize="8"
+                  style={{fill:"var(--t3)"}}>{FLAGS[tops[1].country]||"🌍"} {tops[1].country} <tspan style={{fill:"var(--t2)"}}>{tops[1].count}명</tspan></text>}
+                <text x={bx+9} y={by+70} fontSize="7.5"
+                  style={{fill:"var(--t4)"}}>수출 비중 {pct}% 차지</text>
+              </g>
+            );
+          })}
+        </svg>
+      </div>
+      <div style={{display:"flex",flexWrap:"wrap",gap:6,marginTop:12}}>
+        {Object.entries(RCOLS).map(([region,color])=>(
+          <div key={region}
+            onMouseEnter={()=>setHovered(region)}
+            onMouseLeave={()=>setHovered(null)}
+            style={{display:"flex",alignItems:"center",gap:5,padding:"4px 11px 4px 8px",
+              borderRadius:20,background:hovered===region?"var(--bg-3)":"var(--bg-2)",
+              border:`1px solid ${hovered===region?color:"var(--border)"}`,
+              cursor:"pointer",transition:"all .15s cubic-bezier(0.2,0,0,1)"}}>
+            <div style={{width:7,height:7,borderRadius:"50%",background:color,flexShrink:0}}/>
+            <span style={{fontSize:11,color:"var(--t2)",fontWeight:500}}>{region}</span>
+            <span style={{fontSize:9,color,fontFamily:"var(--mono)",fontWeight:600,marginLeft:2}}>{regionTotals[region]||0}</span>
           </div>
         ))}
       </div>
@@ -2256,9 +2336,16 @@ function EmailFinderView() {
         if (!domain.trim()||!firstName.trim()||!lastName.trim()) { setError("도메인, 이름, 성을 모두 입력하세요"); setLoading(false); return; }
         url = `/api/hunter?action=email-finder&domain=${encodeURIComponent(domain.trim())}&first_name=${encodeURIComponent(firstName.trim())}&last_name=${encodeURIComponent(lastName.trim())}`;
       }
-      const res = await fetch(url); const data = await res.json();
-      if (data.error) setError(data.error); else setResults(data.data);
-    } catch(e) { setError(e instanceof SyntaxError ? "응답 파싱 오류. 잠시 후 다시 시도하세요" : "네트워크 오류. 연결 상태를 확인하세요"); }
+      const res = await fetch(url);
+      const text = await res.text();
+      let data;
+      try { data = JSON.parse(text); } catch(pe) {
+        setError("API 서버가 응답하지 않습니다. 배포 환경에서는 Vercel HUNTER_API_KEY 환경변수를, 로컬에서는 .env 파일에 HUNTER_API_KEY를 설정하세요.");
+        setLoading(false); return;
+      }
+      if (data.error) setError(data.error);
+      else { setResults(data.data); if (data.data?._isMock) setError("⚠️ HUNTER_API_KEY 미설정 — 데모 데이터를 표시 중입니다."); }
+    } catch(e) { setError("네트워크 오류. 연결 상태를 확인하세요: " + e.message); }
     setLoading(false);
   };
 
@@ -2600,6 +2687,7 @@ export default function App() {
       <style>{CSS}</style>
       {showLanding && <LandingHero onEnter={()=>setShowLanding(false)} />}
 
+      {!showLanding && (<>
       {/* App-level Toast */}
       {toast && (
         <div style={{position:"fixed",top:20,right:20,zIndex:300,padding:"12px 20px",borderRadius:10,
@@ -2975,6 +3063,7 @@ fi fi${Math.min(i+1,5)}`}
           </div>
         </div>
       )}
+      </>)}
     </>
   );
 }
