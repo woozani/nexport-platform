@@ -109,6 +109,36 @@ const Ic = {
   Moon:({s=14})=><svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>,
 };
 
+// ─────────── NEXPORT LOGO ───────────
+function NexportLogo({ iconSize = 28, textSize = 17 }) {
+  return (
+    <div style={{display:"flex",alignItems:"center",gap:8}}>
+      {/* N + >> 아이콘 */}
+      <svg width={iconSize} height={Math.round(iconSize*0.7)} viewBox="0 0 40 28" fill="none">
+        <defs>
+          <linearGradient id="nxLogoGrad" x1="0" y1="0" x2="40" y2="0" gradientUnits="userSpaceOnUse">
+            <stop offset="0%" stopColor="#0A2463"/>
+            <stop offset="100%" stopColor="#3E92CC"/>
+          </linearGradient>
+        </defs>
+        {/* N 레터 */}
+        <path d="M2 26V2L18 24V2" stroke="url(#nxLogoGrad)" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"/>
+        {/* 첫 번째 > */}
+        <path d="M23 7L31 14L23 21" stroke="#3E92CC" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
+        {/* 두 번째 > */}
+        <path d="M30 7L38 14L30 21" stroke="#3E92CC" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
+      </svg>
+      {/* NEXPORT 텍스트 그라데이션 */}
+      <span style={{
+        fontSize:textSize, fontWeight:700, letterSpacing:".05em",
+        background:"linear-gradient(90deg,#0A2463 0%,#3E92CC 100%)",
+        WebkitBackgroundClip:"text", WebkitTextFillColor:"transparent",
+        backgroundClip:"text", lineHeight:1,
+      }}>NEXPORT</span>
+    </div>
+  );
+}
+
 // ─────────── DATA ───────────
 const COUNTRIES = ["독일","미국","일본","베트남","스웨덴","네덜란드","영국","호주","캐나다","프랑스","싱가포르","태국","인도","브라질","멕시코"];
 const FLAGS = {"독일":"🇩🇪","미국":"🇺🇸","일본":"🇯🇵","베트남":"🇻🇳","스웨덴":"🇸🇪","네덜란드":"🇳🇱","영국":"🇬🇧","호주":"🇦🇺","캐나다":"🇨🇦","프랑스":"🇫🇷","싱가포르":"🇸🇬","태국":"🇹🇭","인도":"🇮🇳","브라질":"🇧🇷","멕시코":"🇲🇽"};
@@ -814,8 +844,7 @@ function LandingHero({ onEnter, isMobile }) {
       <div style={{position:"sticky",top:0,zIndex:200,background:"var(--glass-bg)",backdropFilter:"blur(20px) saturate(180%)",WebkitBackdropFilter:"blur(20px) saturate(180%)",borderBottom:"1px solid var(--border)",opacity:visible?1:0,transition:"opacity .5s ease"}}>
         <div style={{maxWidth:1080,margin:"0 auto",padding:isMobile?"0 16px":"0 28px",display:"flex",alignItems:"center",justifyContent:"space-between",height:60}}>
           <div style={{display:"flex",alignItems:"center",gap:10}}>
-            <div style={{width:32,height:32,borderRadius:9,background:"linear-gradient(135deg,var(--blue),var(--violet))",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}><Ic.Users s={16}/></div>
-            <span style={{fontSize:17,fontWeight:800,letterSpacing:"-.03em",color:"var(--t1)"}}>NEXPORT</span>
+            <NexportLogo iconSize={isMobile?24:28} textSize={isMobile?15:17}/>
           </div>
           <div style={{display:"flex",alignItems:"center",gap:8}}>
             <div onClick={onEnter} style={{padding:"7px 18px",borderRadius:8,border:"1px solid var(--border)",color:"var(--t2)",fontSize:12,fontWeight:600,cursor:"pointer",transition:"all .18s"}}
