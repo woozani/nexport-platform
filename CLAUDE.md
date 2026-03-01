@@ -51,10 +51,11 @@ nexport-deploy/
 ```
 1. CSS 문자열 정의        — 테마 변수, keyframes, @media
 2. Ic 아이콘 라이브러리   — SVG 아이콘 객체 (Ic.Search, Ic.Mail, ...)
-3. 상수 / Mock 데이터     — COUNTRIES, INDUSTRIES, generateBuyers()
-4. 유틸 훅               — useInView, useIsMobile, CountUp
-5. 컴포넌트              — MobileDesktopBanner, LandingHero, ...
-6. App()                 — 메인 컴포넌트 (라우팅, 상태 관리)
+3. NexportLogo 컴포넌트  — N+>> SVG (linearGradient id: nxLogoGrad, #0A2463→#3E92CC)
+4. 상수 / Mock 데이터     — COUNTRIES, INDUSTRIES, generateBuyers()
+5. 유틸 훅               — useInView, useIsMobile, CountUp
+6. 컴포넌트              — MobileDesktopBanner, LandingHero, ...
+7. App()                 — 메인 컴포넌트 (라우팅, 상태 관리)
 ```
 
 > ⚠️ 단일 파일 ~3,400줄 — 수정 전 반드시 `Grep`으로 위치 먼저 파악할 것
