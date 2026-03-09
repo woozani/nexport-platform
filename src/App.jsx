@@ -712,26 +712,38 @@ function useInView(threshold=0.15) {
   const ref = useRef(null);
   const [inView, setInView] = useState(false);
   useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    // 마운트 직후 이미 뷰포트 안에 있으면 즉시 트리거 (IntersectionObserver는 비동기라 늦을 수 있음)
+    const rect = el.getBoundingClientRect();
+    if (rect.top < window.innerHeight && rect.bottom > 0) {
+      setInView(true);
+      return;
+    }
     const obs = new IntersectionObserver(([e]) => { if(e.isIntersecting) setInView(true); }, {threshold});
-    if(ref.current) obs.observe(ref.current);
+    obs.observe(el);
     return () => obs.disconnect();
   }, []);
   return [ref, inView];
 }
 
 function CountUp({end, suffix="", duration=1200}) {
-  const [ref, inView] = useInView(0.3);
+  const [ref, inView] = useInView(0.1); // threshold 낮춤: 조금만 보여도 즉시 시작
   const [val, setVal] = useState(0);
+  const hasRun = useRef(false); // 중복 실행 방지
   useEffect(() => {
-    if(!inView) return;
+    if(!inView || hasRun.current) return;
+    hasRun.current = true;
+    let rafId;
     const start = performance.now();
     const tick = (now) => {
       const p = Math.min((now - start) / duration, 1);
       setVal(Math.floor(p * end));
-      if(p < 1) requestAnimationFrame(tick);
+      if(p < 1) rafId = requestAnimationFrame(tick);
       else setVal(end);
     };
-    requestAnimationFrame(tick);
+    rafId = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(rafId); // 언마운트 시 RAF 정리
   }, [inView, end, duration]);
   return <span ref={ref}>{val}{suffix}</span>;
 }
