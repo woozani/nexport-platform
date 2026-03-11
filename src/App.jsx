@@ -3421,7 +3421,7 @@ export default function App() {
                   <th style={{width:40,padding:"8px 12px"}}><Checkbox checked={allOnPageSelected} indeterminate={selected.size>0&&!allOnPageSelected} onChange={toggleAll}/></th>
                   <th style={{width:30}}/>
                   {[
-                    ["name","바이어",180],["company","기업명",150],["country","국가",80],["industry","산업",110],
+                    ["name","바이어",180],["company","기업명",150],["country","국가",105],["industry","산업",110],
                     ["score","매칭점수",120],["demand","수요 품목",140],["volume","예상 규모",90],
                     ["buyingIntent","의향",60],["status","상태",75],["email","이메일",170]
                   ].map(([field,label,w])=>(
@@ -3524,7 +3524,7 @@ fi fi${Math.min(i+1,5)}`}
                         <div style={{fontSize:12,fontWeight:500}}>{b.company}</div>
                         <div style={{fontSize:10,color:"var(--t4)",marginTop:1}}>{b.employeeLabel} · {b.revenue}</div>
                       </td>
-                      <td style={{padding:"8px 10px",fontSize:12}}><span>{b.flag}</span> <span style={{color:"var(--t2)"}}>{b.country}</span></td>
+                      <td style={{padding:"8px 10px",fontSize:12,whiteSpace:"nowrap"}}><span>{b.flag}</span> <span style={{color:"var(--t2)"}}>{b.country}</span></td>
                       <td style={{padding:"8px 10px",fontSize:12,color:"var(--t2)"}}>{b.industry}</td>
                       <td style={{padding:"8px 10px"}}><ScoreBar score={b.score}/></td>
                       <td style={{padding:"8px 10px",fontSize:12,color:"var(--t2)"}}>{b.demand}</td>
