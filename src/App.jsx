@@ -143,9 +143,9 @@ function NexportLogo({ iconSize = 28, textSize = 17 }) {
 const COUNTRIES = ["독일","미국","일본","베트남","스웨덴","네덜란드","영국","호주","캐나다","프랑스","싱가포르","태국","인도","브라질","멕시코"];
 const FLAGS = {"독일":"🇩🇪","미국":"🇺🇸","일본":"🇯🇵","베트남":"🇻🇳","스웨덴":"🇸🇪","네덜란드":"🇳🇱","영국":"🇬🇧","호주":"🇦🇺","캐나다":"🇨🇦","프랑스":"🇫🇷","싱가포르":"🇸🇬","태국":"🇹🇭","인도":"🇮🇳","브라질":"🇧🇷","멕시코":"🇲🇽"};
 const REGIONS = {"독일":"유럽","미국":"북미","일본":"아시아","베트남":"동남아","스웨덴":"유럽","네덜란드":"유럽","영국":"유럽","호주":"오세아니아","캐나다":"북미","프랑스":"유럽","싱가포르":"동남아","태국":"동남아","인도":"아시아","브라질":"남미","멕시코":"북미"};
-const INDUSTRIES = ["자동차 부품","전자부품","의료기기","항공우주","플라스틱 사출","금속가공","반도체 장비","화학소재","건설자재","에너지","식품기계","조선/해양","섬유/의류","포장재","냉동/공조"];
+const INDUSTRIES = ["자동차 부품","전자부품","의료기기","항공우주","플라스틱 사출","금속가공","반도체 장비","화학소재","건설자재","에너지","식품기계","조선/해양","섬유/의류","포장재","냉동/공조","방산/방위","이차전지","로봇/자동화","철강/비철금속","공작기계"];
 const CERTS = ["ISO 9001","ISO 13485","IATF 16949","UL","CE","FDA","RoHS","REACH","JIS","AS9100"];
-const DEMANDS = ["CNC 정밀가공 부품","PCB 어셈블리","의료용 정밀 부품","항공기 구조 부품","플라스틱 사출 성형","스테인레스 정밀 부품","반도체 공정 부품","산업용 화학약품","알루미늄 패널/창호","태양광 모듈 부품","식품가공 설비","선박 엔진 부품","기능성 원단","산업용 포장 용기","냉동 컴프레서"];
+const DEMANDS = ["CNC 정밀가공 부품","PCB 어셈블리","의료용 정밀 부품","항공기 구조 부품","플라스틱 사출 성형","스테인레스 정밀 부품","반도체 공정 부품","산업용 화학약품","알루미늄 패널/창호","태양광 모듈 부품","식품가공 설비","선박 엔진 부품","기능성 원단","산업용 포장 용기","냉동 컴프레서","방산용 정밀 부품","배터리 셀/모듈","산업용 로봇 부품","열연/냉연 강판","고정밀 공작기계"];
 const STATUSES = ["신규","검토중","협상중","LOI","계약완료"];
 const REGULATIONS = ["중국산 규제","인증 필수","한국산 우선","Buy American","공공 인프라"];
 const HOT_SIGNALS = ["채용 급증","최근 펀딩","RFQ 발송","전시회 참가","신규공장 건설"];
@@ -159,6 +159,11 @@ const REG_BY_INDUSTRY = {
   "조선/해양":["한국산 우선"],
   "포장재":["한국산 우선"],
   "냉동/공조":["중국산 규제"],
+  "방산/방위":["인증 필수","Buy American"],
+  "이차전지":["중국산 규제"],
+  "로봇/자동화":["중국산 규제"],
+  "철강/비철금속":["한국산 우선"],
+  "공작기계":["인증 필수"],
 };
 const NAMES_FIRST = ["Hans","Sarah","Erik","Nguyen","Tanaka","Pierre","James","Maria","Sven","Akiko","John","Lisa","Marco","Priya","Carlos","Wei","Oliver","Sophie","Lars","Yuki","David","Anna","Michael","Julia","Robert","Nina","Thomas","Emma","Patrick","Linda"];
 const NAMES_LAST = ["Mueller","Chen","Johansson","Tran","Yamamoto","Dupont","Wilson","Garcia","Lindberg","Sato","Smith","Park","Rossi","Patel","Rodriguez","Zhang","Brown","Martin","Eriksson","Kim","Lee","Andersen","Fischer","Nakamura","Costa","Singh","Bergström","Hernandez","Novak","O'Brien"];
@@ -1952,7 +1957,7 @@ function FilterSidebar({ filters, setFilters, collapsed, setCollapsed }) {
           </div>
         </div>
         <FilterSection title="산업" icon={Ic.Layers}>
-          {INDUSTRIES.slice(0,7).map(ind => (
+          {INDUSTRIES.map(ind => (
             <CheckItem key={ind} label={ind} count={ALL_BUYERS.filter(b=>b.industry===ind).length}
               checked={filters.industries.includes(ind)}
               onChange={()=>setFilters(p=>({...p,industries:p.industries.includes(ind)?p.industries.filter(x=>x!==ind):[...p.industries,ind]}))} />
