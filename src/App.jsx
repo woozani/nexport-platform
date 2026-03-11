@@ -148,7 +148,7 @@ const CERTS = ["ISO 9001","ISO 13485","IATF 16949","UL","CE","FDA","RoHS","REACH
 const DEMANDS = ["CNC 정밀가공 부품","PCB 어셈블리","아크릴 패널 가공","스테인레스 정밀 부품","알루미늄 다이캐스팅","플라스틱 사출 성형","금형 제작","표면처리 가공","레이저 커팅","프레스 부품"];
 const STATUSES = ["신규","검토중","협상중","LOI","계약완료"];
 const REGULATIONS = ["중국산 규제","인증 필수","한국산 우선","Buy American","공공 인프라"];
-const HOT_SIGNALS = ["채용 급증","최근 펀딩","RFQ 발송","전시회 출격","신공장 오픈"];
+const HOT_SIGNALS = ["채용 급증","최근 펀딩","RFQ 발송","전시회 참가","신규공장 건설"];
 const REG_BY_INDUSTRY = {
   "의료기기":["인증 필수","한국산 우선"],
   "항공우주":["인증 필수","Buy American"],
