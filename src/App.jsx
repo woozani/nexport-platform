@@ -168,7 +168,7 @@ function generateBuyers(n) {
   const buyers = [];
   for (let i = 0; i < n; i++) {
     const country = COUNTRIES[i % COUNTRIES.length];
-    const company = i < COMPANIES.length ? COMPANIES[i] : `${COMPANIES[i%COMPANIES.length]} ${Math.floor(i/20)+2}`;
+    const company = i < COMPANIES.length ? COMPANIES[i] : `${COMPANIES[i%COMPANIES.length]} ${Math.floor(i/COMPANIES.length)+2}`;
     const score = Math.max(45, Math.min(99, Math.floor(Math.random() * 55) + 45));
     const ind = INDUSTRIES[i % INDUSTRIES.length];
     const emp = [10,25,50,100,250,500,1000,5000][Math.floor(Math.random()*8)];
@@ -187,7 +187,7 @@ function generateBuyers(n) {
         : null;
     buyers.push({
       id: i + 1,
-      name: `${NAMES_FIRST[i%NAMES_FIRST.length]} ${NAMES_LAST[i%NAMES_LAST.length]}`,
+      name: `${NAMES_FIRST[i%NAMES_FIRST.length]} ${NAMES_LAST[Math.floor(i/NAMES_FIRST.length)%NAMES_LAST.length]}`,
       company, country, flag: FLAGS[country] || "🌐",
       region: REGIONS[country] || "기타",
       industry: ind,
@@ -214,7 +214,7 @@ function generateBuyers(n) {
   return buyers;
 }
 
-const ALL_BUYERS = generateBuyers(100);
+const ALL_BUYERS = generateBuyers(1000);
 
 // ─────────── QUICK FILTERS ───────────
 const QUICK_FILTERS = [
