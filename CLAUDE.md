@@ -146,6 +146,33 @@ npm run preview        # http://localhost:4173 빌드 미리보기
 
 ---
 
+## Claude 자동 커밋/푸시 규칙
+
+> **작업 완료 시 Claude가 자동으로 commit + push까지 수행한다.**
+
+### 자동 실행 순서
+1. 코드 수정 완료
+2. `npm run build` 성공 확인 (실패 시 수정 후 재시도)
+3. preview 서버에서 변경사항 시각적 검증
+4. `git add <수정된 파일>` → `git commit -m "feat/fix: 한글 설명"` 자동 실행
+5. `git push origin <현재 브랜치>` 자동 실행
+6. **main 브랜치가 아닌 경우**: `gh pr create` 로 PR 자동 생성 (이미 PR이 없을 때만)
+
+### 커밋 메시지 규칙
+```
+feat: 새 기능 추가 설명
+fix: 버그 수정 설명
+docs: 문서 변경
+refactor: 리팩토링
+```
+
+### 주의
+- `main` 직접 push는 금지 — 반드시 PR 브랜치에서 push
+- 빌드 실패 시 커밋하지 않고 문제 먼저 해결
+- 여러 작업을 한 세션에서 할 경우 작업 단위별로 커밋 분리
+
+---
+
 ## 배포 (Vercel)
 
 | 브랜치 | 결과 |
