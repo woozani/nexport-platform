@@ -3423,7 +3423,7 @@ export default function App() {
                   {[
                     ["name","바이어",180],["company","기업명",150],["country","국가",105],["industry","산업",110],
                     ["score","매칭점수",120],["demand","수요 품목",140],["volume","예상 규모",90],
-                    ["buyingIntent","의향",60],["status","상태",75],["email","이메일",170]
+                    ["buyingIntent","의향",90],["status","상태",75],["email","이메일",170]
                   ].map(([field,label,w])=>(
                     <th key={field} onClick={()=>toggleSort(field)} style={{
                       padding:"8px 10px",fontSize:10,fontWeight:700,color:"var(--t3)",textTransform:"uppercase",
@@ -3529,9 +3529,9 @@ fi fi${Math.min(i+1,5)}`}
                       <td style={{padding:"8px 10px"}}><ScoreBar score={b.score}/></td>
                       <td style={{padding:"8px 10px",fontSize:12,color:"var(--t2)"}}>{b.demand}</td>
                       <td style={{padding:"8px 10px"}}><span style={{fontFamily:"var(--mono)",fontSize:12,fontWeight:600,color:"var(--green)"}}>{b.volume}</span></td>
-                      <td style={{padding:"8px 10px"}}>
+                      <td style={{padding:"8px 10px",whiteSpace:"nowrap"}}>
                         <div><span style={{width:6,height:6,borderRadius:"50%",background:intentColor(b.buyingIntent),display:"inline-block",marginRight:4}}/><span style={{fontSize:11,color:intentColor(b.buyingIntent)}}>{b.buyingIntent}</span></div>
-                        {b.buyerType&&b.buyerType!=="가격우선"&&<div style={{fontSize:9,fontWeight:700,color:b.buyerType==="한국산필수"?"var(--green)":"var(--cyan)",marginTop:2}}>{b.buyerType==="한국산필수"?"🛡 한국산필수":"📋 인증우선"}</div>}
+                        {b.buyerType&&b.buyerType!=="가격우선"&&<div style={{fontSize:9,fontWeight:700,color:b.buyerType==="한국산필수"?"var(--green)":"var(--cyan)",marginTop:2,whiteSpace:"nowrap"}}>{b.buyerType==="한국산필수"?"🛡 한국산필수":"📋 인증우선"}</div>}
                       </td>
                       <td style={{padding:"8px 10px"}}><Badge color={statusColor(b.status)}>{b.status}</Badge></td>
                       <td style={{padding:"8px 10px",fontSize:11,color:"var(--t3)"}}>{b.email}</td>
