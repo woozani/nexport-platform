@@ -148,6 +148,7 @@ const CERTS = ["ISO 9001","ISO 13485","IATF 16949","UL","CE","FDA","RoHS","REACH
 const DEMANDS = ["CNC 정밀가공 부품","PCB 어셈블리","아크릴 패널 가공","스테인레스 정밀 부품","알루미늄 다이캐스팅","플라스틱 사출 성형","금형 제작","표면처리 가공","레이저 커팅","프레스 부품"];
 const STATUSES = ["신규","검토중","협상중","LOI","계약완료"];
 const REGULATIONS = ["중국산 규제","인증 필수","한국산 우선","Buy American","공공 인프라"];
+const HOT_SIGNALS = ["채용 급증","최근 펀딩","RFQ 발송","전시회 출격","신공장 오픈"];
 const REG_BY_INDUSTRY = {
   "의료기기":["인증 필수","한국산 우선"],
   "항공우주":["인증 필수","Buy American"],
@@ -174,6 +175,12 @@ function generateBuyers(n) {
     const buyerType = regulatoryShield.length === 0 ? "가격우선"
       : regulatoryShield.some(r => r === "인증 필수" || r === "Buy American") ? "인증우선"
       : "한국산필수";
+    const buyingIntent = ["높음","중간","낮음"][Math.floor(Math.random()*3)];
+    const hotSignal = buyingIntent === "높음" && Math.random() > 0.45
+      ? HOT_SIGNALS[i % HOT_SIGNALS.length]
+      : buyingIntent === "중간" && Math.random() > 0.78
+        ? HOT_SIGNALS[(i+2) % HOT_SIGNALS.length]
+        : null;
     buyers.push({
       id: i + 1,
       name: `${NAMES_FIRST[i%20]} ${NAMES_LAST[i%20]}`,
@@ -191,7 +198,8 @@ function generateBuyers(n) {
       certifications: certs.length ? certs : [CERTS[Math.floor(Math.random()*CERTS.length)]],
       email: `${NAMES_FIRST[i%20].toLowerCase()}@${company.toLowerCase().replace(/[^a-z]/g,'').slice(0,12)}.com`,
       phone: `+${[49,1,81,84,46,31,44,61,1,33,65,66,91,55,52][i%15]}-${Math.floor(Math.random()*900+100)}-${Math.floor(Math.random()*9000+1000)}`,
-      buyingIntent: ["높음","중간","낮음"][Math.floor(Math.random()*3)],
+      buyingIntent,
+      hotSignal,
       regulatoryShield,
       buyerType,
       saved: Math.random() > .7,
@@ -213,6 +221,7 @@ const QUICK_FILTERS = [
   { id:'europe',      label:'🌍 유럽',    color:'--cyan',   test:(b)=>b.region==='유럽' },
   { id:'asia',        label:'🌏 아시아',  color:'--violet', test:(b)=>b.region==='아시아'||b.region==='동남아' },
   { id:'regShield',   label:'🛡 규제보호', color:'--green',  test:(b)=>b.regulatoryShield&&b.regulatoryShield.length>0 },
+  { id:'hotSignal',   label:'⚡ 핫시그널', color:'--amber',  test:(b)=>!!b.hotSignal },
 ];
 
 // ─────────── PLAYBOOKS ───────────
@@ -439,7 +448,10 @@ function BuyerDetailPanel({ buyer, onClose, onSave, isSaved, onEmailBuyer, onSho
           <div style={{display:"flex",alignItems:"center",gap:14,marginBottom:20}}>
             <div style={{width:52,height:52,borderRadius:13,background:"linear-gradient(135deg,var(--blue-dim),var(--violet-dim))",display:"flex",alignItems:"center",justifyContent:"center",fontSize:20,fontWeight:800,color:"var(--blue)",flexShrink:0}}>{buyer.name.charAt(0)}</div>
             <div>
-              <div style={{fontSize:16,fontWeight:800}}>{buyer.name}</div>
+              <div style={{fontSize:16,fontWeight:800,display:"flex",alignItems:"center",gap:8,flexWrap:"wrap"}}>
+                {buyer.name}
+                {buyer.hotSignal&&<span style={{fontSize:10,fontWeight:700,padding:"2px 8px",borderRadius:5,background:"rgba(245,158,11,.12)",color:"var(--amber)",border:"1px solid rgba(245,158,11,.25)"}}>⚡ {buyer.hotSignal}</span>}
+              </div>
               <div style={{fontSize:12,color:"var(--t3)",marginTop:2}}>{buyer.title}</div>
               <div style={{fontSize:12,color:"var(--t3)",display:"flex",alignItems:"center",gap:4,marginTop:1}}>{buyer.flag} {buyer.company} · {buyer.country}</div>
             </div>
@@ -842,6 +854,12 @@ function LandingHero({ onEnter, isMobile }) {
   const [howRef, howInView] = useInView(0.2);
   // ── ROI 비교 inView ──
   const [roiRef, roiInView] = useInView(0.15);
+  // ── ROI 계산기 state ──
+  const [tradeShowBudget, setTradeShowBudget] = useState(5000);
+  const nexportMonthly = 30;
+  const tradeShowConvRate = 0.01;
+  const nexportConvRate = 0.08;
+  const avgDealSize = 500;
   // ── Features inView ──
   const [featRef, featInView] = useInView(0.15);
 
@@ -1099,6 +1117,61 @@ function LandingHero({ onEnter, isMobile }) {
             ))}
           </div>
         </div>
+
+        {/* ⑤-C 인터랙티브 ROI 계산기 */}
+        {!isMobile && (
+          <div style={{margin:"0 0 80px",padding:"36px 40px",borderRadius:20,background:"var(--bg-2)",border:"1px solid var(--border)",opacity:roiInView?1:0,transform:roiInView?"none":"translateY(16px)",transition:"all .7s cubic-bezier(0.2,0,0,1) .5s"}}>
+            <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:24}}>
+              <div style={{width:32,height:32,borderRadius:8,background:"rgba(245,158,11,.12)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:16}}>🧮</div>
+              <div>
+                <div style={{fontSize:15,fontWeight:800,color:"var(--t1)"}}>나의 ROI 직접 계산해보기</div>
+                <div style={{fontSize:12,color:"var(--t3)",marginTop:2}}>연간 전시회 예산을 입력하면 NEXPORT 대비 절감액을 즉시 계산합니다</div>
+              </div>
+            </div>
+            <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:32,alignItems:"center"}}>
+              {/* 슬라이더 */}
+              <div>
+                <div style={{display:"flex",justifyContent:"space-between",alignItems:"baseline",marginBottom:10}}>
+                  <label style={{fontSize:12,fontWeight:700,color:"var(--t2)"}}>연간 전시회 예산</label>
+                  <span style={{fontSize:22,fontWeight:900,color:"rgba(255,69,58,1)",fontFamily:"var(--mono)"}}>{tradeShowBudget.toLocaleString()}만원</span>
+                </div>
+                <input type="range" min={500} max={20000} step={500} value={tradeShowBudget}
+                  onChange={e=>setTradeShowBudget(Number(e.target.value))}
+                  style={{width:"100%",accentColor:"var(--blue)",cursor:"pointer"}}/>
+                <div style={{display:"flex",justifyContent:"space-between",fontSize:10,color:"var(--t4)",marginTop:4}}>
+                  <span>500만원</span><span>2억원</span>
+                </div>
+                <div style={{marginTop:16,display:"flex",gap:8,flexWrap:"wrap"}}>
+                  {[1000,3000,5000,10000].map(v=>(
+                    <div key={v} onClick={()=>setTradeShowBudget(v)}
+                      style={{padding:"4px 12px",borderRadius:6,fontSize:11,fontWeight:600,cursor:"pointer",transition:"all .15s",
+                        background:tradeShowBudget===v?"var(--blue)":"var(--bg-3)",
+                        color:tradeShowBudget===v?"#fff":"var(--t3)",
+                        border:`1px solid ${tradeShowBudget===v?"var(--blue)":"var(--border)"}`}}>
+                      {(v/1000).toFixed(0)}천만
+                    </div>
+                  ))}
+                </div>
+              </div>
+              {/* 결과 */}
+              <div style={{display:"grid",gap:12}}>
+                {[
+                  {label:"전시회 연간 비용",value:`${tradeShowBudget.toLocaleString()}만원`,sub:`${Math.round(tradeShowBudget*tradeShowConvRate)}만원 가치의 계약 (전환율 ${(tradeShowConvRate*100).toFixed(0)}%)`,color:"rgba(255,69,58,1)",bg:"rgba(255,69,58,.06)",border:"rgba(255,69,58,.2)"},
+                  {label:"NEXPORT 연간 비용",value:`${(nexportMonthly*12).toLocaleString()}만원`,sub:`${Math.round(tradeShowBudget*nexportConvRate/tradeShowConvRate*nexportMonthly*12/tradeShowBudget)}배 더 많은 바이어 접근 가능`,color:"var(--green)",bg:"rgba(16,185,129,.06)",border:"rgba(16,185,129,.2)"},
+                  {label:"연간 절감액",value:`${(tradeShowBudget - nexportMonthly*12).toLocaleString()}만원`,sub:`NEXPORT 전환 시 즉시 절약 — ${Math.round((1-nexportMonthly*12/tradeShowBudget)*100)}% 비용 절감`,color:"var(--cyan)",bg:"rgba(34,211,238,.06)",border:"rgba(34,211,238,.2)"},
+                ].map((item,i)=>(
+                  <div key={i} style={{padding:"12px 16px",borderRadius:10,background:item.bg,border:`1px solid ${item.border}`,display:"flex",justifyContent:"space-between",alignItems:"center",gap:8}}>
+                    <div>
+                      <div style={{fontSize:11,color:"var(--t3)",fontWeight:500}}>{item.label}</div>
+                      <div style={{fontSize:10,color:"var(--t4)",marginTop:2}}>{item.sub}</div>
+                    </div>
+                    <div style={{fontSize:17,fontWeight:900,color:item.color,fontFamily:"var(--mono)",flexShrink:0}}>{item.value}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* ⑤-M MISSION / VISION — 모바일 전용 */}
         {isMobile && (
@@ -1405,7 +1478,7 @@ function AIMatchView({ buyers }) {
 
 // ─────────── COLD EMAIL GENERATOR ───────────
 function ColdEmailModal({ buyer, onClose }) {
-  const [tone, setTone] = useState("formal");
+  const [tone, setTone] = useState(buyer.regulatoryShield?.length > 0 ? "regulatory" : "formal");
   const [lang, setLang] = useState("en");
   const [copied, setCopied] = useState(false);
   const [company, setCompany] = useState("한국정밀부품(주)");
@@ -1495,6 +1568,54 @@ ${buyer.industry} 분야를 리서치하다가 ${buyer.company}를 알게 되었
 ${company}`
       }
     },
+    regulatory: {
+      en: {
+        subject: `Certified Korean Supplier — ${(buyer.regulatoryShield||["Compliance"])[0]} Ready`,
+        body: `Dear ${buyer.name},
+
+I'm reaching out because ${buyer.company}'s procurement environment aligns perfectly with what ${company} offers as a certified Korean manufacturer.
+
+Your market's ${(buyer.regulatoryShield||["compliance"]).join(" and ")} requirements mean that sourcing from proven, certified non-Chinese suppliers has become a strategic priority — and ${company} is positioned to meet exactly these needs.
+
+Why Korean-origin ${product} from ${company}:
+• Fully compliant with ${(buyer.regulatoryShield||[]).join(", ")} requirements
+• ISO-certified manufacturing with complete traceability documentation
+• Zero trade restriction risk — Korean-origin goods face no tariff penalties
+• Proven export experience to ${buyer.country}
+
+Given the current supply chain landscape, we believe now is the ideal time to establish a reliable, compliant supply partnership before demand peaks.
+
+Would you be available for a 20-minute call this week to discuss your current sourcing needs?
+
+Best regards,
+[Your Name]
+${company}
+[Phone] | [Email]`
+      },
+      ko: {
+        subject: `규제 대응 공급망 파트너 제안 — ${company}`,
+        body: `${buyer.name} 님께,
+
+${buyer.company}의 조달 환경과 저희 ${company}의 역량이 정확히 일치한다고 판단하여 연락드립니다.
+
+귀사 시장의 ${(buyer.regulatoryShield||["규정 준수"]).join(", ")} 요건은 검증된 비중국산 공급망 확보를 전략적 과제로 만들었습니다. 저희 ${company}는 이 요구에 정확히 부응할 수 있습니다.
+
+규제 적합 조달에 ${company}를 선택해야 하는 이유:
+• ${(buyer.regulatoryShield||[]).join(", ")} 완전 준수 한국산 제품
+• ISO 인증 제조 + 완전한 이력 추적 문서
+• 무역 규제 리스크 없는 안정적 공급망
+• ${buyer.country} 수출 경험 보유 — 관세 페널티 없음
+
+현재의 공급망 환경을 고려할 때, 지금이 신뢰할 수 있는 규제 준수 공급 파트너십을 구축하기에 최적의 시점이라고 생각합니다.
+
+이번 주 20분 정도 통화가 가능하실까요?
+
+감사합니다.
+[이름]
+${company}
+[연락처]`
+      }
+    },
     urgent: {
       en: {
         subject: `Time-Sensitive: Exclusive Pricing for ${buyer.company}`,
@@ -1558,6 +1679,7 @@ ${company}
     {key:"formal",label:"포멀",icon:<Ic.Shield s={12}/>,desc:"비즈니스 공식"},
     {key:"friendly",label:"친근",icon:<Ic.Users s={12}/>,desc:"캐주얼 네트워킹"},
     {key:"urgent",label:"긴급",icon:<Ic.Eye s={12}/>,desc:"한시적 제안"},
+    ...(buyer.regulatoryShield?.length > 0 ? [{key:"regulatory",label:"규제 우위",icon:<span style={{fontSize:11}}>🛡</span>,desc:"규제 시장 특화"}] : []),
   ];
 
   return (
@@ -1568,7 +1690,10 @@ ${company}
         <div style={{padding:"16px 20px",borderBottom:"1px solid var(--border)",display:"flex",alignItems:"center",gap:12}}>
           <div style={{width:32,height:32,borderRadius:8,background:"var(--green-dim)",display:"flex",alignItems:"center",justifyContent:"center"}}><Ic.Mail s={16}/></div>
           <div style={{flex:1}}>
-            <div style={{fontSize:14,fontWeight:700}}>AI 이메일 생성</div>
+            <div style={{fontSize:14,fontWeight:700,display:"flex",alignItems:"center",gap:8}}>
+              AI 이메일 생성
+              {buyer.regulatoryShield?.length > 0 && <span style={{fontSize:9,fontWeight:700,padding:"2px 7px",borderRadius:4,background:"rgba(139,92,246,.15)",color:"var(--violet)",border:"1px solid rgba(139,92,246,.2)"}}>🛡 규제 우위 자동 선택됨</span>}
+            </div>
             <div style={{fontSize:11,color:"var(--t3)"}}>To: {buyer.name} ({buyer.email})</div>
           </div>
           <div onClick={onClose} style={{cursor:"pointer",padding:4,color:"var(--t4)"}}><Ic.X s={16}/></div>
@@ -3386,7 +3511,10 @@ fi fi${Math.min(i+1,5)}`}
                         <span style={{cursor:"pointer",color:starred.has(b.id)?"var(--amber)":"var(--t4)"}}>{starred.has(b.id)?<Ic.StarFill s={13}/>:<Ic.Star s={13}/>}</span>
                       </td>
                       <td style={{padding:"8px 10px"}}>
-                        <div style={{fontWeight:600,fontSize:13}}>{b.name}</div>
+                        <div style={{fontWeight:600,fontSize:13,display:"flex",alignItems:"center",gap:5}}>
+                          {b.name}
+                          {b.hotSignal&&<span style={{fontSize:9,fontWeight:700,padding:"1px 6px",borderRadius:3,background:"rgba(245,158,11,.15)",color:"var(--amber)",border:"1px solid rgba(245,158,11,.25)",whiteSpace:"nowrap",animation:"pulse 2s infinite"}}>⚡ {b.hotSignal}</span>}
+                        </div>
                         <div style={{fontSize:11,color:"var(--t3)",marginTop:1,display:"flex",alignItems:"center",gap:4,flexWrap:"wrap"}}>
                           <span>{b.title}</span>
                           {b.regulatoryShield&&b.regulatoryShield.length>0&&<span style={{fontSize:9,fontWeight:700,padding:"1px 5px",borderRadius:3,background:"rgba(139,92,246,.15)",color:"var(--violet)",whiteSpace:"nowrap"}}>🛡 규제보호</span>}
