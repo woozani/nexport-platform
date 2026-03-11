@@ -840,6 +840,8 @@ function LandingHero({ onEnter, isMobile }) {
 
   // ── How it Works inView ──
   const [howRef, howInView] = useInView(0.2);
+  // ── ROI 비교 inView ──
+  const [roiRef, roiInView] = useInView(0.15);
   // ── Features inView ──
   const [featRef, featInView] = useInView(0.15);
 
@@ -1005,6 +1007,94 @@ function LandingHero({ onEnter, isMobile }) {
                   <CountUp end={s.end} suffix={s.suffix} duration={1400}/>
                 </div>
                 <div style={{fontSize:11,color:"var(--t3)",marginTop:6,fontWeight:500}}>{s.label}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* ⑤-B ROI 비교 위젯 */}
+        <div ref={roiRef} style={{margin:"0 0 80px"}}>
+          <div style={{textAlign:"center",marginBottom:isMobile?28:44,opacity:roiInView?1:0,transform:roiInView?"none":"translateY(16px)",transition:"all .6s cubic-bezier(0.2,0,0,1)"}}>
+            <div style={{display:"inline-flex",alignItems:"center",gap:6,padding:"4px 14px",borderRadius:20,background:"rgba(245,158,11,.1)",border:"1px solid rgba(245,158,11,.28)",fontSize:11,fontWeight:700,color:"var(--amber)",marginBottom:12,letterSpacing:".04em"}}>
+              실제 수출 영업 담당자 VOC
+            </div>
+            <h2 style={{fontSize:isMobile?22:32,fontWeight:800,letterSpacing:"-.03em",color:"var(--t1)"}}>
+              기존 방식으로 <span style={{color:"rgba(255,69,58,1)"}}>얼마나 낭비</span>하고 있나요?
+            </h2>
+            <p style={{fontSize:isMobile?13:15,color:"var(--t3)",marginTop:10}}>
+              수출 경력 10년+ 실무자 인터뷰 기반 — 연 매출 4,000억 중견기업 &amp; 100억 중소기업
+            </p>
+          </div>
+
+          {/* 비교 카드 */}
+          <div style={{display:isMobile?"flex":"grid",flexDirection:isMobile?"column":undefined,gridTemplateColumns:isMobile?undefined:"1fr 56px 1fr",gap:isMobile?"12px":0,alignItems:"stretch",opacity:roiInView?1:0,transform:roiInView?"none":"translateY(20px)",transition:"all .7s cubic-bezier(0.2,0,0,1) .15s"}}>
+            {/* 기존 방식 */}
+            <div style={{padding:isMobile?"22px 18px":"32px",borderRadius:16,background:"rgba(255,69,58,.04)",border:"1px solid rgba(255,69,58,.2)"}}>
+              <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:20}}>
+                <div style={{width:28,height:28,borderRadius:8,background:"rgba(255,69,58,.12)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:14}}>❌</div>
+                <div style={{fontSize:14,fontWeight:700,color:"rgba(255,69,58,1)"}}>기존 영업 방식</div>
+              </div>
+              {[
+                {label:"해외 전시회 1회 비용",value:"~5,000만원",sub:"항공·숙박·부스·인건비 포함"},
+                {label:"Cold Email 응답률",value:"1% 미만",sub:"\"3년 보냈는데 실계약 0건\" — Scott"},
+                {label:"바이어 발굴까지 걸리는 시간",value:"수 개월",sub:"준비 → 현장 미팅 → 팔로업 전 과정"},
+                {label:"검증 바이어 전환율",value:"1% 미만",sub:"전시회 방문객 대비 실계약 비율"},
+              ].map((item,i)=>(
+                <div key={i} style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",padding:"11px 0",borderBottom:i<3?"1px solid rgba(255,69,58,.1)":"none"}}>
+                  <div style={{flex:1,paddingRight:12}}>
+                    <div style={{fontSize:12,color:"var(--t2)",fontWeight:500,lineHeight:1.4}}>{item.label}</div>
+                    <div style={{fontSize:10,color:"var(--t4)",marginTop:2,lineHeight:1.4,fontStyle:"italic"}}>{item.sub}</div>
+                  </div>
+                  <div style={{fontSize:15,fontWeight:800,color:"rgba(255,69,58,1)",textAlign:"right",flexShrink:0,whiteSpace:"nowrap"}}>{item.value}</div>
+                </div>
+              ))}
+            </div>
+
+            {/* VS */}
+            <div style={{display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
+              <div style={{fontSize:13,fontWeight:900,color:"var(--t4)",letterSpacing:".06em",padding:isMobile?"4px 0":"0",textAlign:"center"}}>VS</div>
+            </div>
+
+            {/* NEXPORT */}
+            <div style={{padding:isMobile?"22px 18px":"32px",borderRadius:16,background:"rgba(16,185,129,.05)",border:"1px solid rgba(16,185,129,.25)",position:"relative",overflow:"hidden"}}>
+              <div style={{position:"absolute",top:0,right:0,padding:"4px 14px",background:"var(--green)",borderRadius:"0 16px 0 12px",fontSize:10,fontWeight:700,color:"#fff",letterSpacing:".04em"}}>NEXPORT</div>
+              <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:20}}>
+                <div style={{width:28,height:28,borderRadius:8,background:"rgba(16,185,129,.15)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:14}}>✅</div>
+                <div style={{fontSize:14,fontWeight:700,color:"var(--green)"}}>NEXPORT 사용 시</div>
+              </div>
+              {[
+                {label:"월 이용 요금",value:"30만원",sub:"3개월 구독 기준 / 전시회 대비 167배↓"},
+                {label:"바이어 매칭 방식",value:"AI 정밀 매칭",sub:"규제·인증·산업·지역별 스코어링"},
+                {label:"바이어 발굴까지 걸리는 시간",value:"5분",sub:"검색 → 이메일 확보 → AI 추천 즉시"},
+                {label:"글로벌 바이어 접근",value:"즉시",sub:"60개국 검증된 바이어 DB 즉시 접근"},
+              ].map((item,i)=>(
+                <div key={i} style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",padding:"11px 0",borderBottom:i<3?"1px solid rgba(16,185,129,.12)":"none"}}>
+                  <div style={{flex:1,paddingRight:12}}>
+                    <div style={{fontSize:12,color:"var(--t2)",fontWeight:500,lineHeight:1.4}}>{item.label}</div>
+                    <div style={{fontSize:10,color:"var(--t4)",marginTop:2,lineHeight:1.4,fontStyle:"italic"}}>{item.sub}</div>
+                  </div>
+                  <div style={{fontSize:15,fontWeight:800,color:"var(--green)",textAlign:"right",flexShrink:0,whiteSpace:"nowrap"}}>{item.value}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* VOC 인용 */}
+          <div style={{display:"grid",gridTemplateColumns:isMobile?"1fr":"1fr 1fr",gap:16,marginTop:20,opacity:roiInView?1:0,transform:roiInView?"none":"translateY(16px)",transition:"all .7s cubic-bezier(0.2,0,0,1) .3s"}}>
+            {[
+              {quote:"전시회에 5,000만원 쏟아부었는데, 실제로 이어진 계약은 손에 꼽아요. 그마저도 3년 뒤에나 됐고.",name:"Scott",role:"연 매출 4,000억 중견기업 · 자동차 부품 수출 담당"},
+              {quote:"3년간 cold email 보냈는데 응답이 거의 없었어요. 검증된 바이어를 찾는 게 가장 큰 문제예요.",name:"Peter",role:"연 매출 100억 중소기업 · 수처리 장비 수출 담당"},
+            ].map((q,i)=>(
+              <div key={i} style={{padding:"20px 22px",borderRadius:14,background:"var(--bg-2)",border:"1px solid var(--border)"}}>
+                <div style={{fontSize:24,color:"var(--t4)",lineHeight:1,marginBottom:8,fontFamily:"Georgia,serif"}}>"</div>
+                <p style={{fontSize:13,color:"var(--t2)",lineHeight:1.75,fontStyle:"italic",margin:"0 0 14px"}}>{q.quote}</p>
+                <div style={{display:"flex",alignItems:"center",gap:8}}>
+                  <div style={{width:28,height:28,borderRadius:"50%",background:"linear-gradient(135deg,var(--blue),var(--violet))",display:"flex",alignItems:"center",justifyContent:"center",fontSize:10,fontWeight:700,color:"#fff",flexShrink:0}}>{q.name[0]}</div>
+                  <div>
+                    <div style={{fontSize:12,fontWeight:700,color:"var(--t1)"}}>{q.name}</div>
+                    <div style={{fontSize:10,color:"var(--t4)"}}>{q.role}</div>
+                  </div>
+                </div>
               </div>
             ))}
           </div>
