@@ -147,6 +147,14 @@ const INDUSTRIES = ["자동차 부품","전자부품","의료기기","항공우�
 const CERTS = ["ISO 9001","ISO 13485","IATF 16949","UL","CE","FDA","RoHS","REACH","JIS","AS9100"];
 const DEMANDS = ["CNC 정밀가공 부품","PCB 어셈블리","아크릴 패널 가공","스테인레스 정밀 부품","알루미늄 다이캐스팅","플라스틱 사출 성형","금형 제작","표면처리 가공","레이저 커팅","프레스 부품"];
 const STATUSES = ["신규","검토중","협상중","LOI","계약완료"];
+const REGULATIONS = ["중국산 규제","인증 필수","한국산 우선","Buy American","공공 인프라"];
+const REG_BY_INDUSTRY = {
+  "의료기기":["인증 필수","한국산 우선"],
+  "항공우주":["인증 필수","Buy American"],
+  "에너지":["중국산 규제","공공 인프라"],
+  "반도체 장비":["중국산 규제"],
+  "건설자재":["공공 인프라"],
+};
 const NAMES_FIRST = ["Hans","Sarah","Erik","Nguyen","Tanaka","Pierre","James","Maria","Sven","Akiko","John","Lisa","Marco","Priya","Carlos","Wei","Oliver","Sophie","Lars","Yuki"];
 const NAMES_LAST = ["Mueller","Chen","Johansson","Tran","Yamamoto","Dupont","Wilson","Garcia","Lindberg","Sato","Smith","Park","Rossi","Patel","Rodriguez","Zhang","Brown","Martin","Eriksson","Kim"];
 const COMPANIES = ["TechParts GmbH","Pacific Trade Corp","Saigon Manufacturing","Nordic Solutions AB","Osaka Precision Co.","Rotterdam Metals BV","Thames Engineering","Sydney Industrial","Maple Leaf Tech","Lyon Aerospace","SG Components Pte","Bangkok Polymer","Delhi Precision","São Paulo Metals","Monterrey Auto Parts","Shanghai Tech Group","Manchester Steel","Paris Medical Devices","Stockholm Dynamics","Tokyo Electronics"];
@@ -161,6 +169,11 @@ function generateBuyers(n) {
     const emp = [10,25,50,100,250,500,1000,5000][Math.floor(Math.random()*8)];
     const rev = ["$1M-5M","$5M-10M","$10M-50M","$50M-100M","$100M+"][Math.floor(Math.random()*5)];
     const certs = CERTS.filter(() => Math.random() > .65);
+    const baseRegs = REG_BY_INDUSTRY[ind] || [];
+    const regulatoryShield = baseRegs.length > 0 && Math.random() > 0.25 ? baseRegs : [];
+    const buyerType = regulatoryShield.length === 0 ? "가격우선"
+      : regulatoryShield.some(r => r === "인증 필수" || r === "Buy American") ? "인증우선"
+      : "한국산필수";
     buyers.push({
       id: i + 1,
       name: `${NAMES_FIRST[i%20]} ${NAMES_LAST[i%20]}`,
@@ -179,6 +192,8 @@ function generateBuyers(n) {
       email: `${NAMES_FIRST[i%20].toLowerCase()}@${company.toLowerCase().replace(/[^a-z]/g,'').slice(0,12)}.com`,
       phone: `+${[49,1,81,84,46,31,44,61,1,33,65,66,91,55,52][i%15]}-${Math.floor(Math.random()*900+100)}-${Math.floor(Math.random()*9000+1000)}`,
       buyingIntent: ["높음","중간","낮음"][Math.floor(Math.random()*3)],
+      regulatoryShield,
+      buyerType,
       saved: Math.random() > .7,
       starred: Math.random() > .85,
       lastActive: `${Math.floor(Math.random()*30)+1}일 전`,
@@ -197,6 +212,7 @@ const QUICK_FILTERS = [
   { id:'negotiating', label:'🤝 협상중',  color:'--blue',   test:(b)=>b.status==='협상중' },
   { id:'europe',      label:'🌍 유럽',    color:'--cyan',   test:(b)=>b.region==='유럽' },
   { id:'asia',        label:'🌏 아시아',  color:'--violet', test:(b)=>b.region==='아시아'||b.region==='동남아' },
+  { id:'regShield',   label:'🛡 규제보호', color:'--green',  test:(b)=>b.regulatoryShield&&b.regulatoryShield.length>0 },
 ];
 
 // ─────────── PLAYBOOKS ───────────
@@ -1068,7 +1084,7 @@ function LandingHero({ onEnter, isMobile }) {
 // ─────────── AI MATCH VIEW ───────────
 function AIMatchView({ buyers }) {
   const [step, setStep] = useState("input");
-  const [profile, setProfile] = useState({ company:"", product:"", industry:"", certs:[], regions:[] });
+  const [profile, setProfile] = useState({ company:"", product:"", industry:"", certs:[], regions:[], preferRegulated:false });
   const [progress, setProgress] = useState(0);
   const [results, setResults] = useState(null);
 
@@ -1109,12 +1125,14 @@ function AIMatchView({ buyers }) {
             if (profile.product && b.demand && b.demand.toLowerCase().includes(profile.product.toLowerCase().slice(0,3))) s += 8;
             if (b.buyingIntent === "높음") s += 10;
             else if (b.buyingIntent === "중간") s += 5;
+            if (profile.preferRegulated && b.regulatoryShield && b.regulatoryShield.length > 0) s += 20;
             const matchPct = Math.min(99, Math.round(s * 1.1));
             const reasons = [];
             if (profile.industry && b.industry) reasons.push("산업 매칭");
             if (profile.regions.length > 0) reasons.push("타겟 지역");
             if (profile.certs.length > 0 && b.certifications && b.certifications.some(c=>profile.certs.includes(c))) reasons.push("인증 일치");
             if (b.buyingIntent === "높음") reasons.push("구매의향 높음");
+            if (profile.preferRegulated && b.regulatoryShield && b.regulatoryShield.length > 0) reasons.push("규제 보호 시장");
             return { ...b, aiScore: s, matchPct, reasons: reasons.slice(0,3) };
           }).sort((a,b) => b.aiScore - a.aiScore).slice(0, 15);
           setResults(scored);
@@ -1183,6 +1201,22 @@ function AIMatchView({ buyers }) {
             {regionList.map(r=>(
               <div key={r} onClick={()=>toggleArr(null,null,"regions",r)} style={tagStyle(profile.regions.includes(r))}>{r}</div>
             ))}
+          </div>
+        </div>
+
+        <div onClick={()=>setProfile(p=>({...p,preferRegulated:!p.preferRegulated}))}
+          style={{...cardStyle,marginBottom:16,animation:"fadeIn .4s ease .45s",animationFillMode:"both",cursor:"pointer",
+            border:`1px solid ${profile.preferRegulated?"var(--green)":"var(--border)"}`,
+            background:profile.preferRegulated?"rgba(16,185,129,.06)":"var(--bg-2)"}}>
+          <div style={{display:"flex",alignItems:"center",gap:12}}>
+            <div style={{width:36,height:36,borderRadius:9,background:profile.preferRegulated?"var(--green-dim)":"var(--bg-3)",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0,fontSize:18}}>🛡</div>
+            <div style={{flex:1}}>
+              <div style={{fontSize:13,fontWeight:700,color:profile.preferRegulated?"var(--green)":"var(--t1)"}}>규제 보호 바이어 우선 매칭</div>
+              <div style={{fontSize:11,color:"var(--t3)",marginTop:2}}>중국산 규제·인증 필수·Buy American 등 한국산이 유리한 바이어를 상위에 배치</div>
+            </div>
+            <div style={{width:20,height:20,borderRadius:10,border:`2px solid ${profile.preferRegulated?"var(--green)":"var(--border)"}`,background:profile.preferRegulated?"var(--green)":"transparent",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0,transition:"all .2s"}}>
+              {profile.preferRegulated&&<Ic.Check s={10}/>}
+            </div>
           </div>
         </div>
 
@@ -1649,7 +1683,7 @@ function AIAssistant({ buyers, onClose }) {
 }
 
 function FilterSidebar({ filters, setFilters, collapsed, setCollapsed }) {
-  const [openSections, setOpenSections] = useState({"산업":true,"지역":true,"회사규모":false,"인증":false,"구매의향":false,"매칭점수":false});
+  const [openSections, setOpenSections] = useState({"산업":true,"지역":true,"회사규모":false,"인증":false,"구매의향":false,"규제시장":false,"매칭점수":false});
   const toggle = k => setOpenSections(p=>({...p,[k]:!p[k]}));
 
   const FilterSection = ({title, icon:Icon, children}) => (
@@ -1686,7 +1720,7 @@ function FilterSidebar({ filters, setFilters, collapsed, setCollapsed }) {
         <div style={{display:"flex",alignItems:"center",gap:6,fontSize:13,fontWeight:700}}><Ic.Filter s={14}/>필터</div>
         <div style={{display:"flex",gap:4}}>
           {Object.values(filters).some(v => Array.isArray(v) ? v.length : v) && (
-            <div onClick={()=>setFilters({industries:[],regions:[],sizes:[],certs:[],intents:[],scoreMin:0,scoreMax:100})} style={{fontSize:10,color:"var(--red)",cursor:"pointer",padding:"2px 6px",borderRadius:4,background:"var(--red-dim)"}}>초기화</div>
+            <div onClick={()=>setFilters({industries:[],regions:[],sizes:[],certs:[],intents:[],regulations:[],scoreMin:0,scoreMax:100})} style={{fontSize:10,color:"var(--red)",cursor:"pointer",padding:"2px 6px",borderRadius:4,background:"var(--red-dim)"}}>초기화</div>
           )}
           <div onClick={()=>setCollapsed(true)} style={{cursor:"pointer",color:"var(--t4)",padding:2}}><Ic.ChevLeft s={14}/></div>
         </div>
@@ -1731,6 +1765,14 @@ function FilterSidebar({ filters, setFilters, collapsed, setCollapsed }) {
             <CheckItem key={i} label={i} count={ALL_BUYERS.filter(b=>b.buyingIntent===i).length}
               checked={filters.intents.includes(i)}
               onChange={()=>setFilters(p=>({...p,intents:p.intents.includes(i)?p.intents.filter(x=>x!==i):[...p.intents,i]}))} />
+          ))}
+        </FilterSection>
+        <FilterSection title="규제시장" icon={Ic.Shield}>
+          <div style={{fontSize:10,color:"var(--t4)",marginBottom:6,lineHeight:1.4}}>한국산이 유리한 규제 조건을 가진 바이어</div>
+          {REGULATIONS.map(r => (
+            <CheckItem key={r} label={r} count={ALL_BUYERS.filter(b=>b.regulatoryShield&&b.regulatoryShield.includes(r)).length}
+              checked={(filters.regulations||[]).includes(r)}
+              onChange={()=>setFilters(p=>({...p,regulations:(p.regulations||[]).includes(r)?p.regulations.filter(x=>x!==r):[...(p.regulations||[]),r]}))} />
           ))}
         </FilterSection>
         <FilterSection title="매칭점수" icon={Ic.Bar}>
@@ -2799,7 +2841,7 @@ function EmailFinderView() {
 }
 
 export default function App() {
-  const [filters, setFilters] = useState({industries:[],regions:[],sizes:[],certs:[],intents:[],scoreMin:0,scoreMax:100});
+  const [filters, setFilters] = useState({industries:[],regions:[],sizes:[],certs:[],intents:[],regulations:[],scoreMin:0,scoreMax:100});
   const [sideCollapsed, setSideCollapsed] = useState(false);
   const [search, setSearch] = useState("");
   const [detailBuyer, setDetailBuyer] = useState(null);
@@ -2927,6 +2969,7 @@ export default function App() {
     if (filters.regions.length) d = d.filter(b => filters.regions.includes(b.region));
     if (filters.certs.length) d = d.filter(b => b.certifications.some(c => filters.certs.includes(c)));
     if (filters.intents.length) d = d.filter(b => filters.intents.includes(b.buyingIntent));
+    if (filters.regulations&&filters.regulations.length) d = d.filter(b => filters.regulations.some(r => (b.regulatoryShield||[]).includes(r)));
     if (filters.scoreMin > 0) d = d.filter(b => b.score >= filters.scoreMin);
     if (filters.scoreMax < 100) d = d.filter(b => b.score <= filters.scoreMax);
     // Size filter
@@ -2981,6 +3024,7 @@ export default function App() {
     ...filters.regions.map(r => ({label:r,clear:()=>setFilters(p=>({...p,regions:p.regions.filter(x=>x!==r)}))})),
     ...filters.certs.map(c => ({label:c,clear:()=>setFilters(p=>({...p,certs:p.certs.filter(x=>x!==c)}))})),
     ...filters.intents.map(i => ({label:`의향:${i}`,clear:()=>setFilters(p=>({...p,intents:p.intents.filter(x=>x!==i)}))})),
+    ...(filters.regulations||[]).map(r => ({label:`규제:${r}`,clear:()=>setFilters(p=>({...p,regulations:p.regulations.filter(x=>x!==r)}))})),
   ];
 
   useEffect(() => { setPage(1); }, [filters, search, tab, quickFilter]);
@@ -3253,7 +3297,10 @@ fi fi${Math.min(i+1,5)}`}
                       </td>
                       <td style={{padding:"8px 10px"}}>
                         <div style={{fontWeight:600,fontSize:13}}>{b.name}</div>
-                        <div style={{fontSize:11,color:"var(--t3)",marginTop:1}}>{b.title}</div>
+                        <div style={{fontSize:11,color:"var(--t3)",marginTop:1,display:"flex",alignItems:"center",gap:4,flexWrap:"wrap"}}>
+                          <span>{b.title}</span>
+                          {b.regulatoryShield&&b.regulatoryShield.length>0&&<span style={{fontSize:9,fontWeight:700,padding:"1px 5px",borderRadius:3,background:"rgba(139,92,246,.15)",color:"var(--violet)",whiteSpace:"nowrap"}}>🛡 규제보호</span>}
+                        </div>
                       </td>
                       <td style={{padding:"8px 10px"}}>
                         <div style={{fontSize:12,fontWeight:500}}>{b.company}</div>
@@ -3264,7 +3311,10 @@ fi fi${Math.min(i+1,5)}`}
                       <td style={{padding:"8px 10px"}}><ScoreBar score={b.score}/></td>
                       <td style={{padding:"8px 10px",fontSize:12,color:"var(--t2)"}}>{b.demand}</td>
                       <td style={{padding:"8px 10px"}}><span style={{fontFamily:"var(--mono)",fontSize:12,fontWeight:600,color:"var(--green)"}}>{b.volume}</span></td>
-                      <td style={{padding:"8px 10px"}}><span style={{width:6,height:6,borderRadius:"50%",background:intentColor(b.buyingIntent),display:"inline-block",marginRight:4}}/><span style={{fontSize:11,color:intentColor(b.buyingIntent)}}>{b.buyingIntent}</span></td>
+                      <td style={{padding:"8px 10px"}}>
+                        <div><span style={{width:6,height:6,borderRadius:"50%",background:intentColor(b.buyingIntent),display:"inline-block",marginRight:4}}/><span style={{fontSize:11,color:intentColor(b.buyingIntent)}}>{b.buyingIntent}</span></div>
+                        {b.buyerType&&b.buyerType!=="가격우선"&&<div style={{fontSize:9,fontWeight:700,color:b.buyerType==="한국산필수"?"var(--green)":"var(--cyan)",marginTop:2}}>{b.buyerType==="한국산필수"?"🛡 한국산필수":"📋 인증우선"}</div>}
+                      </td>
                       <td style={{padding:"8px 10px"}}><Badge color={statusColor(b.status)}>{b.status}</Badge></td>
                       <td style={{padding:"8px 10px",fontSize:11,color:"var(--t3)"}}>{b.email}</td>
                       <td style={{padding:"8px 10px"}} onClick={e=>e.stopPropagation()}>
