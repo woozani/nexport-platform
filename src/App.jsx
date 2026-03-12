@@ -2225,7 +2225,6 @@ function PlaybookView({ buyers, savedSet, onRunPlaybook }) {
         <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:6}}>
           <Ic.BookOpen s={20}/>
           <h2 style={{fontSize:20,fontWeight:700,color:"var(--t1)"}}>아웃리치 플레이북</h2>
-          <span style={{fontSize:11,padding:"3px 8px",borderRadius:6,background:"var(--violet-dim)",color:"var(--violet)",fontWeight:600,border:"1px solid rgba(139,92,246,.2)"}}>Apollo 방식</span>
         </div>
         <p style={{fontSize:13,color:"var(--t3)",maxWidth:560,lineHeight:1.6}}>
           단계별 바이어 접근 전략 — 플레이북을 실행하면 해당 바이어가 자동 선택됩니다. 이메일 발송, 비교 분석을 즉시 시작하세요.
