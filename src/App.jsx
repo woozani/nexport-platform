@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, useCallback, useRef, useReducer } from "react";
+import { useState, useEffect, useMemo, useCallback, useRef, useReducer, Fragment } from "react";
 import { ComposableMap, Geographies, Geography, Marker } from "react-simple-maps";
 
 // ─────────── STYLES ───────────
@@ -1000,7 +1000,7 @@ function LandingHero({ onEnter, isMobile }) {
           </div>
           <div className="hiw-grid" style={{display:isMobile?"flex":"grid",flexDirection:isMobile?"column":undefined,gridTemplateColumns:isMobile?undefined:"1fr auto 1fr auto 1fr",gap:isMobile?"16px":0,alignItems:isMobile?"stretch":"start"}}>
             {steps.map((s,i) => (
-              <React.Fragment key={i}>
+              <Fragment key={i}>
                 <div style={{textAlign:"center",padding:"0 12px",opacity:howInView?1:0,animation:howInView?`staggerUp .6s cubic-bezier(0.2,0,0,1) ${i*200}ms both`:"none"}}>
                   <div style={{width:56,height:56,borderRadius:16,background:s.dim,display:"flex",alignItems:"center",justifyContent:"center",margin:"0 auto 16px",color:s.color,border:`1px solid ${s.color}33`}}>
                     {s.icon}
@@ -1015,7 +1015,7 @@ function LandingHero({ onEnter, isMobile }) {
                     <div style={{color:"var(--t4)",fontSize:16,marginLeft:4,opacity:howInView?1:0,transition:`opacity .4s ${i*200+400}ms`}}>→</div>
                   </div>
                 )}
-              </React.Fragment>
+              </Fragment>
             ))}
           </div>
         </div>
