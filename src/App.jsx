@@ -3074,9 +3074,17 @@ export default function App() {
   const isMobile = useIsMobile();
   const [showMobileBanner, setShowMobileBanner] = useState(false);
 
-  // 뒤로가기로 랜딩 복귀
+  // 뒤로가기/앞으로가기 랜딩↔플랫폼 전환
   useEffect(() => {
-    const onPop = () => { setShowLanding(true); setShowMobileBanner(false); };
+    const onPop = (e) => {
+      if (e.state?.page === "platform") {
+        setShowLanding(false);
+        setShowMobileBanner(false);
+      } else {
+        setShowLanding(true);
+        setShowMobileBanner(false);
+      }
+    };
     window.addEventListener("popstate", onPop);
     return () => window.removeEventListener("popstate", onPop);
   }, []);
