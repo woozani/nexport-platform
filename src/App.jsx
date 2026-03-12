@@ -3579,6 +3579,8 @@ fi fi${Math.min(i+1,5)}`}
               {filtered.length > 0 && `${(page-1)*perPage+1}-${Math.min(page*perPage,filtered.length)} / ${filtered.length}건`}
             </div>
             <div style={{display:"flex",gap:4,alignItems:"center"}}>
+              {/* 맨 앞 */}
+              <div onClick={()=>page>1&&setPage(1)} style={{padding:"4px 8px",borderRadius:4,border:"1px solid var(--border)",cursor:page>1?"pointer":"default",color:page>1?"var(--t2)":"var(--t4)",fontSize:11,fontFamily:"var(--mono)",letterSpacing:"-1px"}}>{"<<"}</div>
               <div onClick={()=>page>1&&setPage(p=>p-1)} style={{padding:"4px 8px",borderRadius:4,border:"1px solid var(--border)",cursor:page>1?"pointer":"default",color:page>1?"var(--t2)":"var(--t4)",fontSize:11}}><Ic.ChevLeft s={12}/></div>
               {Array.from({length:Math.min(7,totalPages)}, (_,i) => {
                 let p;
@@ -3595,8 +3597,9 @@ fi fi${Math.min(i+1,5)}`}
                 );
               })}
               <div onClick={()=>page<totalPages&&setPage(p=>p+1)} style={{padding:"4px 8px",borderRadius:4,border:"1px solid var(--border)",cursor:page<totalPages?"pointer":"default",color:page<totalPages?"var(--t2)":"var(--t4)",fontSize:11}}><Ic.ChevRight s={12}/></div>
+              {/* 맨 끝 */}
+              <div onClick={()=>page<totalPages&&setPage(totalPages)} style={{padding:"4px 8px",borderRadius:4,border:"1px solid var(--border)",cursor:page<totalPages?"pointer":"default",color:page<totalPages?"var(--t2)":"var(--t4)",fontSize:11,fontFamily:"var(--mono)",letterSpacing:"-1px"}}>{">>"}</div>
             </div>
-            <div style={{fontSize:11,color:"var(--t4)"}}>페이지당 {perPage}건</div>
           </div>
 
           {/* Floating Action Bar */}
