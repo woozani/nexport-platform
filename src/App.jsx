@@ -751,13 +751,15 @@ function useInView(threshold=0.15) {
   useEffect(() => {
     const el = ref.current;
     if (!el) return;
-    // 마운트 직후 이미 뷰포트 안에 있으면 즉시 트리거 (IntersectionObserver는 비동기라 늦을 수 있음)
-    const rect = el.getBoundingClientRect();
-    if (rect.top < window.innerHeight && rect.bottom > 0) {
-      setInView(true);
-      return;
+    // 가장 가까운 스크롤 가능한 부모를 root로 사용 (내부 스크롤 컨테이너 대응)
+    let root = null;
+    let parent = el.parentElement;
+    while (parent && parent !== document.body) {
+      const s = getComputedStyle(parent);
+      if (s.overflowY === 'auto' || s.overflowY === 'scroll') { root = parent; break; }
+      parent = parent.parentElement;
     }
-    const obs = new IntersectionObserver(([e]) => { if(e.isIntersecting) setInView(true); }, {threshold});
+    const obs = new IntersectionObserver(([e]) => { if(e.isIntersecting) setInView(true); }, {threshold, root});
     obs.observe(el);
     return () => obs.disconnect();
   }, []);
@@ -998,8 +1000,8 @@ function LandingHero({ onEnter, isMobile }) {
           </div>
           <div className="hiw-grid" style={{display:isMobile?"flex":"grid",flexDirection:isMobile?"column":undefined,gridTemplateColumns:isMobile?undefined:"1fr auto 1fr auto 1fr",gap:isMobile?"16px":0,alignItems:isMobile?"stretch":"start"}}>
             {steps.map((s,i) => (
-              <>
-                <div key={`step-${i}`} style={{textAlign:"center",padding:"0 12px",opacity:howInView?1:0,animation:howInView?`staggerUp .6s cubic-bezier(0.2,0,0,1) ${i*200}ms both`:"none"}}>
+              <React.Fragment key={i}>
+                <div style={{textAlign:"center",padding:"0 12px",opacity:howInView?1:0,animation:howInView?`staggerUp .6s cubic-bezier(0.2,0,0,1) ${i*200}ms both`:"none"}}>
                   <div style={{width:56,height:56,borderRadius:16,background:s.dim,display:"flex",alignItems:"center",justifyContent:"center",margin:"0 auto 16px",color:s.color,border:`1px solid ${s.color}33`}}>
                     {s.icon}
                   </div>
@@ -1008,12 +1010,12 @@ function LandingHero({ onEnter, isMobile }) {
                   <div style={{fontSize:13,color:"var(--t3)",lineHeight:1.65}}>{s.desc}</div>
                 </div>
                 {i < steps.length-1 && (
-                  <div key={`line-${i}`} className="hiw-connector" style={{display:"flex",alignItems:"center",paddingTop:28}}>
+                  <div className="hiw-connector" style={{display:"flex",alignItems:"center",paddingTop:28}}>
                     <div style={{height:2,width:howInView?60:0,background:`linear-gradient(90deg,${steps[i].color},${steps[i+1].color})`,borderRadius:2,transition:`width .8s cubic-bezier(0.2,0,0,1) ${i*200+300}ms`,opacity:howInView?1:0}}/>
                     <div style={{color:"var(--t4)",fontSize:16,marginLeft:4,opacity:howInView?1:0,transition:`opacity .4s ${i*200+400}ms`}}>→</div>
                   </div>
                 )}
-              </>
+              </React.Fragment>
             ))}
           </div>
         </div>
@@ -2175,7 +2177,6 @@ function PipelineHealth({ buyers, buyerNotes }) {
       <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:20}}>
         <Ic.Target s={16}/>
         <span style={{fontSize:14,fontWeight:700,color:"var(--t1)"}}>파이프라인 건강도</span>
-        <span style={{fontSize:10,padding:"2px 7px",borderRadius:5,background:"var(--blue-dim)",color:"var(--blue)",fontWeight:600,border:"1px solid rgba(59,107,245,.15)"}}>Apollo 방식</span>
         <span style={{marginLeft:"auto",fontSize:11,color:"var(--t3)"}}>{buyers.length}명 전체 바이어 기준</span>
       </div>
       <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:24,marginBottom:riskBuyers.length?16:0}}>
