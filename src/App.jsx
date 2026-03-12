@@ -3073,6 +3073,13 @@ export default function App() {
   const [showLanding, setShowLanding] = useState(true);
   const isMobile = useIsMobile();
   const [showMobileBanner, setShowMobileBanner] = useState(false);
+
+  // 뒤로가기로 랜딩 복귀
+  useEffect(() => {
+    const onPop = () => { setShowLanding(true); setShowMobileBanner(false); };
+    window.addEventListener("popstate", onPop);
+    return () => window.removeEventListener("popstate", onPop);
+  }, []);
   const [tab, setTab] = useState("전체");
   const [sort, setSort] = useState({field:"score",asc:false});
   const [selected, setSelected] = useState(new Set());
@@ -3267,7 +3274,7 @@ export default function App() {
     <>
       <style>{CSS}</style>
       {showLanding && <LandingHero
-        onEnter={() => isMobile ? setShowMobileBanner(true) : setShowLanding(false)}
+        onEnter={() => { if (isMobile) { setShowMobileBanner(true); } else { history.pushState({ page: "platform" }, "", location.href); setShowLanding(false); } }}
         isMobile={isMobile}
       />}
       {showMobileBanner && <MobileDesktopBanner onClose={() => setShowMobileBanner(false)} />}
