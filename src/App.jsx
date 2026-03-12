@@ -3185,7 +3185,7 @@ export default function App() {
         const ids = new Set(p.map(n=>n.id));
         const newOnes = highValue
           .filter(b=>!ids.has(`save-${b.id}`))
-          .map(b=>({id:`save-${b.id}`,type:"match",title:"고가치 바이어 저장됨",body:`${b.name} (${b.score}점) 저장 — 빠른 접촉을 권장합니다`,ts:Date.now(),read:false}));
+          .map(b=>({id:`save-${b.id}`,type:"match",title:'"High Value" 바이어 저장됨',body:`${b.name} (${b.score}점) 저장 — 빠른 접촉을 권장합니다`,ts:Date.now(),read:false}));
         if (newOnes.length===0) return p;
         setNotifUnread(u=>u+newOnes.length);
         return [...newOnes,...p];
