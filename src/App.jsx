@@ -140,9 +140,9 @@ function NexportLogo({ iconSize = 28, textSize = 17 }) {
 }
 
 // ─────────── DATA ───────────
-const COUNTRIES = ["독일","미국","일본","베트남","스웨덴","네덜란드","영국","호주","캐나다","프랑스","싱가포르","태국","인도","브라질","멕시코"];
-const FLAGS = {"독일":"🇩🇪","미국":"🇺🇸","일본":"🇯🇵","베트남":"🇻🇳","스웨덴":"🇸🇪","네덜란드":"🇳🇱","영국":"🇬🇧","호주":"🇦🇺","캐나다":"🇨🇦","프랑스":"🇫🇷","싱가포르":"🇸🇬","태국":"🇹🇭","인도":"🇮🇳","브라질":"🇧🇷","멕시코":"🇲🇽"};
-const REGIONS = {"독일":"유럽","미국":"북미","일본":"아시아","베트남":"동남아","스웨덴":"유럽","네덜란드":"유럽","영국":"유럽","호주":"오세아니아","캐나다":"북미","프랑스":"유럽","싱가포르":"동남아","태국":"동남아","인도":"아시아","브라질":"남미","멕시코":"북미"};
+const COUNTRIES = ["독일","미국","일본","베트남","스웨덴","네덜란드","영국","호주","캐나다","프랑스","싱가포르","태국","인도","브라질","멕시코","아랍에미리트","사우디아라비아","튀르키예","이스라엘","남아프리카공화국","나이지리아","이집트","케냐"];
+const FLAGS = {"독일":"🇩🇪","미국":"🇺🇸","일본":"🇯🇵","베트남":"🇻🇳","스웨덴":"🇸🇪","네덜란드":"🇳🇱","영국":"🇬🇧","호주":"🇦🇺","캐나다":"🇨🇦","프랑스":"🇫🇷","싱가포르":"🇸🇬","태국":"🇹🇭","인도":"🇮🇳","브라질":"🇧🇷","멕시코":"🇲🇽","아랍에미리트":"🇦🇪","사우디아라비아":"🇸🇦","튀르키예":"🇹🇷","이스라엘":"🇮🇱","남아프리카공화국":"🇿🇦","나이지리아":"🇳🇬","이집트":"🇪🇬","케냐":"🇰🇪"};
+const REGIONS = {"독일":"유럽","미국":"북미","일본":"아시아","베트남":"동남아","스웨덴":"유럽","네덜란드":"유럽","영국":"유럽","호주":"오세아니아","캐나다":"북미","프랑스":"유럽","싱가포르":"동남아","태국":"동남아","인도":"아시아","브라질":"남미","멕시코":"북미","아랍에미리트":"중동","사우디아라비아":"중동","튀르키예":"중동","이스라엘":"중동","남아프리카공화국":"아프리카","나이지리아":"아프리카","이집트":"아프리카","케냐":"아프리카"};
 const INDUSTRIES = ["자동차 부품","전자부품","의료기기","항공우주","플라스틱 사출","금속가공","반도체 장비","화학소재","건설자재","에너지","식품기계","조선/해양","섬유/의류","포장재","냉동/공조","방산/방위","이차전지","로봇/자동화","철강/비철금속","공작기계"];
 const CERTS = ["ISO 9001","ISO 13485","IATF 16949","UL","CE","FDA","RoHS","REACH","JIS","AS9100"];
 const DEMANDS = ["CNC 정밀가공 부품","PCB 어셈블리","의료용 정밀 부품","항공기 구조 부품","플라스틱 사출 성형","스테인레스 정밀 부품","반도체 공정 부품","산업용 화학약품","알루미늄 패널/창호","태양광 모듈 부품","식품가공 설비","선박 엔진 부품","기능성 원단","산업용 포장 용기","냉동 컴프레서","방산용 정밀 부품","배터리 셀/모듈","산업용 로봇 부품","열연/냉연 강판","고정밀 공작기계"];
@@ -167,7 +167,7 @@ const REG_BY_INDUSTRY = {
 };
 const NAMES_FIRST = ["Hans","Sarah","Erik","Nguyen","Tanaka","Pierre","James","Maria","Sven","Akiko","John","Lisa","Marco","Priya","Carlos","Wei","Oliver","Sophie","Lars","Yuki","David","Anna","Michael","Julia","Robert","Nina","Thomas","Emma","Patrick","Linda"];
 const NAMES_LAST = ["Mueller","Chen","Johansson","Tran","Yamamoto","Dupont","Wilson","Garcia","Lindberg","Sato","Smith","Park","Rossi","Patel","Rodriguez","Zhang","Brown","Martin","Eriksson","Kim","Lee","Andersen","Fischer","Nakamura","Costa","Singh","Bergström","Hernandez","Novak","O'Brien"];
-const COMPANIES = ["TechParts GmbH","Pacific Trade Corp","Saigon Manufacturing","Nordic Solutions AB","Osaka Precision Co.","Rotterdam Metals BV","Thames Engineering","Sydney Industrial","Maple Leaf Tech","Lyon Aerospace","SG Components Pte","Bangkok Polymer","Delhi Precision","São Paulo Metals","Monterrey Auto Parts","Shanghai Tech Group","Manchester Steel","Paris Medical Devices","Stockholm Dynamics","Tokyo Electronics","Berlin Industrial AG","Melbourne Parts Co.","Toronto Precision Inc.","Seoul Components","Warsaw Engineering"];
+const COMPANIES = ["TechParts GmbH","Pacific Trade Corp","Saigon Manufacturing","Nordic Solutions AB","Osaka Precision Co.","Rotterdam Metals BV","Thames Engineering","Sydney Industrial","Maple Leaf Tech","Lyon Aerospace","SG Components Pte","Bangkok Polymer","Delhi Precision","São Paulo Metals","Monterrey Auto Parts","Shanghai Tech Group","Manchester Steel","Paris Medical Devices","Stockholm Dynamics","Tokyo Electronics","Berlin Industrial AG","Melbourne Parts Co.","Toronto Precision Inc.","Seoul Components","Warsaw Engineering","Dubai Trade Solutions","Riyadh Industrial Group","Istanbul Precision Co.","Tel Aviv Tech Ltd","Cape Town Manufacturing","Lagos Export Corp","Cairo Industrial Co.","Nairobi Parts Ltd"];
 
 function generateBuyers(n) {
   const buyers = [];
@@ -206,7 +206,7 @@ function generateBuyers(n) {
       revenue: rev,
       certifications: certs.length ? certs : [CERTS[Math.floor(Math.random()*CERTS.length)]],
       email: `${NAMES_FIRST[i%NAMES_FIRST.length].toLowerCase()}@${company.toLowerCase().replace(/[^a-z]/g,'').slice(0,12)}.com`,
-      phone: `+${[49,1,81,84,46,31,44,61,1,33,65,66,91,55,52][i%15]}-${Math.floor(Math.random()*900+100)}-${Math.floor(Math.random()*9000+1000)}`,
+      phone: `+${[49,1,81,84,46,31,44,61,1,33,65,66,91,55,52,971,966,90,972,27,234,20,254][i%23]}-${Math.floor(Math.random()*900+100)}-${Math.floor(Math.random()*9000+1000)}`,
       buyingIntent,
       hotSignal,
       regulatoryShield,
@@ -229,6 +229,8 @@ const QUICK_FILTERS = [
   { id:'negotiating', label:'🤝 협상중',  color:'--blue',   test:(b)=>b.status==='협상중' },
   { id:'europe',      label:'🌍 유럽',    color:'--cyan',   test:(b)=>b.region==='유럽' },
   { id:'asia',        label:'🌏 아시아',  color:'--violet', test:(b)=>b.region==='아시아'||b.region==='동남아' },
+  { id:'middleeast',  label:'🕌 중동',    color:'--amber',  test:(b)=>b.region==='중동' },
+  { id:'africa',      label:'🌍 아프리카', color:'--green',  test:(b)=>b.region==='아프리카' },
   { id:'regShield',   label:'🛡 규제보호', color:'--green',  test:(b)=>b.regulatoryShield&&b.regulatoryShield.length>0 },
   { id:'hotSignal',   label:'⚡ 핫시그널', color:'--amber',  test:(b)=>!!b.hotSignal },
 ];
@@ -1966,7 +1968,7 @@ function FilterSidebar({ filters, setFilters, collapsed, setCollapsed }) {
           ))}
         </FilterSection>
         <FilterSection title="지역" icon={Ic.Globe}>
-          {["유럽","북미","아시아","동남아","오세아니아","남미"].map(r => (
+          {["유럽","북미","아시아","동남아","오세아니아","남미","중동","아프리카"].map(r => (
             <CheckItem key={r} label={r} count={ALL_BUYERS.filter(b=>b.region===r).length}
               checked={filters.regions.includes(r)}
               onChange={()=>setFilters(p=>({...p,regions:p.regions.includes(r)?p.regions.filter(x=>x!==r):[...p.regions,r]}))} />
