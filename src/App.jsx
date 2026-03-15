@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, useCallback, useRef, useReducer } from "react";
+import { useState, useEffect, useMemo, useCallback, useRef, useReducer, Fragment } from "react";
 import { ComposableMap, Geographies, Geography, Marker } from "react-simple-maps";
 
 // ─────────── STYLES ───────────
@@ -140,30 +140,40 @@ function NexportLogo({ iconSize = 28, textSize = 17 }) {
 }
 
 // ─────────── DATA ───────────
-const COUNTRIES = ["독일","미국","일본","베트남","스웨덴","네덜란드","영국","호주","캐나다","프랑스","싱가포르","태국","인도","브라질","멕시코"];
-const FLAGS = {"독일":"🇩🇪","미국":"🇺🇸","일본":"🇯🇵","베트남":"🇻🇳","스웨덴":"🇸🇪","네덜란드":"🇳🇱","영국":"🇬🇧","호주":"🇦🇺","캐나다":"🇨🇦","프랑스":"🇫🇷","싱가포르":"🇸🇬","태국":"🇹🇭","인도":"🇮🇳","브라질":"🇧🇷","멕시코":"🇲🇽"};
-const REGIONS = {"독일":"유럽","미국":"북미","일본":"아시아","베트남":"동남아","스웨덴":"유럽","네덜란드":"유럽","영국":"유럽","호주":"오세아니아","캐나다":"북미","프랑스":"유럽","싱가포르":"동남아","태국":"동남아","인도":"아시아","브라질":"남미","멕시코":"북미"};
-const INDUSTRIES = ["자동차 부품","전자부품","의료기기","항공우주","플라스틱 사출","금속가공","반도체 장비","화학소재","건설자재","에너지"];
+const COUNTRIES = ["독일","미국","일본","베트남","스웨덴","네덜란드","영국","호주","캐나다","프랑스","싱가포르","태국","인도","브라질","멕시코","아랍에미리트","사우디아라비아","튀르키예","이스라엘","남아프리카공화국","나이지리아","이집트","케냐"];
+const FLAGS = {"독일":"🇩🇪","미국":"🇺🇸","일본":"🇯🇵","베트남":"🇻🇳","스웨덴":"🇸🇪","네덜란드":"🇳🇱","영국":"🇬🇧","호주":"🇦🇺","캐나다":"🇨🇦","프랑스":"🇫🇷","싱가포르":"🇸🇬","태국":"🇹🇭","인도":"🇮🇳","브라질":"🇧🇷","멕시코":"🇲🇽","아랍에미리트":"🇦🇪","사우디아라비아":"🇸🇦","튀르키예":"🇹🇷","이스라엘":"🇮🇱","남아프리카공화국":"🇿🇦","나이지리아":"🇳🇬","이집트":"🇪🇬","케냐":"🇰🇪"};
+const REGIONS = {"독일":"유럽","미국":"북미","일본":"아시아","베트남":"동남아","스웨덴":"유럽","네덜란드":"유럽","영국":"유럽","호주":"오세아니아","캐나다":"북미","프랑스":"유럽","싱가포르":"동남아","태국":"동남아","인도":"아시아","브라질":"남미","멕시코":"북미","아랍에미리트":"중동","사우디아라비아":"중동","튀르키예":"중동","이스라엘":"중동","남아프리카공화국":"아프리카","나이지리아":"아프리카","이집트":"아프리카","케냐":"아프리카"};
+const INDUSTRIES = ["자동차 부품","전자부품","의료기기","항공우주","플라스틱 사출","금속가공","반도체 장비","화학소재","건설자재","에너지","식품기계","조선/해양","섬유/의류","포장재","냉동/공조","방산/방위","이차전지","로봇/자동화","철강/비철금속","공작기계"];
 const CERTS = ["ISO 9001","ISO 13485","IATF 16949","UL","CE","FDA","RoHS","REACH","JIS","AS9100"];
-const DEMANDS = ["CNC 정밀가공 부품","PCB 어셈블리","아크릴 패널 가공","스테인레스 정밀 부품","알루미늄 다이캐스팅","플라스틱 사출 성형","금형 제작","표면처리 가공","레이저 커팅","프레스 부품"];
+const DEMANDS = ["CNC 정밀가공 부품","PCB 어셈블리","의료용 정밀 부품","항공기 구조 부품","플라스틱 사출 성형","스테인레스 정밀 부품","반도체 공정 부품","산업용 화학약품","알루미늄 패널/창호","태양광 모듈 부품","식품가공 설비","선박 엔진 부품","기능성 원단","산업용 포장 용기","냉동 컴프레서","방산용 정밀 부품","배터리 셀/모듈","산업용 로봇 부품","열연/냉연 강판","고정밀 공작기계"];
 const STATUSES = ["신규","검토중","협상중","LOI","계약완료"];
 const REGULATIONS = ["중국산 규제","인증 필수","한국산 우선","Buy American","공공 인프라"];
+const HOT_SIGNALS = ["채용 급증","최근 펀딩","RFQ 발송","전시회 참가","신규공장 건설"];
 const REG_BY_INDUSTRY = {
   "의료기기":["인증 필수","한국산 우선"],
   "항공우주":["인증 필수","Buy American"],
   "에너지":["중국산 규제","공공 인프라"],
   "반도체 장비":["중국산 규제"],
   "건설자재":["공공 인프라"],
+  "식품기계":["인증 필수"],
+  "조선/해양":["한국산 우선"],
+  "포장재":["한국산 우선"],
+  "냉동/공조":["중국산 규제"],
+  "방산/방위":["인증 필수","Buy American"],
+  "이차전지":["중국산 규제"],
+  "로봇/자동화":["중국산 규제"],
+  "철강/비철금속":["한국산 우선"],
+  "공작기계":["인증 필수"],
 };
-const NAMES_FIRST = ["Hans","Sarah","Erik","Nguyen","Tanaka","Pierre","James","Maria","Sven","Akiko","John","Lisa","Marco","Priya","Carlos","Wei","Oliver","Sophie","Lars","Yuki"];
-const NAMES_LAST = ["Mueller","Chen","Johansson","Tran","Yamamoto","Dupont","Wilson","Garcia","Lindberg","Sato","Smith","Park","Rossi","Patel","Rodriguez","Zhang","Brown","Martin","Eriksson","Kim"];
-const COMPANIES = ["TechParts GmbH","Pacific Trade Corp","Saigon Manufacturing","Nordic Solutions AB","Osaka Precision Co.","Rotterdam Metals BV","Thames Engineering","Sydney Industrial","Maple Leaf Tech","Lyon Aerospace","SG Components Pte","Bangkok Polymer","Delhi Precision","São Paulo Metals","Monterrey Auto Parts","Shanghai Tech Group","Manchester Steel","Paris Medical Devices","Stockholm Dynamics","Tokyo Electronics"];
+const NAMES_FIRST = ["Hans","Sarah","Erik","Nguyen","Tanaka","Pierre","James","Maria","Sven","Akiko","John","Lisa","Marco","Priya","Carlos","Wei","Oliver","Sophie","Lars","Yuki","David","Anna","Michael","Julia","Robert","Nina","Thomas","Emma","Patrick","Linda"];
+const NAMES_LAST = ["Mueller","Chen","Johansson","Tran","Yamamoto","Dupont","Wilson","Garcia","Lindberg","Sato","Smith","Park","Rossi","Patel","Rodriguez","Zhang","Brown","Martin","Eriksson","Kim","Lee","Andersen","Fischer","Nakamura","Costa","Singh","Bergström","Hernandez","Novak","O'Brien"];
+const COMPANIES = ["TechParts GmbH","Pacific Trade Corp","Saigon Manufacturing","Nordic Solutions AB","Osaka Precision Co.","Rotterdam Metals BV","Thames Engineering","Sydney Industrial","Maple Leaf Tech","Lyon Aerospace","SG Components Pte","Bangkok Polymer","Delhi Precision","São Paulo Metals","Monterrey Auto Parts","Shanghai Tech Group","Manchester Steel","Paris Medical Devices","Stockholm Dynamics","Tokyo Electronics","Berlin Industrial AG","Melbourne Parts Co.","Toronto Precision Inc.","Seoul Components","Warsaw Engineering","Dubai Trade Solutions","Riyadh Industrial Group","Istanbul Precision Co.","Tel Aviv Tech Ltd","Cape Town Manufacturing","Lagos Export Corp","Cairo Industrial Co.","Nairobi Parts Ltd"];
 
 function generateBuyers(n) {
   const buyers = [];
   for (let i = 0; i < n; i++) {
     const country = COUNTRIES[i % COUNTRIES.length];
-    const company = i < COMPANIES.length ? COMPANIES[i] : `${COMPANIES[i%COMPANIES.length]} ${Math.floor(i/20)+2}`;
+    const company = i < COMPANIES.length ? COMPANIES[i] : `${COMPANIES[i%COMPANIES.length]} ${Math.floor(i/COMPANIES.length)+2}`;
     const score = Math.max(45, Math.min(99, Math.floor(Math.random() * 55) + 45));
     const ind = INDUSTRIES[i % INDUSTRIES.length];
     const emp = [10,25,50,100,250,500,1000,5000][Math.floor(Math.random()*8)];
@@ -174,9 +184,15 @@ function generateBuyers(n) {
     const buyerType = regulatoryShield.length === 0 ? "가격우선"
       : regulatoryShield.some(r => r === "인증 필수" || r === "Buy American") ? "인증우선"
       : "한국산필수";
+    const buyingIntent = ["높음","중간","낮음"][Math.floor(Math.random()*3)];
+    const hotSignal = buyingIntent === "높음" && Math.random() > 0.45
+      ? HOT_SIGNALS[i % HOT_SIGNALS.length]
+      : buyingIntent === "중간" && Math.random() > 0.78
+        ? HOT_SIGNALS[(i+2) % HOT_SIGNALS.length]
+        : null;
     buyers.push({
       id: i + 1,
-      name: `${NAMES_FIRST[i%20]} ${NAMES_LAST[i%20]}`,
+      name: `${NAMES_FIRST[i%NAMES_FIRST.length]} ${NAMES_LAST[Math.floor(i/NAMES_FIRST.length)%NAMES_LAST.length]}`,
       company, country, flag: FLAGS[country] || "🌐",
       region: REGIONS[country] || "기타",
       industry: ind,
@@ -189,9 +205,10 @@ function generateBuyers(n) {
       employeeLabel: emp >= 1000 ? `${emp/1000}K+` : `${emp}+`,
       revenue: rev,
       certifications: certs.length ? certs : [CERTS[Math.floor(Math.random()*CERTS.length)]],
-      email: `${NAMES_FIRST[i%20].toLowerCase()}@${company.toLowerCase().replace(/[^a-z]/g,'').slice(0,12)}.com`,
-      phone: `+${[49,1,81,84,46,31,44,61,1,33,65,66,91,55,52][i%15]}-${Math.floor(Math.random()*900+100)}-${Math.floor(Math.random()*9000+1000)}`,
-      buyingIntent: ["높음","중간","낮음"][Math.floor(Math.random()*3)],
+      email: `${NAMES_FIRST[i%NAMES_FIRST.length].toLowerCase()}@${company.toLowerCase().replace(/[^a-z]/g,'').slice(0,12)}.com`,
+      phone: `+${[49,1,81,84,46,31,44,61,1,33,65,66,91,55,52,971,966,90,972,27,234,20,254][i%23]}-${Math.floor(Math.random()*900+100)}-${Math.floor(Math.random()*9000+1000)}`,
+      buyingIntent,
+      hotSignal,
       regulatoryShield,
       buyerType,
       saved: Math.random() > .7,
@@ -202,7 +219,7 @@ function generateBuyers(n) {
   return buyers;
 }
 
-const ALL_BUYERS = generateBuyers(60);
+const ALL_BUYERS = generateBuyers(1000);
 
 // ─────────── QUICK FILTERS ───────────
 const QUICK_FILTERS = [
@@ -212,7 +229,10 @@ const QUICK_FILTERS = [
   { id:'negotiating', label:'🤝 협상중',  color:'--blue',   test:(b)=>b.status==='협상중' },
   { id:'europe',      label:'🌍 유럽',    color:'--cyan',   test:(b)=>b.region==='유럽' },
   { id:'asia',        label:'🌏 아시아',  color:'--violet', test:(b)=>b.region==='아시아'||b.region==='동남아' },
+  { id:'middleeast',  label:'🕌 중동',    color:'--amber',  test:(b)=>b.region==='중동' },
+  { id:'africa',      label:'🌍 아프리카', color:'--green',  test:(b)=>b.region==='아프리카' },
   { id:'regShield',   label:'🛡 규제보호', color:'--green',  test:(b)=>b.regulatoryShield&&b.regulatoryShield.length>0 },
+  { id:'hotSignal',   label:'⚡ 핫시그널', color:'--amber',  test:(b)=>!!b.hotSignal },
 ];
 
 // ─────────── PLAYBOOKS ───────────
@@ -439,7 +459,10 @@ function BuyerDetailPanel({ buyer, onClose, onSave, isSaved, onEmailBuyer, onSho
           <div style={{display:"flex",alignItems:"center",gap:14,marginBottom:20}}>
             <div style={{width:52,height:52,borderRadius:13,background:"linear-gradient(135deg,var(--blue-dim),var(--violet-dim))",display:"flex",alignItems:"center",justifyContent:"center",fontSize:20,fontWeight:800,color:"var(--blue)",flexShrink:0}}>{buyer.name.charAt(0)}</div>
             <div>
-              <div style={{fontSize:16,fontWeight:800}}>{buyer.name}</div>
+              <div style={{fontSize:16,fontWeight:800,display:"flex",alignItems:"center",gap:8,flexWrap:"wrap"}}>
+                {buyer.name}
+                {buyer.hotSignal&&<span style={{fontSize:10,fontWeight:700,padding:"2px 8px",borderRadius:5,background:"rgba(245,158,11,.12)",color:"var(--amber)",border:"1px solid rgba(245,158,11,.25)"}}>⚡ {buyer.hotSignal}</span>}
+              </div>
               <div style={{fontSize:12,color:"var(--t3)",marginTop:2}}>{buyer.title}</div>
               <div style={{fontSize:12,color:"var(--t3)",display:"flex",alignItems:"center",gap:4,marginTop:1}}>{buyer.flag} {buyer.company} · {buyer.country}</div>
             </div>
@@ -730,13 +753,15 @@ function useInView(threshold=0.15) {
   useEffect(() => {
     const el = ref.current;
     if (!el) return;
-    // 마운트 직후 이미 뷰포트 안에 있으면 즉시 트리거 (IntersectionObserver는 비동기라 늦을 수 있음)
-    const rect = el.getBoundingClientRect();
-    if (rect.top < window.innerHeight && rect.bottom > 0) {
-      setInView(true);
-      return;
+    // 가장 가까운 스크롤 가능한 부모를 root로 사용 (내부 스크롤 컨테이너 대응)
+    let root = null;
+    let parent = el.parentElement;
+    while (parent && parent !== document.body) {
+      const s = getComputedStyle(parent);
+      if (s.overflowY === 'auto' || s.overflowY === 'scroll') { root = parent; break; }
+      parent = parent.parentElement;
     }
-    const obs = new IntersectionObserver(([e]) => { if(e.isIntersecting) setInView(true); }, {threshold});
+    const obs = new IntersectionObserver(([e]) => { if(e.isIntersecting) setInView(true); }, {threshold, root});
     obs.observe(el);
     return () => obs.disconnect();
   }, []);
@@ -842,6 +867,12 @@ function LandingHero({ onEnter, isMobile }) {
   const [howRef, howInView] = useInView(0.2);
   // ── ROI 비교 inView ──
   const [roiRef, roiInView] = useInView(0.15);
+  // ── ROI 계산기 state ──
+  const [tradeShowBudget, setTradeShowBudget] = useState(5000);
+  const nexportMonthly = 30;
+  const tradeShowConvRate = 0.01;
+  const nexportConvRate = 0.08;
+  const avgDealSize = 500;
   // ── Features inView ──
   const [featRef, featInView] = useInView(0.15);
 
@@ -971,8 +1002,8 @@ function LandingHero({ onEnter, isMobile }) {
           </div>
           <div className="hiw-grid" style={{display:isMobile?"flex":"grid",flexDirection:isMobile?"column":undefined,gridTemplateColumns:isMobile?undefined:"1fr auto 1fr auto 1fr",gap:isMobile?"16px":0,alignItems:isMobile?"stretch":"start"}}>
             {steps.map((s,i) => (
-              <>
-                <div key={`step-${i}`} style={{textAlign:"center",padding:"0 12px",opacity:howInView?1:0,animation:howInView?`staggerUp .6s cubic-bezier(0.2,0,0,1) ${i*200}ms both`:"none"}}>
+              <Fragment key={i}>
+                <div style={{textAlign:"center",padding:"0 12px",opacity:howInView?1:0,animation:howInView?`staggerUp .6s cubic-bezier(0.2,0,0,1) ${i*200}ms both`:"none"}}>
                   <div style={{width:56,height:56,borderRadius:16,background:s.dim,display:"flex",alignItems:"center",justifyContent:"center",margin:"0 auto 16px",color:s.color,border:`1px solid ${s.color}33`}}>
                     {s.icon}
                   </div>
@@ -981,12 +1012,12 @@ function LandingHero({ onEnter, isMobile }) {
                   <div style={{fontSize:13,color:"var(--t3)",lineHeight:1.65}}>{s.desc}</div>
                 </div>
                 {i < steps.length-1 && (
-                  <div key={`line-${i}`} className="hiw-connector" style={{display:"flex",alignItems:"center",paddingTop:28}}>
+                  <div className="hiw-connector" style={{display:"flex",alignItems:"center",paddingTop:28}}>
                     <div style={{height:2,width:howInView?60:0,background:`linear-gradient(90deg,${steps[i].color},${steps[i+1].color})`,borderRadius:2,transition:`width .8s cubic-bezier(0.2,0,0,1) ${i*200+300}ms`,opacity:howInView?1:0}}/>
                     <div style={{color:"var(--t4)",fontSize:16,marginLeft:4,opacity:howInView?1:0,transition:`opacity .4s ${i*200+400}ms`}}>→</div>
                   </div>
                 )}
-              </>
+              </Fragment>
             ))}
           </div>
         </div>
@@ -1099,6 +1130,61 @@ function LandingHero({ onEnter, isMobile }) {
             ))}
           </div>
         </div>
+
+        {/* ⑤-C 인터랙티브 ROI 계산기 */}
+        {!isMobile && (
+          <div style={{margin:"0 0 80px",padding:"36px 40px",borderRadius:20,background:"var(--bg-2)",border:"1px solid var(--border)",opacity:roiInView?1:0,transform:roiInView?"none":"translateY(16px)",transition:"all .7s cubic-bezier(0.2,0,0,1) .5s"}}>
+            <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:24}}>
+              <div style={{width:32,height:32,borderRadius:8,background:"rgba(245,158,11,.12)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:16}}>🧮</div>
+              <div>
+                <div style={{fontSize:15,fontWeight:800,color:"var(--t1)"}}>나의 ROI 직접 계산해보기</div>
+                <div style={{fontSize:12,color:"var(--t3)",marginTop:2}}>연간 전시회 예산을 입력하면 NEXPORT 대비 절감액을 즉시 계산합니다</div>
+              </div>
+            </div>
+            <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:32,alignItems:"center"}}>
+              {/* 슬라이더 */}
+              <div>
+                <div style={{display:"flex",justifyContent:"space-between",alignItems:"baseline",marginBottom:10}}>
+                  <label style={{fontSize:12,fontWeight:700,color:"var(--t2)"}}>연간 전시회 예산</label>
+                  <span style={{fontSize:22,fontWeight:900,color:"rgba(255,69,58,1)",fontFamily:"var(--mono)"}}>{tradeShowBudget.toLocaleString()}만원</span>
+                </div>
+                <input type="range" min={500} max={20000} step={500} value={tradeShowBudget}
+                  onChange={e=>setTradeShowBudget(Number(e.target.value))}
+                  style={{width:"100%",accentColor:"var(--blue)",cursor:"pointer"}}/>
+                <div style={{display:"flex",justifyContent:"space-between",fontSize:10,color:"var(--t4)",marginTop:4}}>
+                  <span>500만원</span><span>2억원</span>
+                </div>
+                <div style={{marginTop:16,display:"flex",gap:8,flexWrap:"wrap"}}>
+                  {[1000,3000,5000,10000].map(v=>(
+                    <div key={v} onClick={()=>setTradeShowBudget(v)}
+                      style={{padding:"4px 12px",borderRadius:6,fontSize:11,fontWeight:600,cursor:"pointer",transition:"all .15s",
+                        background:tradeShowBudget===v?"var(--blue)":"var(--bg-3)",
+                        color:tradeShowBudget===v?"#fff":"var(--t3)",
+                        border:`1px solid ${tradeShowBudget===v?"var(--blue)":"var(--border)"}`}}>
+                      {(v/1000).toFixed(0)}천만
+                    </div>
+                  ))}
+                </div>
+              </div>
+              {/* 결과 */}
+              <div style={{display:"grid",gap:12}}>
+                {[
+                  {label:"전시회 연간 비용",value:`${tradeShowBudget.toLocaleString()}만원`,sub:`${Math.round(tradeShowBudget*tradeShowConvRate)}만원 가치의 계약 (전환율 ${(tradeShowConvRate*100).toFixed(0)}%)`,color:"rgba(255,69,58,1)",bg:"rgba(255,69,58,.06)",border:"rgba(255,69,58,.2)"},
+                  {label:"NEXPORT 연간 비용",value:`${(nexportMonthly*12).toLocaleString()}만원`,sub:`${Math.round(tradeShowBudget*nexportConvRate/tradeShowConvRate*nexportMonthly*12/tradeShowBudget)}배 더 많은 바이어 접근 가능`,color:"var(--green)",bg:"rgba(16,185,129,.06)",border:"rgba(16,185,129,.2)"},
+                  {label:"연간 절감액",value:`${(tradeShowBudget - nexportMonthly*12).toLocaleString()}만원`,sub:`NEXPORT 전환 시 즉시 절약 — ${Math.round((1-nexportMonthly*12/tradeShowBudget)*100)}% 비용 절감`,color:"var(--cyan)",bg:"rgba(34,211,238,.06)",border:"rgba(34,211,238,.2)"},
+                ].map((item,i)=>(
+                  <div key={i} style={{padding:"12px 16px",borderRadius:10,background:item.bg,border:`1px solid ${item.border}`,display:"flex",justifyContent:"space-between",alignItems:"center",gap:8}}>
+                    <div>
+                      <div style={{fontSize:11,color:"var(--t3)",fontWeight:500}}>{item.label}</div>
+                      <div style={{fontSize:10,color:"var(--t4)",marginTop:2}}>{item.sub}</div>
+                    </div>
+                    <div style={{fontSize:17,fontWeight:900,color:item.color,fontFamily:"var(--mono)",flexShrink:0}}>{item.value}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* ⑤-M MISSION / VISION — 모바일 전용 */}
         {isMobile && (
@@ -1405,7 +1491,7 @@ function AIMatchView({ buyers }) {
 
 // ─────────── COLD EMAIL GENERATOR ───────────
 function ColdEmailModal({ buyer, onClose }) {
-  const [tone, setTone] = useState("formal");
+  const [tone, setTone] = useState(buyer.regulatoryShield?.length > 0 ? "regulatory" : "formal");
   const [lang, setLang] = useState("en");
   const [copied, setCopied] = useState(false);
   const [company, setCompany] = useState("한국정밀부품(주)");
@@ -1495,6 +1581,54 @@ ${buyer.industry} 분야를 리서치하다가 ${buyer.company}를 알게 되었
 ${company}`
       }
     },
+    regulatory: {
+      en: {
+        subject: `Certified Korean Supplier — ${(buyer.regulatoryShield||["Compliance"])[0]} Ready`,
+        body: `Dear ${buyer.name},
+
+I'm reaching out because ${buyer.company}'s procurement environment aligns perfectly with what ${company} offers as a certified Korean manufacturer.
+
+Your market's ${(buyer.regulatoryShield||["compliance"]).join(" and ")} requirements mean that sourcing from proven, certified non-Chinese suppliers has become a strategic priority — and ${company} is positioned to meet exactly these needs.
+
+Why Korean-origin ${product} from ${company}:
+• Fully compliant with ${(buyer.regulatoryShield||[]).join(", ")} requirements
+• ISO-certified manufacturing with complete traceability documentation
+• Zero trade restriction risk — Korean-origin goods face no tariff penalties
+• Proven export experience to ${buyer.country}
+
+Given the current supply chain landscape, we believe now is the ideal time to establish a reliable, compliant supply partnership before demand peaks.
+
+Would you be available for a 20-minute call this week to discuss your current sourcing needs?
+
+Best regards,
+[Your Name]
+${company}
+[Phone] | [Email]`
+      },
+      ko: {
+        subject: `규제 대응 공급망 파트너 제안 — ${company}`,
+        body: `${buyer.name} 님께,
+
+${buyer.company}의 조달 환경과 저희 ${company}의 역량이 정확히 일치한다고 판단하여 연락드립니다.
+
+귀사 시장의 ${(buyer.regulatoryShield||["규정 준수"]).join(", ")} 요건은 검증된 비중국산 공급망 확보를 전략적 과제로 만들었습니다. 저희 ${company}는 이 요구에 정확히 부응할 수 있습니다.
+
+규제 적합 조달에 ${company}를 선택해야 하는 이유:
+• ${(buyer.regulatoryShield||[]).join(", ")} 완전 준수 한국산 제품
+• ISO 인증 제조 + 완전한 이력 추적 문서
+• 무역 규제 리스크 없는 안정적 공급망
+• ${buyer.country} 수출 경험 보유 — 관세 페널티 없음
+
+현재의 공급망 환경을 고려할 때, 지금이 신뢰할 수 있는 규제 준수 공급 파트너십을 구축하기에 최적의 시점이라고 생각합니다.
+
+이번 주 20분 정도 통화가 가능하실까요?
+
+감사합니다.
+[이름]
+${company}
+[연락처]`
+      }
+    },
     urgent: {
       en: {
         subject: `Time-Sensitive: Exclusive Pricing for ${buyer.company}`,
@@ -1558,6 +1692,7 @@ ${company}
     {key:"formal",label:"포멀",icon:<Ic.Shield s={12}/>,desc:"비즈니스 공식"},
     {key:"friendly",label:"친근",icon:<Ic.Users s={12}/>,desc:"캐주얼 네트워킹"},
     {key:"urgent",label:"긴급",icon:<Ic.Eye s={12}/>,desc:"한시적 제안"},
+    ...(buyer.regulatoryShield?.length > 0 ? [{key:"regulatory",label:"규제 우위",icon:<span style={{fontSize:11}}>🛡</span>,desc:"규제 시장 특화"}] : []),
   ];
 
   return (
@@ -1568,7 +1703,10 @@ ${company}
         <div style={{padding:"16px 20px",borderBottom:"1px solid var(--border)",display:"flex",alignItems:"center",gap:12}}>
           <div style={{width:32,height:32,borderRadius:8,background:"var(--green-dim)",display:"flex",alignItems:"center",justifyContent:"center"}}><Ic.Mail s={16}/></div>
           <div style={{flex:1}}>
-            <div style={{fontSize:14,fontWeight:700}}>AI 이메일 생성</div>
+            <div style={{fontSize:14,fontWeight:700,display:"flex",alignItems:"center",gap:8}}>
+              AI 이메일 생성
+              {buyer.regulatoryShield?.length > 0 && <span style={{fontSize:9,fontWeight:700,padding:"2px 7px",borderRadius:4,background:"rgba(139,92,246,.15)",color:"var(--violet)",border:"1px solid rgba(139,92,246,.2)"}}>🛡 규제 우위 자동 선택됨</span>}
+            </div>
             <div style={{fontSize:11,color:"var(--t3)"}}>To: {buyer.name} ({buyer.email})</div>
           </div>
           <div onClick={onClose} style={{cursor:"pointer",padding:4,color:"var(--t4)"}}><Ic.X s={16}/></div>
@@ -1823,14 +1961,14 @@ function FilterSidebar({ filters, setFilters, collapsed, setCollapsed }) {
           </div>
         </div>
         <FilterSection title="산업" icon={Ic.Layers}>
-          {INDUSTRIES.slice(0,7).map(ind => (
+          {INDUSTRIES.map(ind => (
             <CheckItem key={ind} label={ind} count={ALL_BUYERS.filter(b=>b.industry===ind).length}
               checked={filters.industries.includes(ind)}
               onChange={()=>setFilters(p=>({...p,industries:p.industries.includes(ind)?p.industries.filter(x=>x!==ind):[...p.industries,ind]}))} />
           ))}
         </FilterSection>
         <FilterSection title="지역" icon={Ic.Globe}>
-          {["유럽","북미","아시아","동남아","오세아니아","남미"].map(r => (
+          {["유럽","북미","아시아","동남아","오세아니아","남미","중동","아프리카"].map(r => (
             <CheckItem key={r} label={r} count={ALL_BUYERS.filter(b=>b.region===r).length}
               checked={filters.regions.includes(r)}
               onChange={()=>setFilters(p=>({...p,regions:p.regions.includes(r)?p.regions.filter(x=>x!==r):[...p.regions,r]}))} />
@@ -2041,7 +2179,6 @@ function PipelineHealth({ buyers, buyerNotes }) {
       <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:20}}>
         <Ic.Target s={16}/>
         <span style={{fontSize:14,fontWeight:700,color:"var(--t1)"}}>파이프라인 건강도</span>
-        <span style={{fontSize:10,padding:"2px 7px",borderRadius:5,background:"var(--blue-dim)",color:"var(--blue)",fontWeight:600,border:"1px solid rgba(59,107,245,.15)"}}>Apollo 방식</span>
         <span style={{marginLeft:"auto",fontSize:11,color:"var(--t3)"}}>{buyers.length}명 전체 바이어 기준</span>
       </div>
       <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:24,marginBottom:riskBuyers.length?16:0}}>
@@ -2091,7 +2228,6 @@ function PlaybookView({ buyers, savedSet, onRunPlaybook }) {
         <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:6}}>
           <Ic.BookOpen s={20}/>
           <h2 style={{fontSize:20,fontWeight:700,color:"var(--t1)"}}>아웃리치 플레이북</h2>
-          <span style={{fontSize:11,padding:"3px 8px",borderRadius:6,background:"var(--violet-dim)",color:"var(--violet)",fontWeight:600,border:"1px solid rgba(139,92,246,.2)"}}>Apollo 방식</span>
         </div>
         <p style={{fontSize:13,color:"var(--t3)",maxWidth:560,lineHeight:1.6}}>
           단계별 바이어 접근 전략 — 플레이북을 실행하면 해당 바이어가 자동 선택됩니다. 이메일 발송, 비교 분석을 즉시 시작하세요.
@@ -2940,6 +3076,21 @@ export default function App() {
   const [showLanding, setShowLanding] = useState(true);
   const isMobile = useIsMobile();
   const [showMobileBanner, setShowMobileBanner] = useState(false);
+
+  // 뒤로가기/앞으로가기 랜딩↔플랫폼 전환
+  useEffect(() => {
+    const onPop = (e) => {
+      if (e.state?.page === "platform") {
+        setShowLanding(false);
+        setShowMobileBanner(false);
+      } else {
+        setShowLanding(true);
+        setShowMobileBanner(false);
+      }
+    };
+    window.addEventListener("popstate", onPop);
+    return () => window.removeEventListener("popstate", onPop);
+  }, []);
   const [tab, setTab] = useState("전체");
   const [sort, setSort] = useState({field:"score",asc:false});
   const [selected, setSelected] = useState(new Set());
@@ -3036,7 +3187,7 @@ export default function App() {
         const ids = new Set(p.map(n=>n.id));
         const newOnes = highValue
           .filter(b=>!ids.has(`save-${b.id}`))
-          .map(b=>({id:`save-${b.id}`,type:"match",title:"고가치 바이어 저장됨",body:`${b.name} (${b.score}점) 저장 — 빠른 접촉을 권장합니다`,ts:Date.now(),read:false}));
+          .map(b=>({id:`save-${b.id}`,type:"match",title:'"High Value" 바이어 저장됨',body:`${b.name} (${b.score}점) 저장 — 빠른 접촉을 권장합니다`,ts:Date.now(),read:false}));
         if (newOnes.length===0) return p;
         setNotifUnread(u=>u+newOnes.length);
         return [...newOnes,...p];
@@ -3134,7 +3285,7 @@ export default function App() {
     <>
       <style>{CSS}</style>
       {showLanding && <LandingHero
-        onEnter={() => isMobile ? setShowMobileBanner(true) : setShowLanding(false)}
+        onEnter={() => { if (isMobile) { setShowMobileBanner(true); } else { history.pushState({ page: "platform" }, "", location.href); setShowLanding(false); } }}
         isMobile={isMobile}
       />}
       {showMobileBanner && <MobileDesktopBanner onClose={() => setShowMobileBanner(false)} />}
@@ -3296,9 +3447,9 @@ export default function App() {
                   <th style={{width:40,padding:"8px 12px"}}><Checkbox checked={allOnPageSelected} indeterminate={selected.size>0&&!allOnPageSelected} onChange={toggleAll}/></th>
                   <th style={{width:30}}/>
                   {[
-                    ["name","바이어",180],["company","기업명",150],["country","국가",80],["industry","산업",110],
+                    ["name","바이어",180],["company","기업명",150],["country","국가",105],["industry","산업",110],
                     ["score","매칭점수",120],["demand","수요 품목",140],["volume","예상 규모",90],
-                    ["buyingIntent","의향",60],["status","상태",75],["email","이메일",170]
+                    ["buyingIntent","의향",90],["status","상태",75],["email","이메일",170]
                   ].map(([field,label,w])=>(
                     <th key={field} onClick={()=>toggleSort(field)} style={{
                       padding:"8px 10px",fontSize:10,fontWeight:700,color:"var(--t3)",textTransform:"uppercase",
@@ -3386,7 +3537,10 @@ fi fi${Math.min(i+1,5)}`}
                         <span style={{cursor:"pointer",color:starred.has(b.id)?"var(--amber)":"var(--t4)"}}>{starred.has(b.id)?<Ic.StarFill s={13}/>:<Ic.Star s={13}/>}</span>
                       </td>
                       <td style={{padding:"8px 10px"}}>
-                        <div style={{fontWeight:600,fontSize:13}}>{b.name}</div>
+                        <div style={{fontWeight:600,fontSize:13,display:"flex",alignItems:"center",gap:5}}>
+                          {b.name}
+                          {b.hotSignal&&<span style={{fontSize:9,fontWeight:700,padding:"1px 6px",borderRadius:3,background:"rgba(245,158,11,.15)",color:"var(--amber)",border:"1px solid rgba(245,158,11,.25)",whiteSpace:"nowrap",animation:"pulse 2s infinite"}}>⚡ {b.hotSignal}</span>}
+                        </div>
                         <div style={{fontSize:11,color:"var(--t3)",marginTop:1,display:"flex",alignItems:"center",gap:4,flexWrap:"wrap"}}>
                           <span>{b.title}</span>
                           {b.regulatoryShield&&b.regulatoryShield.length>0&&<span style={{fontSize:9,fontWeight:700,padding:"1px 5px",borderRadius:3,background:"rgba(139,92,246,.15)",color:"var(--violet)",whiteSpace:"nowrap"}}>🛡 규제보호</span>}
@@ -3396,14 +3550,14 @@ fi fi${Math.min(i+1,5)}`}
                         <div style={{fontSize:12,fontWeight:500}}>{b.company}</div>
                         <div style={{fontSize:10,color:"var(--t4)",marginTop:1}}>{b.employeeLabel} · {b.revenue}</div>
                       </td>
-                      <td style={{padding:"8px 10px",fontSize:12}}><span>{b.flag}</span> <span style={{color:"var(--t2)"}}>{b.country}</span></td>
+                      <td style={{padding:"8px 10px",fontSize:12,whiteSpace:"nowrap"}}><span>{b.flag}</span> <span style={{color:"var(--t2)"}}>{b.country}</span></td>
                       <td style={{padding:"8px 10px",fontSize:12,color:"var(--t2)"}}>{b.industry}</td>
                       <td style={{padding:"8px 10px"}}><ScoreBar score={b.score}/></td>
                       <td style={{padding:"8px 10px",fontSize:12,color:"var(--t2)"}}>{b.demand}</td>
                       <td style={{padding:"8px 10px"}}><span style={{fontFamily:"var(--mono)",fontSize:12,fontWeight:600,color:"var(--green)"}}>{b.volume}</span></td>
-                      <td style={{padding:"8px 10px"}}>
+                      <td style={{padding:"8px 10px",whiteSpace:"nowrap"}}>
                         <div><span style={{width:6,height:6,borderRadius:"50%",background:intentColor(b.buyingIntent),display:"inline-block",marginRight:4}}/><span style={{fontSize:11,color:intentColor(b.buyingIntent)}}>{b.buyingIntent}</span></div>
-                        {b.buyerType&&b.buyerType!=="가격우선"&&<div style={{fontSize:9,fontWeight:700,color:b.buyerType==="한국산필수"?"var(--green)":"var(--cyan)",marginTop:2}}>{b.buyerType==="한국산필수"?"🛡 한국산필수":"📋 인증우선"}</div>}
+                        {b.buyerType&&b.buyerType!=="가격우선"&&<div style={{fontSize:9,fontWeight:700,color:b.buyerType==="한국산필수"?"var(--green)":"var(--cyan)",marginTop:2,whiteSpace:"nowrap"}}>{b.buyerType==="한국산필수"?"🛡 한국산필수":"📋 인증우선"}</div>}
                       </td>
                       <td style={{padding:"8px 10px"}}><Badge color={statusColor(b.status)}>{b.status}</Badge></td>
                       <td style={{padding:"8px 10px",fontSize:11,color:"var(--t3)"}}>{b.email}</td>
@@ -3428,6 +3582,8 @@ fi fi${Math.min(i+1,5)}`}
               {filtered.length > 0 && `${(page-1)*perPage+1}-${Math.min(page*perPage,filtered.length)} / ${filtered.length}건`}
             </div>
             <div style={{display:"flex",gap:4,alignItems:"center"}}>
+              {/* 맨 앞 */}
+              <div onClick={()=>page>1&&setPage(1)} style={{padding:"4px 8px",borderRadius:4,border:"1px solid var(--border)",cursor:page>1?"pointer":"default",color:page>1?"var(--t2)":"var(--t4)",fontSize:11,fontFamily:"var(--mono)",letterSpacing:"-1px"}}>{"<<"}</div>
               <div onClick={()=>page>1&&setPage(p=>p-1)} style={{padding:"4px 8px",borderRadius:4,border:"1px solid var(--border)",cursor:page>1?"pointer":"default",color:page>1?"var(--t2)":"var(--t4)",fontSize:11}}><Ic.ChevLeft s={12}/></div>
               {Array.from({length:Math.min(7,totalPages)}, (_,i) => {
                 let p;
@@ -3444,8 +3600,9 @@ fi fi${Math.min(i+1,5)}`}
                 );
               })}
               <div onClick={()=>page<totalPages&&setPage(p=>p+1)} style={{padding:"4px 8px",borderRadius:4,border:"1px solid var(--border)",cursor:page<totalPages?"pointer":"default",color:page<totalPages?"var(--t2)":"var(--t4)",fontSize:11}}><Ic.ChevRight s={12}/></div>
+              {/* 맨 끝 */}
+              <div onClick={()=>page<totalPages&&setPage(totalPages)} style={{padding:"4px 8px",borderRadius:4,border:"1px solid var(--border)",cursor:page<totalPages?"pointer":"default",color:page<totalPages?"var(--t2)":"var(--t4)",fontSize:11,fontFamily:"var(--mono)",letterSpacing:"-1px"}}>{">>"}</div>
             </div>
-            <div style={{fontSize:11,color:"var(--t4)"}}>페이지당 {perPage}건</div>
           </div>
 
           {/* Floating Action Bar */}
