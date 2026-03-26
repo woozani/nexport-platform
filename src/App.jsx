@@ -895,7 +895,7 @@ function LandingHero({ onEnter, isMobile }) {
   const mockBuyers = [
     { name:"Sarah Chen", company:"Pacific Trade Corp", flag:"🇺🇸", score:98, email:"sarah@pacifictrade.com" },
     { name:"Hans Mueller", company:"TechParts GmbH", flag:"🇩🇪", score:97, email:"hans@techparts.de" },
-    { name:"Akiko Sato", company:"Lyon Aerospace", flag:"🇸🇪", score:96, email:"akiko@lyonaero..." },
+    { name:"Akiko Sato", company:"Lyon Aerospace", flag:"🇫🇷", score:96, email:"akiko@lyonaero..." },
   ];
 
   return (
@@ -1097,7 +1097,7 @@ function LandingHero({ onEnter, isMobile }) {
                 <div style={{fontSize:14,fontWeight:700,color:"var(--green)"}}>NEXPORT 사용 시</div>
               </div>
               {[
-                {label:"월 이용 요금",value:"30만원",sub:"3개월 구독 기준 / 전시회 대비 167배↓"},
+                {label:"월 이용 요금",value:"9.9만원~",sub:"Starter 기준 / 전시회 1회(5,000만원) 대비 500배↓"},
                 {label:"바이어 매칭 방식",value:"AI 정밀 매칭",sub:"규제·인증·산업·지역별 스코어링"},
                 {label:"바이어 발굴까지 걸리는 시간",value:"5분",sub:"검색 → 이메일 확보 → AI 추천 즉시"},
                 {label:"글로벌 바이어 접근",value:"즉시",sub:"60개국 검증된 바이어 DB 즉시 접근"},
@@ -1215,26 +1215,29 @@ function LandingHero({ onEnter, isMobile }) {
           </div>
         )}
 
-        {/* ⑥ FEATURES GRID — 데스크탑 전용 */}
-        {!isMobile &&
-        <div ref={featRef} style={{padding:"0 0 80px"}}>
-          <div style={{textAlign:"center",marginBottom:40,opacity:featInView?1:0,transform:featInView?"none":"translateY(16px)",transition:"all .6s cubic-bezier(0.2,0,0,1)"}}>
+        {/* ⑥ FEATURES GRID — 데스크탑 + 모바일 */}
+        <div ref={featRef} style={{padding:isMobile?"0 0 48px":"0 0 80px"}}>
+          <div style={{textAlign:"center",marginBottom:isMobile?24:40,opacity:featInView?1:0,transform:featInView?"none":"translateY(16px)",transition:"all .6s cubic-bezier(0.2,0,0,1)"}}>
             <div style={{fontSize:11,fontWeight:700,color:"var(--blue)",textTransform:"uppercase",letterSpacing:".12em",marginBottom:10}}>Features</div>
-            <h2 style={{fontSize:32,fontWeight:800,letterSpacing:"-.03em",color:"var(--t1)"}}>수출 전 과정을 하나의 플랫폼에서</h2>
+            <h2 style={{fontSize:isMobile?22:32,fontWeight:800,letterSpacing:"-.03em",color:"var(--t1)"}}>수출 전 과정을 하나의 플랫폼에서</h2>
           </div>
-          <div style={{display:"grid",gridTemplateColumns:"repeat(2,1fr)",gap:16}}>
+          <div style={{display:"grid",gridTemplateColumns:isMobile?"1fr":"repeat(2,1fr)",gap:isMobile?12:16}}>
             {features.map((f,i)=>(
-              <div key={i} style={{padding:"28px 28px 24px",borderRadius:14,background:"var(--bg-2)",border:"1px solid var(--border)",boxShadow:"var(--card-shadow)",transition:"all .25s cubic-bezier(0.2,0,0,1)",cursor:"default",opacity:featInView?1:0,animation:featInView?`staggerUp .55s cubic-bezier(0.2,0,0,1) ${i*110}ms both`:"none",position:"relative",overflow:"hidden"}}
-                onMouseEnter={e=>{e.currentTarget.style.borderColor=f.color+"55";e.currentTarget.style.transform="translateY(-4px)";e.currentTarget.style.boxShadow="var(--glass-shadow)"}}
-                onMouseLeave={e=>{e.currentTarget.style.borderColor="var(--border)";e.currentTarget.style.transform="none";e.currentTarget.style.boxShadow="var(--card-shadow)"}}>
-                <div style={{width:46,height:46,borderRadius:12,background:f.dim,display:"flex",alignItems:"center",justifyContent:"center",marginBottom:16,color:f.color,border:`1px solid ${f.color}22`}}>{f.icon}</div>
-                <div style={{fontSize:16,fontWeight:700,color:"var(--t1)",marginBottom:8}}>{f.title}</div>
-                <div style={{fontSize:13,color:"var(--t3)",lineHeight:1.65}}>{f.desc}</div>
-                <div style={{position:"absolute",bottom:20,right:20,fontSize:16,color:f.color,opacity:.5}}>→</div>
+              <div key={i} style={{padding:isMobile?"20px 18px 18px":"28px 28px 24px",borderRadius:isMobile?12:14,background:"var(--bg-2)",border:"1px solid var(--border)",boxShadow:"var(--card-shadow)",transition:"all .25s cubic-bezier(0.2,0,0,1)",cursor:"default",opacity:featInView?1:0,animation:featInView?`staggerUp .55s cubic-bezier(0.2,0,0,1) ${i*110}ms both`:"none",position:"relative",overflow:"hidden"}}
+                onMouseEnter={e=>{if(!isMobile){e.currentTarget.style.borderColor=f.color+"55";e.currentTarget.style.transform="translateY(-4px)";e.currentTarget.style.boxShadow="var(--glass-shadow)"}}}
+                onMouseLeave={e=>{if(!isMobile){e.currentTarget.style.borderColor="var(--border)";e.currentTarget.style.transform="none";e.currentTarget.style.boxShadow="var(--card-shadow)"}}}>
+                <div style={{display:"flex",alignItems:isMobile?"center":"flex-start",gap:isMobile?14:0,flexDirection:isMobile?"row":"column"}}>
+                  <div style={{width:isMobile?40:46,height:isMobile?40:46,minWidth:isMobile?40:46,borderRadius:isMobile?10:12,background:f.dim,display:"flex",alignItems:"center",justifyContent:"center",marginBottom:isMobile?0:16,color:f.color,border:`1px solid ${f.color}22`}}>{f.icon}</div>
+                  <div>
+                    <div style={{fontSize:isMobile?14:16,fontWeight:700,color:"var(--t1)",marginBottom:isMobile?4:8}}>{f.title}</div>
+                    <div style={{fontSize:isMobile?12:13,color:"var(--t3)",lineHeight:1.65}}>{f.desc}</div>
+                  </div>
+                </div>
+                {!isMobile && <div style={{position:"absolute",bottom:20,right:20,fontSize:16,color:f.color,opacity:.5}}>→</div>}
               </div>
             ))}
           </div>
-        </div>}
+        </div>
 
         {/* ⑥-B 인증·규제 보호 쇼케이스 */}
         <div ref={regRef} style={{padding:"0 0 80px"}}>
@@ -1394,6 +1397,98 @@ function LandingHero({ onEnter, isMobile }) {
           )}
         </div>
 
+        {/* ⑥-C PRICING */}
+        <div style={{padding:isMobile?"0 0 48px":"0 0 80px"}}>
+          <div style={{textAlign:"center",marginBottom:isMobile?24:44}}>
+            <div style={{fontSize:11,fontWeight:700,color:"var(--violet)",textTransform:"uppercase",letterSpacing:".12em",marginBottom:10}}>Pricing</div>
+            <h2 style={{fontSize:isMobile?22:32,fontWeight:800,letterSpacing:"-.03em",color:"var(--t1)"}}>투명한 요금제, 숨겨진 비용 없음</h2>
+            <p style={{fontSize:isMobile?13:15,color:"var(--t3)",marginTop:10}}>14일 무료 체험 · 신용카드 불필요 · 언제든 해지 가능</p>
+          </div>
+          <div style={{display:"grid",gridTemplateColumns:isMobile?"1fr":"repeat(3,1fr)",gap:isMobile?16:20,maxWidth:960,margin:"0 auto"}}>
+            {/* Free */}
+            <div style={{padding:isMobile?"24px 20px":"32px 28px",borderRadius:16,background:"var(--bg-2)",border:"1px solid var(--border)",boxShadow:"var(--card-shadow)"}}>
+              <div style={{fontSize:12,fontWeight:700,color:"var(--t3)",textTransform:"uppercase",letterSpacing:".08em",marginBottom:8}}>Free</div>
+              <div style={{display:"flex",alignItems:"baseline",gap:4,marginBottom:4}}>
+                <span style={{fontSize:isMobile?32:40,fontWeight:900,color:"var(--t1)"}}>₩0</span>
+                <span style={{fontSize:13,color:"var(--t3)"}}>/월</span>
+              </div>
+              <div style={{fontSize:12,color:"var(--t4)",marginBottom:20}}>기능 탐색용</div>
+              <div style={{borderTop:"1px solid var(--border)",paddingTop:16,display:"flex",flexDirection:"column",gap:10}}>
+                {["바이어 검색 3회/일","AI 매칭 미리보기","기본 국가 필터"].map((t,i)=>(
+                  <div key={i} style={{display:"flex",alignItems:"center",gap:8,fontSize:13,color:"var(--t2)"}}>
+                    <span style={{color:"var(--green)",fontSize:14}}>✓</span>{t}
+                  </div>
+                ))}
+              </div>
+              <div onClick={onEnter} style={{marginTop:24,padding:"12px 0",borderRadius:10,textAlign:"center",fontSize:13,fontWeight:700,cursor:"pointer",border:"1px solid var(--border)",color:"var(--t2)",transition:"all .2s"}}
+                onMouseEnter={e=>{e.currentTarget.style.borderColor="var(--blue)";e.currentTarget.style.color="var(--blue)"}}
+                onMouseLeave={e=>{e.currentTarget.style.borderColor="var(--border)";e.currentTarget.style.color="var(--t2)"}}>
+                무료로 시작
+              </div>
+            </div>
+            {/* Starter — 추천 */}
+            <div style={{padding:isMobile?"24px 20px":"32px 28px",borderRadius:16,background:"var(--bg-2)",border:"2px solid var(--blue)",boxShadow:"0 0 40px rgba(10,132,255,.12)",position:"relative"}}>
+              <div style={{position:"absolute",top:-12,left:"50%",transform:"translateX(-50%)",padding:"4px 16px",borderRadius:20,background:"var(--blue)",color:"#fff",fontSize:11,fontWeight:700,whiteSpace:"nowrap"}}>가장 인기</div>
+              <div style={{fontSize:12,fontWeight:700,color:"var(--blue)",textTransform:"uppercase",letterSpacing:".08em",marginBottom:8}}>Starter</div>
+              <div style={{display:"flex",alignItems:"baseline",gap:4,marginBottom:4}}>
+                <span style={{fontSize:isMobile?32:40,fontWeight:900,color:"var(--t1)"}}>₩99,000</span>
+                <span style={{fontSize:13,color:"var(--t3)"}}>/월</span>
+              </div>
+              <div style={{fontSize:12,color:"var(--t4)",marginBottom:20}}>수출 시작 단계</div>
+              <div style={{borderTop:"1px solid var(--border)",paddingTop:16,display:"flex",flexDirection:"column",gap:10}}>
+                {["바이어 검색 무제한","AI 매칭 월 50회","콜드이메일 월 200건","인증·규제 필터","기본 대시보드"].map((t,i)=>(
+                  <div key={i} style={{display:"flex",alignItems:"center",gap:8,fontSize:13,color:"var(--t2)"}}>
+                    <span style={{color:"var(--green)",fontSize:14}}>✓</span>{t}
+                  </div>
+                ))}
+              </div>
+              <div onClick={onEnter} style={{marginTop:24,padding:"12px 0",borderRadius:10,textAlign:"center",fontSize:13,fontWeight:700,cursor:"pointer",background:"var(--blue)",color:"#fff",transition:"all .2s"}}
+                onMouseEnter={e=>e.currentTarget.style.opacity="0.85"} onMouseLeave={e=>e.currentTarget.style.opacity="1"}>
+                14일 무료 체험 →
+              </div>
+            </div>
+            {/* Pro */}
+            <div style={{padding:isMobile?"24px 20px":"32px 28px",borderRadius:16,background:"var(--bg-2)",border:"1px solid var(--border)",boxShadow:"var(--card-shadow)"}}>
+              <div style={{fontSize:12,fontWeight:700,color:"var(--violet)",textTransform:"uppercase",letterSpacing:".08em",marginBottom:8}}>Pro</div>
+              <div style={{display:"flex",alignItems:"baseline",gap:4,marginBottom:4}}>
+                <span style={{fontSize:isMobile?32:40,fontWeight:900,color:"var(--t1)"}}>₩290,000</span>
+                <span style={{fontSize:13,color:"var(--t3)"}}>/월</span>
+              </div>
+              <div style={{fontSize:12,color:"var(--t4)",marginBottom:20}}>본격 수출 확장</div>
+              <div style={{borderTop:"1px solid var(--border)",paddingTop:16,display:"flex",flexDirection:"column",gap:10}}>
+                {["Starter 전체 기능 포함","AI 매칭 무제한","콜드이메일 무제한","고급 분석 대시보드","우선 기술 지원","API 연동"].map((t,i)=>(
+                  <div key={i} style={{display:"flex",alignItems:"center",gap:8,fontSize:13,color:"var(--t2)"}}>
+                    <span style={{color:"var(--green)",fontSize:14}}>✓</span>{t}
+                  </div>
+                ))}
+              </div>
+              <div onClick={onEnter} style={{marginTop:24,padding:"12px 0",borderRadius:10,textAlign:"center",fontSize:13,fontWeight:700,cursor:"pointer",border:"1px solid var(--violet)",color:"var(--violet)",transition:"all .2s"}}
+                onMouseEnter={e=>{e.currentTarget.style.background="var(--violet)";e.currentTarget.style.color="#fff"}}
+                onMouseLeave={e=>{e.currentTarget.style.background="transparent";e.currentTarget.style.color="var(--violet)"}}>
+                Pro 시작하기 →
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* ⑥-D 신뢰 요소 — 지원 기관 & 수상 */}
+        <div style={{padding:isMobile?"0 0 48px":"0 0 80px",textAlign:"center"}}>
+          <div style={{fontSize:11,fontWeight:700,color:"var(--t4)",textTransform:"uppercase",letterSpacing:".12em",marginBottom:isMobile?20:28}}>Trusted & Supported By</div>
+          <div style={{display:"flex",flexWrap:"wrap",justifyContent:"center",alignItems:"center",gap:isMobile?16:32}}>
+            {[
+              {name:"KOTRA",desc:"대한무역투자진흥공사"},
+              {name:"중소벤처기업부",desc:"창업지원"},
+              {name:"K-Startup",desc:"글로벌 프로그램"},
+              {name:"Hunter.io",desc:"공식 파트너"},
+            ].map((org,i)=>(
+              <div key={i} style={{padding:isMobile?"12px 18px":"14px 28px",borderRadius:10,background:"var(--bg-2)",border:"1px solid var(--border)",display:"flex",flexDirection:"column",alignItems:"center",gap:4,minWidth:isMobile?120:140}}>
+                <div style={{fontSize:isMobile?13:14,fontWeight:700,color:"var(--t2)"}}>{org.name}</div>
+                <div style={{fontSize:10,color:"var(--t4)"}}>{org.desc}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+
         {/* ⑦ BOTTOM CTA */}
         <div style={{margin:"0 0 60px",padding:isMobile?"40px 20px":"56px 40px",borderRadius:20,background:"linear-gradient(135deg,rgba(10,132,255,.09),rgba(191,90,242,.06))",border:"1px solid rgba(10,132,255,.18)",textAlign:"center",position:"relative",overflow:"hidden"}}>
           <div style={{position:"absolute",top:"50%",left:"50%",transform:"translate(-50%,-50%)",width:"60%",height:"60%",borderRadius:"50%",background:"radial-gradient(circle,rgba(10,132,255,.07) 0%,transparent 70%)",pointerEvents:"none"}}/>
@@ -1409,8 +1504,18 @@ function LandingHero({ onEnter, isMobile }) {
         </div>
 
         {/* Footer */}
-        <div style={{textAlign:"center",padding:"24px 0 40px",borderTop:"1px solid var(--border)"}}>
-          <div style={{fontSize:11,color:"var(--t4)"}}>© 2026 NEXPORT. AI 기반 수출 바이어 매칭 플랫폼</div>
+        <div style={{padding:"32px 0 40px",borderTop:"1px solid var(--border)"}}>
+          <div style={{display:"flex",flexDirection:isMobile?"column":"row",justifyContent:"space-between",alignItems:"center",gap:isMobile?16:0}}>
+            <div style={{fontSize:11,color:"var(--t4)"}}>© 2026 NEXPORT. AI 기반 수출 바이어 매칭 플랫폼</div>
+            <div style={{display:"flex",gap:20,alignItems:"center"}}>
+              {[{label:"이용약관",href:"#"},{label:"개인정보처리방침",href:"#"},{label:"고객센터",href:"mailto:support@nexport.trade"}].map((link,i)=>(
+                <a key={i} href={link.href} style={{fontSize:11,color:"var(--t4)",textDecoration:"none",transition:"color .2s"}}
+                  onMouseEnter={e=>e.currentTarget.style.color="var(--t2)"} onMouseLeave={e=>e.currentTarget.style.color="var(--t4)"}>
+                  {link.label}
+                </a>
+              ))}
+            </div>
+          </div>
         </div>
       </div>
     </div>
