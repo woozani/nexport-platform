@@ -875,12 +875,15 @@ function LandingHero({ onEnter, isMobile }) {
   const avgDealSize = 500;
   // ── Features inView ──
   const [featRef, featInView] = useInView(0.15);
+  // ── 인증·규제 섹션 inView ──
+  const [regRef, regInView] = useInView(0.15);
+  const [activeRegTab, setActiveRegTab] = useState("cert");
 
   const features = [
-    { icon: <Ic.Search s={20}/>, title: "바이어 탐색", desc: "60개국 산업·인증·지역별 고급 필터링으로 최적의 바이어를 즉시 발굴하세요", color: "var(--blue)", dim: "var(--blue-dim)" },
-    { icon: <Ic.Mail s={20}/>, title: "이메일 파인더", desc: "Hunter.io 기반 실시간 바이어 이메일 검색 및 검증으로 직통 연락처 확보", color: "var(--cyan)", dim: "var(--cyan-dim)" },
-    { icon: <Ic.Bar s={20}/>, title: "세일즈 대시보드", desc: "파이프라인 관리, KPI 지표, 전환율 분석을 한눈에 모니터링", color: "var(--amber)", dim: "var(--amber-dim)" },
-    { icon: <Ic.Sparkle s={20}/>, title: "AI 매칭", desc: "제조사 프로필 기반 TOP 15 바이어 자동 추천 — 매칭 근거까지 설명", color: "var(--green)", dim: "var(--green-dim)" },
+    { icon: <Ic.Search s={20}/>, title: "AI 바이어 매칭", desc: "제조사 프로필(산업·인증·지역) 입력 시 AI가 최적 바이어 TOP 15를 자동 추천 — 매칭 근거까지 설명", color: "var(--blue)", dim: "var(--blue-dim)" },
+    { icon: <Ic.Mail s={20}/>, title: "콜드이메일 자동화", desc: "개인화 이메일 자동 생성·전송, 오픈율/클릭률 실시간 추적으로 세일즈 효율 극대화", color: "var(--cyan)", dim: "var(--cyan-dim)" },
+    { icon: <Ic.Shield s={20}/>, title: "인증·규제 필터", desc: "수출 대상국별 필수 인증(CE, FDA 등) 및 규제 요건을 자동 필터링 — 한국산 유리 시장 즉시 파악", color: "var(--green)", dim: "var(--green-dim)" },
+    { icon: <Ic.Bar s={20}/>, title: "세일즈 대시보드", desc: "바이어 응답률, 파이프라인 현황, 성과 지표를 한눈에 관리하고 모니터링", color: "var(--amber)", dim: "var(--amber-dim)" },
   ];
 
   const steps = [
@@ -1232,6 +1235,164 @@ function LandingHero({ onEnter, isMobile }) {
             ))}
           </div>
         </div>}
+
+        {/* ⑥-B 인증·규제 보호 쇼케이스 */}
+        <div ref={regRef} style={{padding:"0 0 80px"}}>
+          <div style={{textAlign:"center",marginBottom:isMobile?28:48,opacity:regInView?1:0,transform:regInView?"none":"translateY(20px)",transition:"all .6s cubic-bezier(0.2,0,0,1)"}}>
+            <div style={{display:"inline-flex",alignItems:"center",gap:6,padding:"4px 14px",borderRadius:20,background:"rgba(16,185,129,.1)",border:"1px solid rgba(16,185,129,.28)",fontSize:11,fontWeight:700,color:"var(--green)",marginBottom:12,letterSpacing:".04em"}}>
+              <Ic.Shield s={12}/> Certification & Regulation
+            </div>
+            <h2 style={{fontSize:isMobile?22:32,fontWeight:800,letterSpacing:"-.03em",color:"var(--t1)"}}>
+              인증·규제 필터로 <span style={{color:"var(--green)"}}>한국산 유리 시장</span> 자동 발굴
+            </h2>
+            <p style={{fontSize:isMobile?13:15,color:"var(--t3)",marginTop:10,maxWidth:600,margin:"10px auto 0"}}>
+              수출 대상국별 필수 인증과 규제 요건을 자동 분석 — 한국 제조업체에 유리한 바이어를 우선 추천합니다
+            </p>
+          </div>
+
+          {/* 탭 토글 */}
+          <div style={{display:"flex",justifyContent:"center",gap:8,marginBottom:isMobile?20:32,opacity:regInView?1:0,transition:"opacity .6s .15s"}}>
+            {[{key:"cert",label:"인증 필터",icon:<Ic.Shield s={13}/>},{key:"reg",label:"규제 보호",icon:<span style={{fontSize:12}}>🛡</span>}].map(tab=>(
+              <div key={tab.key} onClick={()=>setActiveRegTab(tab.key)}
+                style={{display:"flex",alignItems:"center",gap:6,padding:"8px 20px",borderRadius:10,fontSize:12,fontWeight:700,cursor:"pointer",transition:"all .2s",
+                  background:activeRegTab===tab.key?"var(--green)":"var(--bg-2)",
+                  color:activeRegTab===tab.key?"#fff":"var(--t2)",
+                  border:`1px solid ${activeRegTab===tab.key?"var(--green)":"var(--border)"}`}}>
+                {tab.icon}{tab.label}
+              </div>
+            ))}
+          </div>
+
+          {/* 인증 필터 탭 */}
+          {activeRegTab==="cert" && (
+            <div style={{display:isMobile?"flex":"grid",flexDirection:isMobile?"column":undefined,gridTemplateColumns:isMobile?undefined:"1fr 1fr",gap:isMobile?16:24,opacity:regInView?1:0,transform:regInView?"none":"translateY(16px)",transition:"all .7s cubic-bezier(0.2,0,0,1) .2s"}}>
+              {/* 좌측: 인증 배지 시각화 */}
+              <div style={{padding:isMobile?"22px 18px":"32px",borderRadius:16,background:"var(--bg-2)",border:"1px solid var(--border)",boxShadow:"var(--card-shadow)"}}>
+                <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:20}}>
+                  <div style={{width:32,height:32,borderRadius:8,background:"rgba(34,211,238,.12)",display:"flex",alignItems:"center",justifyContent:"center",color:"var(--cyan)"}}><Ic.Shield s={16}/></div>
+                  <div>
+                    <div style={{fontSize:14,fontWeight:700,color:"var(--t1)"}}>국제 인증 자동 매칭</div>
+                    <div style={{fontSize:11,color:"var(--t3)"}}>바이어가 요구하는 인증을 보유 인증과 자동 비교</div>
+                  </div>
+                </div>
+                <div style={{display:"flex",flexWrap:"wrap",gap:8,marginBottom:20}}>
+                  {["ISO 9001","CE","FDA","UL","RoHS","REACH","ISO 13485","IATF 16949","AS9100","JIS"].map((cert,i)=>(
+                    <div key={cert} style={{padding:"6px 14px",borderRadius:8,fontSize:11,fontWeight:700,letterSpacing:".02em",
+                      background:i<4?"rgba(16,185,129,.1)":"var(--bg-3)",
+                      color:i<4?"var(--green)":"var(--t3)",
+                      border:`1px solid ${i<4?"rgba(16,185,129,.25)":"var(--border)"}`,
+                      animation:regInView?`staggerUp .4s cubic-bezier(0.2,0,0,1) ${i*60}ms both`:"none"}}>
+                      {i<4&&<span style={{marginRight:4}}>✓</span>}{cert}
+                    </div>
+                  ))}
+                </div>
+                <div style={{padding:"14px 16px",borderRadius:10,background:"rgba(16,185,129,.06)",border:"1px solid rgba(16,185,129,.18)"}}>
+                  <div style={{display:"flex",alignItems:"center",gap:6,marginBottom:6}}>
+                    <span style={{fontSize:12}}>✅</span>
+                    <span style={{fontSize:12,fontWeight:700,color:"var(--green)"}}>4개 인증 일치</span>
+                    <span style={{fontSize:10,color:"var(--t4)"}}>/ 10개 중</span>
+                  </div>
+                  <div style={{height:6,borderRadius:3,background:"var(--bg-3)",overflow:"hidden"}}>
+                    <div style={{width:regInView?"40%":"0%",height:"100%",borderRadius:3,background:"linear-gradient(90deg,var(--green),var(--cyan))",transition:"width 1.2s cubic-bezier(0.2,0,0,1) .5s"}}/>
+                  </div>
+                </div>
+              </div>
+
+              {/* 우측: 산업별 필수 인증 매트릭스 */}
+              <div style={{padding:isMobile?"22px 18px":"32px",borderRadius:16,background:"var(--bg-2)",border:"1px solid var(--border)",boxShadow:"var(--card-shadow)"}}>
+                <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:20}}>
+                  <div style={{width:32,height:32,borderRadius:8,background:"rgba(10,132,255,.12)",display:"flex",alignItems:"center",justifyContent:"center",color:"var(--blue)"}}><Ic.Bar s={16}/></div>
+                  <div>
+                    <div style={{fontSize:14,fontWeight:700,color:"var(--t1)"}}>산업별 필수 인증 매트릭스</div>
+                    <div style={{fontSize:11,color:"var(--t3)"}}>수출 대상 산업에 따른 필수 인증 자동 안내</div>
+                  </div>
+                </div>
+                {[
+                  {industry:"의료기기",certs:["FDA","CE","ISO 13485"],flag:"🇺🇸🇪🇺"},
+                  {industry:"자동차 부품",certs:["IATF 16949","CE","UL"],flag:"🇩🇪🇺🇸"},
+                  {industry:"전자·반도체",certs:["RoHS","REACH","UL"],flag:"🇪🇺🇯🇵"},
+                  {industry:"항공우주",certs:["AS9100","ISO 9001"],flag:"🇺🇸🇸🇪"},
+                ].map((row,i)=>(
+                  <div key={i} style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"10px 12px",borderRadius:8,marginBottom:6,background:i%2===0?"rgba(120,120,128,.03)":"transparent",
+                    opacity:regInView?1:0,animation:regInView?`staggerUp .45s cubic-bezier(0.2,0,0,1) ${i*100+200}ms both`:"none"}}>
+                    <div style={{display:"flex",alignItems:"center",gap:8}}>
+                      <span style={{fontSize:14}}>{row.flag}</span>
+                      <span style={{fontSize:12,fontWeight:600,color:"var(--t1)"}}>{row.industry}</span>
+                    </div>
+                    <div style={{display:"flex",gap:4,flexWrap:"wrap"}}>
+                      {row.certs.map(c=>(
+                        <span key={c} style={{padding:"3px 8px",borderRadius:5,fontSize:10,fontWeight:600,background:"var(--cyan-dim)",color:"var(--cyan)",border:"1px solid rgba(34,211,238,.15)"}}>{c}</span>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* 규제 보호 탭 */}
+          {activeRegTab==="reg" && (
+            <div style={{display:isMobile?"flex":"grid",flexDirection:isMobile?"column":undefined,gridTemplateColumns:isMobile?undefined:"1fr 1fr",gap:isMobile?16:24,opacity:regInView?1:0,transform:regInView?"none":"translateY(16px)",transition:"all .7s cubic-bezier(0.2,0,0,1) .2s"}}>
+              {/* 좌측: 규제 보호 시장 */}
+              <div style={{padding:isMobile?"22px 18px":"32px",borderRadius:16,background:"var(--bg-2)",border:"1px solid var(--border)",boxShadow:"var(--card-shadow)"}}>
+                <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:20}}>
+                  <div style={{width:32,height:32,borderRadius:8,background:"rgba(139,92,246,.12)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:16}}>🛡</div>
+                  <div>
+                    <div style={{fontSize:14,fontWeight:700,color:"var(--t1)"}}>한국산 유리 규제 시장</div>
+                    <div style={{fontSize:11,color:"var(--t3)"}}>중국산 규제·Buy American 등 한국산이 유리한 시장 자동 탐지</div>
+                  </div>
+                </div>
+                {[
+                  {reg:"중국산 규제",desc:"중국산 제품 수입 제한 — 한국산 대체 수요 급증",color:"var(--violet)",bg:"rgba(139,92,246,.08)",border:"rgba(139,92,246,.2)",count:127},
+                  {reg:"인증 필수",desc:"특정 인증 보유 업체만 입찰 가능 — 인증 보유 시 독점적 기회",color:"var(--green)",bg:"rgba(16,185,129,.06)",border:"rgba(16,185,129,.2)",count:89},
+                  {reg:"Buy American",desc:"미국산/동맹국산 우선 — 한국 FTA 국가로 유리",color:"var(--blue)",bg:"rgba(10,132,255,.06)",border:"rgba(10,132,255,.2)",count:54},
+                  {reg:"공공 인프라",desc:"정부 조달·공공 프로젝트 — 신뢰할 수 있는 공급처 필수",color:"var(--amber)",bg:"rgba(245,158,11,.06)",border:"rgba(245,158,11,.2)",count:38},
+                ].map((item,i)=>(
+                  <div key={i} style={{padding:"12px 14px",borderRadius:10,marginBottom:8,background:item.bg,border:`1px solid ${item.border}`,
+                    opacity:regInView?1:0,animation:regInView?`staggerUp .45s cubic-bezier(0.2,0,0,1) ${i*100+200}ms both`:"none"}}>
+                    <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:4}}>
+                      <span style={{fontSize:12,fontWeight:700,color:item.color}}>{item.reg}</span>
+                      <span style={{fontSize:10,fontWeight:700,color:item.color,padding:"2px 8px",borderRadius:4,background:"rgba(255,255,255,.06)"}}>{item.count}개 바이어</span>
+                    </div>
+                    <div style={{fontSize:11,color:"var(--t3)",lineHeight:1.5}}>{item.desc}</div>
+                  </div>
+                ))}
+              </div>
+
+              {/* 우측: 규제 보호 효과 */}
+              <div style={{padding:isMobile?"22px 18px":"32px",borderRadius:16,background:"var(--bg-2)",border:"1px solid var(--border)",boxShadow:"var(--card-shadow)"}}>
+                <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:20}}>
+                  <div style={{width:32,height:32,borderRadius:8,background:"rgba(16,185,129,.12)",display:"flex",alignItems:"center",justifyContent:"center",color:"var(--green)"}}><Ic.Sparkle s={16}/></div>
+                  <div>
+                    <div style={{fontSize:14,fontWeight:700,color:"var(--t1)"}}>규제 보호 바이어 매칭 효과</div>
+                    <div style={{fontSize:11,color:"var(--t3)"}}>규제 시장 바이어는 일반 대비 전환율이 월등히 높습니다</div>
+                  </div>
+                </div>
+                {[
+                  {label:"규제 보호 바이어 응답률",value:"3.2x",sub:"일반 바이어 대비 3.2배 높은 이메일 응답률",color:"var(--green)"},
+                  {label:"평균 계약 규모",value:"+47%",sub:"규제 시장 바이어의 평균 딜 사이즈가 47% 더 큼",color:"var(--blue)"},
+                  {label:"재계약률",value:"89%",sub:"한번 거래한 규제 시장 바이어의 재계약 비율",color:"var(--violet)"},
+                ].map((item,i)=>(
+                  <div key={i} style={{padding:"16px",borderRadius:12,marginBottom:10,background:"var(--bg-3)",border:"1px solid var(--border)",
+                    opacity:regInView?1:0,animation:regInView?`staggerUp .45s cubic-bezier(0.2,0,0,1) ${i*120+200}ms both`:"none"}}>
+                    <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+                      <div>
+                        <div style={{fontSize:12,fontWeight:600,color:"var(--t2)",marginBottom:4}}>{item.label}</div>
+                        <div style={{fontSize:10,color:"var(--t4)"}}>{item.sub}</div>
+                      </div>
+                      <div style={{fontSize:28,fontWeight:900,color:item.color,fontFamily:"var(--mono)"}}>{item.value}</div>
+                    </div>
+                  </div>
+                ))}
+                {/* CTA */}
+                <div onClick={onEnter} style={{marginTop:16,padding:"12px 20px",borderRadius:10,background:"linear-gradient(135deg,var(--green),rgba(16,185,129,.8))",color:"#fff",fontSize:13,fontWeight:700,textAlign:"center",cursor:"pointer",transition:"all .2s"}}
+                  onMouseEnter={e=>e.currentTarget.style.transform="translateY(-2px)"} onMouseLeave={e=>e.currentTarget.style.transform="none"}>
+                  🛡 규제 보호 바이어 지금 탐색하기 →
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
 
         {/* ⑦ BOTTOM CTA */}
         <div style={{margin:"0 0 60px",padding:isMobile?"40px 20px":"56px 40px",borderRadius:20,background:"linear-gradient(135deg,rgba(10,132,255,.09),rgba(191,90,242,.06))",border:"1px solid rgba(10,132,255,.18)",textAlign:"center",position:"relative",overflow:"hidden"}}>
