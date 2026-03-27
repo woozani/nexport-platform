@@ -149,6 +149,21 @@ const DEMANDS = ["CNC 정밀가공 부품","PCB 어셈블리","의료용 정밀 
 const STATUSES = ["신규","검토중","협상중","LOI","계약완료"];
 const REGULATIONS = ["중국산 규제","인증 필수","한국산 우선","Buy American","공공 인프라"];
 const HOT_SIGNALS = ["채용 급증","최근 펀딩","RFQ 발송","전시회 참가","신규공장 건설"];
+const INTENT_SIGNALS = [
+  {type:"rfq",label:"RFQ 발송",icon:"📋",desc:"최근 30일 내 견적 요청"},
+  {type:"hiring",label:"구매팀 채용 중",icon:"👥",desc:"Procurement 직군 채용 공고 감지"},
+  {type:"funding",label:"최근 투자 유치",icon:"💰",desc:"시리즈 펀딩 또는 증자 완료"},
+  {type:"supplier_change",label:"공급업체 변경",icon:"🔄",desc:"기존 공급사 계약 만료 / 교체 움직임"},
+  {type:"expansion",label:"신규 공장/법인",icon:"🏭",desc:"생산시설 확장 또는 해외 법인 설립"},
+  {type:"trade_show",label:"전시회 참가 예정",icon:"🎪",desc:"관련 산업 전시회 등록 확인"},
+  {type:"price_inquiry",label:"가격 조회",icon:"🔍",desc:"NEXPORT에서 유사 제품 검색 이력"},
+  {type:"contract_renewal",label:"계약 갱신 시기",icon:"📅",desc:"기존 공급 계약 만료 3개월 전"},
+];
+const TRUST_LEVELS = [
+  {grade:"Gold",label:"Gold 인증",color:"#F59E0B",bg:"rgba(245,158,11,.08)",border:"rgba(245,158,11,.25)",minScore:85,desc:"거래이력 검증 완료 + 높은 응답률"},
+  {grade:"Silver",label:"Silver 인증",color:"#94A3B8",bg:"rgba(148,163,184,.08)",border:"rgba(148,163,184,.25)",minScore:70,desc:"기업 정보 검증 완료"},
+  {grade:"Bronze",label:"Bronze",color:"#CD7F32",bg:"rgba(205,127,50,.08)",border:"rgba(205,127,50,.25)",minScore:0,desc:"기본 프로필 등록"},
+];
 const REG_BY_INDUSTRY = {
   "의료기기":["인증 필수","한국산 우선"],
   "항공우주":["인증 필수","Buy American"],
@@ -211,6 +226,12 @@ function generateBuyers(n) {
       hotSignal,
       regulatoryShield,
       buyerType,
+      intentSignals: INTENT_SIGNALS.filter((_,si) => {
+        if (buyingIntent === "높음") return Math.random() > .55 && si < 5;
+        if (buyingIntent === "중간") return Math.random() > .78 && si < 4;
+        return Math.random() > .92;
+      }),
+      trustLevel: score >= 85 ? TRUST_LEVELS[0] : score >= 70 ? TRUST_LEVELS[1] : TRUST_LEVELS[2],
       saved: Math.random() > .7,
       starred: Math.random() > .85,
       lastActive: `${Math.floor(Math.random()*30)+1}일 전`,
@@ -461,6 +482,7 @@ function BuyerDetailPanel({ buyer, onClose, onSave, isSaved, onEmailBuyer, onSho
             <div>
               <div style={{fontSize:16,fontWeight:800,display:"flex",alignItems:"center",gap:8,flexWrap:"wrap"}}>
                 {buyer.name}
+                {buyer.trustLevel&&<span style={{fontSize:9,fontWeight:700,padding:"2px 7px",borderRadius:5,background:buyer.trustLevel.bg,color:buyer.trustLevel.color,border:`1px solid ${buyer.trustLevel.border}`}}>{buyer.trustLevel.grade==="Gold"?"🏆":"🔹"} {buyer.trustLevel.label}</span>}
                 {buyer.hotSignal&&<span style={{fontSize:10,fontWeight:700,padding:"2px 8px",borderRadius:5,background:"rgba(245,158,11,.12)",color:"var(--amber)",border:"1px solid rgba(245,158,11,.25)"}}>⚡ {buyer.hotSignal}</span>}
               </div>
               <div style={{fontSize:12,color:"var(--t3)",marginTop:2}}>{buyer.title}</div>
@@ -507,6 +529,31 @@ function BuyerDetailPanel({ buyer, onClose, onSave, isSaved, onEmailBuyer, onSho
               {(!buyer.certifications||buyer.certifications.length===0)&&<span style={{fontSize:11,color:"var(--t4)"}}>인증 정보 없음</span>}
             </div>
           </div>
+          {buyer.intentSignals&&buyer.intentSignals.length>0&&(
+            <div style={{padding:16,borderRadius:10,background:"var(--bg-2)",border:"1px solid var(--border)",marginBottom:16}}>
+              <div style={{fontSize:12,fontWeight:700,color:"var(--t2)",marginBottom:12,display:"flex",alignItems:"center",gap:6}}><Ic.Zap s={13}/>인텐트 시그널</div>
+              <div style={{display:"grid",gap:8}}>
+                {buyer.intentSignals.map((sig,si)=>(
+                  <div key={si} style={{display:"flex",alignItems:"center",gap:10,padding:"8px 10px",borderRadius:8,background:"rgba(10,132,255,.04)",border:"1px solid rgba(10,132,255,.1)"}}>
+                    <span style={{fontSize:16,flexShrink:0}}>{sig.icon}</span>
+                    <div>
+                      <div style={{fontSize:12,fontWeight:700,color:"var(--blue)"}}>{sig.label}</div>
+                      <div style={{fontSize:10,color:"var(--t3)",marginTop:1}}>{sig.desc}</div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+          {buyer.trustLevel&&(
+            <div style={{padding:16,borderRadius:10,background:buyer.trustLevel.bg,border:`1px solid ${buyer.trustLevel.border}`,marginBottom:16,display:"flex",alignItems:"center",gap:12}}>
+              <span style={{fontSize:24}}>{buyer.trustLevel.grade==="Gold"?"🏆":buyer.trustLevel.grade==="Silver"?"🔹":"🔸"}</span>
+              <div>
+                <div style={{fontSize:13,fontWeight:700,color:buyer.trustLevel.color}}>{buyer.trustLevel.label} 바이어</div>
+                <div style={{fontSize:11,color:"var(--t3)",marginTop:2}}>{buyer.trustLevel.desc}</div>
+              </div>
+            </div>
+          )}
           <div style={{padding:16,borderRadius:10,background:"var(--bg-2)",border:"1px solid var(--border)"}}>
             <div style={{fontSize:12,fontWeight:700,color:"var(--t2)",marginBottom:12,display:"flex",alignItems:"center",gap:6}}><Ic.Sparkle s={13}/>AI 분석</div>
             <div style={{fontSize:12,color:"var(--t2)",lineHeight:1.7}}>
@@ -3929,11 +3976,15 @@ fi fi${Math.min(i+1,5)}`}
                       <td style={{padding:"8px 10px"}}>
                         <div style={{fontWeight:600,fontSize:13,display:"flex",alignItems:"center",gap:5}}>
                           {b.name}
+                          {b.trustLevel&&<span style={{fontSize:9,fontWeight:700,padding:"1px 6px",borderRadius:3,background:b.trustLevel.bg,color:b.trustLevel.color,border:`1px solid ${b.trustLevel.border}`,whiteSpace:"nowrap"}}>{b.trustLevel.grade==="Gold"?"🏆":"🔹"} {b.trustLevel.label}</span>}
                           {b.hotSignal&&<span style={{fontSize:9,fontWeight:700,padding:"1px 6px",borderRadius:3,background:"rgba(245,158,11,.15)",color:"var(--amber)",border:"1px solid rgba(245,158,11,.25)",whiteSpace:"nowrap",animation:"pulse 2s infinite"}}>⚡ {b.hotSignal}</span>}
                         </div>
                         <div style={{fontSize:11,color:"var(--t3)",marginTop:1,display:"flex",alignItems:"center",gap:4,flexWrap:"wrap"}}>
                           <span>{b.title}</span>
                           {b.regulatoryShield&&b.regulatoryShield.length>0&&<span style={{fontSize:9,fontWeight:700,padding:"1px 5px",borderRadius:3,background:"rgba(139,92,246,.15)",color:"var(--violet)",whiteSpace:"nowrap"}}>🛡 규제보호</span>}
+                          {b.intentSignals&&b.intentSignals.length>0&&b.intentSignals.slice(0,2).map((sig,si)=>(
+                            <span key={si} style={{fontSize:9,fontWeight:600,padding:"1px 5px",borderRadius:3,background:"rgba(10,132,255,.08)",color:"var(--blue)",whiteSpace:"nowrap"}}>{sig.icon} {sig.label}</span>
+                          ))}
                         </div>
                       </td>
                       <td style={{padding:"8px 10px"}}>
