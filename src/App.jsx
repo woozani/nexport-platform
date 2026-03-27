@@ -2855,50 +2855,86 @@ function PlaybookView({ buyers, savedSet, onRunPlaybook }) {
 
 function KanbanPipeline({ buyers }) {
   const stages = [
-    { key:"신규 리드", color:"var(--blue)", dim:"var(--blue-dim)", count:12 },
-    { key:"검토 중", color:"var(--violet)", dim:"var(--violet-dim)", count:8 },
-    { key:"협상 중", color:"var(--amber)", dim:"var(--amber-dim)", count:4 },
-    { key:"LOI 발행", color:"var(--cyan)", dim:"var(--cyan-dim)", count:3 },
-    { key:"계약 완료", color:"var(--green)", dim:"var(--green-dim)", count:2 },
+    { key:"신규 리드", color:"var(--blue)", dim:"var(--blue-dim)", count:12, convRate:65, avgDays:3 },
+    { key:"검토 중", color:"var(--violet)", dim:"var(--violet-dim)", count:8, convRate:50, avgDays:7 },
+    { key:"협상 중", color:"var(--amber)", dim:"var(--amber-dim)", count:4, convRate:60, avgDays:14 },
+    { key:"LOI 발행", color:"var(--cyan)", dim:"var(--cyan-dim)", count:3, convRate:80, avgDays:10 },
+    { key:"계약 완료", color:"var(--green)", dim:"var(--green-dim)", count:2, convRate:100, avgDays:0 },
   ];
   const allBuyers = buyers || [];
   const getBuyers = (si) => {
     const start = stages.slice(0,si).reduce((a,s)=>a+s.count,0);
-    return allBuyers.slice(start, start+stages[si].count).slice(0,5);
+    return allBuyers.slice(start, start+stages[si].count).slice(0,4);
   };
+  // Stage value calculation
+  const stageValues = stages.map((st,si)=>{
+    const cards = getBuyers(si);
+    const val = cards.reduce((s,b)=>{const m=b.volume?.match(/\$(\d+\.?\d*)/);return s+(m?parseFloat(m[1]):0);},0);
+    return val;
+  });
+  const totalValue = stageValues.reduce((a,b)=>a+b,0);
+
   return (
     <div style={{marginTop:16}}>
-      <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:14}}>
+      <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:6}}>
         <Ic.Grid s={14}/>
-        <span style={{fontSize:13,fontWeight:700}}>세일즈 파이프라인</span>
-        <span style={{fontSize:11,color:"var(--t4)",marginLeft:"auto"}}>{allBuyers.length}건 관리 중</span>
+        <span style={{fontSize:13,fontWeight:700}}>딜 파이프라인</span>
+        <span style={{fontSize:11,color:"var(--t4)",marginLeft:"auto"}}>{stages.reduce((a,s)=>a+s.count,0)}건 · 예상 총 매출 <span style={{fontWeight:700,color:"var(--green)",fontFamily:"var(--mono)"}}>${totalValue.toFixed(1)}M</span></span>
+      </div>
+      {/* Funnel progress bar */}
+      <div style={{display:"flex",gap:2,marginBottom:14,height:6,borderRadius:3,overflow:"hidden"}}>
+        {stages.map((st,si)=>(
+          <div key={si} style={{flex:st.count,background:st.color,transition:"flex .3s"}} title={`${st.key}: ${st.count}건`}/>
+        ))}
       </div>
       <div style={{display:"grid",gridTemplateColumns:"repeat(5,1fr)",gap:10,overflow:"auto"}}>
         {stages.map((st,si)=>{
           const cards = getBuyers(si);
+          const stageVal = stageValues[si];
           return (
-            <div key={st.key} style={{background:"var(--bg-2)",borderRadius:12,border:"1px solid var(--border)",boxShadow:"var(--card-shadow)",overflow:"hidden",minWidth:160}}>
-              <div style={{padding:"10px 12px",borderBottom:"1px solid var(--border)",display:"flex",alignItems:"center",gap:8}}>
-                <div style={{width:8,height:8,borderRadius:"50%",background:st.color}}/>
-                <span style={{fontSize:11,fontWeight:700,flex:1}}>{st.key}</span>
-                <span style={{fontSize:10,fontWeight:700,color:st.color,background:st.dim,padding:"2px 6px",borderRadius:4}}>{st.count}</span>
+            <div key={st.key} style={{background:"var(--bg-2)",borderRadius:12,border:"1px solid var(--border)",boxShadow:"var(--card-shadow)",overflow:"hidden",minWidth:150}}>
+              {/* Stage header */}
+              <div style={{padding:"10px 12px",borderBottom:"1px solid var(--border)"}}>
+                <div style={{display:"flex",alignItems:"center",gap:6,marginBottom:6}}>
+                  <div style={{width:8,height:8,borderRadius:"50%",background:st.color}}/>
+                  <span style={{fontSize:11,fontWeight:700,flex:1}}>{st.key}</span>
+                  <span style={{fontSize:10,fontWeight:700,color:st.color,background:st.dim,padding:"2px 6px",borderRadius:4}}>{st.count}</span>
+                </div>
+                <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+                  <span style={{fontSize:10,color:"var(--green)",fontWeight:700,fontFamily:"var(--mono)"}}>${stageVal.toFixed(1)}M</span>
+                  {si<4&&<span style={{fontSize:9,color:"var(--t4)"}}>→ 전환 {st.convRate}%</span>}
+                  {si===4&&<span style={{fontSize:9,color:"var(--green)",fontWeight:600}}>성사</span>}
+                </div>
               </div>
-              <div style={{padding:8,display:"grid",gap:6,minHeight:100}}>
-                {cards.map((b,i)=>(
-                  <div key={b.id||i} style={{padding:"8px 10px",borderRadius:8,background:"var(--bg-3)",border:"1px solid var(--border)",fontSize:11,transition:"all .15s cubic-bezier(0.2,0,0,1)",cursor:"pointer"}}
-                    onMouseEnter={e=>{e.currentTarget.style.borderColor="var(--border-h)";e.currentTarget.style.transform="translateY(-1px)"}}
-                    onMouseLeave={e=>{e.currentTarget.style.borderColor="var(--border)";e.currentTarget.style.transform="none"}}>
-                    <div style={{fontWeight:700,fontSize:11,marginBottom:3}}>{b.name}</div>
-                    <div style={{color:"var(--t3)",fontSize:10,display:"flex",alignItems:"center",gap:4}}>{b.flag} {b.company}</div>
-                    <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginTop:6}}>
-                      <span style={{fontSize:9,color:"var(--t4)"}}>{b.volume}</span>
-                      <span style={{fontSize:10,fontWeight:700,fontFamily:"var(--mono)",color:st.color}}>{b.score}</span>
+              {/* Cards */}
+              <div style={{padding:6,display:"grid",gap:4,minHeight:80}}>
+                {cards.map((b,i)=>{
+                  const daysInStage = parseInt(b.lastActive)||1;
+                  const isStale = daysInStage > 14 && si < 4;
+                  return (
+                    <div key={b.id||i} style={{padding:"7px 9px",borderRadius:8,background:isStale?"rgba(255,69,58,.03)":"var(--bg-3)",border:`1px solid ${isStale?"rgba(255,69,58,.15)":"var(--border)"}`,fontSize:11,transition:"all .15s",cursor:"pointer"}}
+                      onMouseEnter={e=>{e.currentTarget.style.borderColor="var(--border-h)";e.currentTarget.style.transform="translateY(-1px)"}}
+                      onMouseLeave={e=>{e.currentTarget.style.borderColor=isStale?"rgba(255,69,58,.15)":"var(--border)";e.currentTarget.style.transform="none"}}>
+                      <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:3}}>
+                        <span style={{fontWeight:700,fontSize:10}}>{b.name}</span>
+                        {isStale&&<span style={{fontSize:8,padding:"1px 4px",borderRadius:3,background:"rgba(255,69,58,.1)",color:"rgba(255,69,58,1)",fontWeight:700}}>정체</span>}
+                      </div>
+                      <div style={{color:"var(--t3)",fontSize:9,display:"flex",alignItems:"center",gap:3}}>{b.flag} {b.company}</div>
+                      <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginTop:4}}>
+                        <span style={{fontSize:9,color:"var(--green)",fontWeight:600,fontFamily:"var(--mono)"}}>{b.volume}</span>
+                        <span style={{fontSize:8,color:"var(--t4)"}}>{b.lastActive}</span>
+                      </div>
                     </div>
-                  </div>
-                ))}
-                {cards.length===0&&<div style={{textAlign:"center",padding:12,fontSize:10,color:"var(--t4)"}}>비어있음</div>}
-                {st.count>5&&<div style={{textAlign:"center",padding:4,fontSize:9,color:"var(--t4)"}}>+{st.count-5}건 더보기</div>}
+                  );
+                })}
+                {cards.length===0&&<div style={{textAlign:"center",padding:10,fontSize:9,color:"var(--t4)"}}>비어있음</div>}
+                {st.count>4&&<div style={{textAlign:"center",padding:3,fontSize:9,color:"var(--t4)"}}>+{st.count-4}건 더</div>}
               </div>
+              {/* Stage footer — avg days */}
+              {si<4&&<div style={{padding:"6px 10px",borderTop:"1px solid var(--border)",display:"flex",alignItems:"center",justifyContent:"center",gap:4}}>
+                <span style={{fontSize:9,color:"var(--t4)"}}>평균 체류</span>
+                <span style={{fontSize:10,fontWeight:700,color:st.avgDays>10?"var(--amber)":"var(--t2)",fontFamily:"var(--mono)"}}>{st.avgDays}일</span>
+              </div>}
             </div>
           );
         })}
