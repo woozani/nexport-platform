@@ -145,6 +145,28 @@ const FLAGS = {"독일":"🇩🇪","미국":"🇺🇸","일본":"🇯🇵","베�
 const REGIONS = {"독일":"유럽","미국":"북미","일본":"아시아","베트남":"동남아","스웨덴":"유럽","네덜란드":"유럽","영국":"유럽","호주":"오세아니아","캐나다":"북미","프랑스":"유럽","싱가포르":"동남아","태국":"동남아","인도":"아시아","브라질":"남미","멕시코":"북미","아랍에미리트":"중동","사우디아라비아":"중동","튀르키예":"중동","이스라엘":"중동","남아프리카공화국":"아프리카","나이지리아":"아프리카","이집트":"아프리카","케냐":"아프리카"};
 const INDUSTRIES = ["자동차 부품","전자부품","의료기기","항공우주","플라스틱 사출","금속가공","반도체 장비","화학소재","건설자재","에너지","식품기계","조선/해양","섬유/의류","포장재","냉동/공조","방산/방위","이차전지","로봇/자동화","철강/비철금속","공작기계"];
 const CERTS = ["ISO 9001","ISO 13485","IATF 16949","UL","CE","FDA","RoHS","REACH","JIS","AS9100"];
+
+// ─── 국가별 수출 컴플라이언스 데이터 ───
+const EXPORT_COMPLIANCE = {
+  "미국":{flag:"🇺🇸",riskLevel:"높음",riskColor:"var(--red)",docs:["상업 송장 (Commercial Invoice)","패킹 리스트 (Packing List)","선하증권 (B/L)","원산지 증명서 (C/O)","FDA 사전통보 (식품·의료기기)","FCC 인증 (전자제품)"],certs:["FDA","UL","FCC","CPSC"],regulations:["Buy American Act 적용 품목 확인","EAR/ITAR 수출통제 대상 여부 검토","TSCA (화학물질) 사전 등록","관세율: 평균 3.4% (MFN)"],tips:["HS 코드 사전 확인 필수 — 관세율 차이 큼","FDA 등록은 수출 전 최소 30일 전 완료","CPSIA (소비자 제품) 제3자 시험 필요"]},
+  "독일":{flag:"🇩🇪",riskLevel:"중간",riskColor:"var(--amber)",docs:["상업 송장","패킹 리스트","EUR.1 이동 증명서","적합성 선언서 (DoC)","CE 기술문서 (Technical File)"],certs:["CE","RoHS","REACH","TÜV"],regulations:["EU CE 마킹 필수 (기계·전기·의료)","REACH 화학물질 등록 (연 1톤 이상)","RoHS 유해물질 제한","WEEE 전자폐기물 등록"],tips:["한-EU FTA 활용 시 관세 0% 가능","CE 마킹 없으면 통관 불가","독일어 라벨·사용 설명서 필수"]},
+  "일본":{flag:"🇯🇵",riskLevel:"중간",riskColor:"var(--amber)",docs:["상업 송장","패킹 리스트","원산지 증명서","수입 신고서","식품위생 증명 (식품)"],certs:["JIS","PSE","JGMP","PMDA"],regulations:["PSE 마크 (전기용품)","식품위생법 검사 (식품·식기)","약기법 (의료기기) 사전 승인","화학물질 심사법 (화심법)"],tips:["한-일 RCEP 활용 관세 인하 가능","JIS 규격 적합 시 시장 진입 유리","일본어 표시 라벨 필수"]},
+  "영국":{flag:"🇬🇧",riskLevel:"중간",riskColor:"var(--amber)",docs:["상업 송장","패킹 리스트","UKCA 적합성 선언서","원산지 증명서"],certs:["UKCA","BSI","RoHS"],regulations:["UKCA 마킹 (CE 대체, 2025~)","UK RoHS 규정 준수","UK REACH 별도 등록 필요"],tips:["한-영 FTA 활용 관세 혜택","Brexit 이후 CE→UKCA 전환 주의","영국 수입업자(UK Importer) 지정 필수"]},
+  "프랑스":{flag:"🇫🇷",riskLevel:"중간",riskColor:"var(--amber)",docs:["상업 송장","패킹 리스트","EUR.1 이동 증명서","CE 적합성 선언서"],certs:["CE","NF","RoHS","REACH"],regulations:["EU CE 마킹 필수","프랑스어 라벨·설명서 의무","REACH 화학물질 등록","Triman 마크 (재활용 표시)"],tips:["한-EU FTA 원산지 기준 충족 시 무관세","프랑스어 번역 품질이 시장 신뢰도에 직결","화장품은 CPNP 등록 필수"]},
+  "캐나다":{flag:"🇨🇦",riskLevel:"중간",riskColor:"var(--amber)",docs:["상업 송장","패킹 리스트","원산지 증명서","CFIA 증명 (식품)"],certs:["CSA","SCC","CFIA"],regulations:["CCPSA (소비자 제품 안전)","이중 언어 (영어+프랑스어) 라벨 필수","PMRA (농약·화학) 등록","CRTC (통신기기) 인증"],tips:["한-캐 FTA 활용 관세 혜택","이중 언어 표시 미비 시 통관 거부","CBSA 사전 판정 활용 추천"]},
+  "호주":{flag:"🇦🇺",riskLevel:"낮음",riskColor:"var(--green)",docs:["상업 송장","패킹 리스트","원산지 증명서","검역 신고서 (해당 시)"],certs:["RCM","SAA","TGA"],regulations:["RCM 마크 (전기·통신)","TGA 등록 (의료기기)","ACCC 소비자 보호법","바이오시큐리티 검역"],tips:["한-호 FTA 대부분 품목 무관세","호주 전압 240V 규격 주의","목재 포장재 ISPM 15 처리 필수"]},
+  "베트남":{flag:"🇻🇳",riskLevel:"낮음",riskColor:"var(--green)",docs:["상업 송장","패킹 리스트","원산지 증명서 (Form AK)","수입 라이선스 (일부 품목)"],certs:["TCVN","MoIT"],regulations:["수입 라이선스 품목 확인","TCVN 베트남 국가표준 적용","라벨 베트남어 표시 필수"],tips:["한-ASEAN FTA / RCEP 활용","공산품 품질검사 면제 품목 확인","통관 절차 2~5일 소요"]},
+  "싱가포르":{flag:"🇸🇬",riskLevel:"낮음",riskColor:"var(--green)",docs:["상업 송장","패킹 리스트","원산지 증명서"],certs:["Safety Mark","NEA"],regulations:["Safety Mark (전기제품 33개 품목)","NEA 환경청 등록 (화학)","HSA 등록 (의료기기·식품)"],tips:["한-싱 FTA 대부분 무관세","자유무역항 — 관세 거의 없음","영어 서류로 진행 가능"]},
+  "태국":{flag:"🇹🇭",riskLevel:"낮음",riskColor:"var(--green)",docs:["상업 송장","패킹 리스트","원산지 증명서 (Form AK)","수입 라이선스"],certs:["TISI","FDA Thai"],regulations:["TISI 강제 표준 품목 확인","태국 FDA (식품·화장품·의료기기)","관세율: 평균 5~20%"],tips:["한-ASEAN FTA 활용 관세 절감","태국어 라벨 필수","BOI 투자 촉진 활용 가능"]},
+  "인도":{flag:"🇮🇳",riskLevel:"높음",riskColor:"var(--red)",docs:["상업 송장","패킹 리스트","원산지 증명서","BIS 라이선스","수입 라이선스 (제한 품목)"],certs:["BIS","ISI","FSSAI"],regulations:["BIS 강제 인증 (전자·철강·화학 등)","FSSAI 등록 (식품)","수입 라이선스 제한 품목 다수","비관세 장벽 높음"],tips:["한-인도 CEPA 활용 관세 인하","BIS 인증 6~12개월 소요 — 조기 착수","비관세 장벽(검사·라벨·표준) 주의"]},
+  "브라질":{flag:"🇧🇷",riskLevel:"높음",riskColor:"var(--red)",docs:["상업 송장","패킹 리스트","원산지 증명서","수입 라이선스 (LI)","INMETRO 인증서"],certs:["INMETRO","ANVISA","ANATEL"],regulations:["INMETRO 강제 인증 (광범위)","ANVISA 등록 (의료·식품·화장품)","ANATEL 인증 (통신기기)","관세율: 평균 11.5% + 내국세"],tips:["남미 최대 시장이나 규제 복잡","INMETRO 인증 3~6개월 소요","포르투갈어 라벨·설명서 필수"]},
+  "멕시코":{flag:"🇲🇽",riskLevel:"중간",riskColor:"var(--amber)",docs:["상업 송장","패킹 리스트","원산지 증명서","NOM 인증서","수입 페디멘토"],certs:["NOM","COFEPRIS"],regulations:["NOM 강제 표준 (전기·전자·식품 등)","COFEPRIS (식품·의료·화장품)","스페인어 라벨 필수"],tips:["한-멕시코 직접 FTA 없음 — 관세 주의","NOM 인증 현지 대리인 필수","USMCA 활용 시 미국 경유 전략 고려"]},
+  "스웨덴":{flag:"🇸🇪",riskLevel:"낮음",riskColor:"var(--green)",docs:["상업 송장","패킹 리스트","EUR.1 이동 증명서","CE 적합성 선언서"],certs:["CE","RoHS","REACH"],regulations:["EU CE 마킹 필수","스웨덴 화학물질청(KEMI) 규제","EU REACH/RoHS 준수"],tips:["한-EU FTA 활용 무관세 다수","영어 서류 수용 가능","높은 환경 기준 충족 필요"]},
+  "네덜란드":{flag:"🇳🇱",riskLevel:"낮음",riskColor:"var(--green)",docs:["상업 송장","패킹 리스트","EUR.1 이동 증명서","CE 적합성 선언서"],certs:["CE","RoHS","REACH"],regulations:["EU CE 마킹 필수","로테르담항 EU 물류 허브","REACH/RoHS 준수"],tips:["한-EU FTA 활용 무관세","유럽 물류 허브 — 재수출 전략 가능","영어 비즈니스 소통 원활"]},
+  "아랍에미리트":{flag:"🇦🇪",riskLevel:"중간",riskColor:"var(--amber)",docs:["상업 송장","패킹 리스트","원산지 증명서","적합성 인증서 (CoC)"],certs:["ECAS","ESMA","Halal"],regulations:["ECAS/ESMA 적합성 인증","할랄 인증 (식품·화장품)","두바이 자유무역지대 활용"],tips:["한-UAE FTA 없음 — 관세율 5%","할랄 인증 필수 (식품)","아랍어 라벨 권장"]},
+  "사우디아라비아":{flag:"🇸🇦",riskLevel:"높음",riskColor:"var(--red)",docs:["상업 송장","패킹 리스트","원산지 증명서","SABER 적합성 인증","할랄 인증"],certs:["SABER","SASO","Halal"],regulations:["SABER 플랫폼 사전 인증 필수","SASO 표준 적합성","할랄 인증 (식품·화장품)","이슬람 규정 준수"],tips:["SABER 인증 없이 통관 불가","아랍어 라벨 필수","사우디 비전 2030 관련 산업 유망"]},
+};
+
 const DEMANDS = ["CNC 정밀가공 부품","PCB 어셈블리","의료용 정밀 부품","항공기 구조 부품","플라스틱 사출 성형","스테인레스 정밀 부품","반도체 공정 부품","산업용 화학약품","알루미늄 패널/창호","태양광 모듈 부품","식품가공 설비","선박 엔진 부품","기능성 원단","산업용 포장 용기","냉동 컴프레서","방산용 정밀 부품","배터리 셀/모듈","산업용 로봇 부품","열연/냉연 강판","고정밀 공작기계"];
 const STATUSES = ["신규","검토중","협상중","LOI","계약완료"];
 const REGULATIONS = ["중국산 규제","인증 필수","한국산 우선","Buy American","공공 인프라"];
@@ -563,6 +585,66 @@ function BuyerDetailPanel({ buyer, onClose, onSave, isSaved, onEmailBuyer, onSho
               {buyer.score<60&&" 추가적인 니즈 파악이 필요합니다."}
             </div>
           </div>
+
+          {/* ── Export Compliance Checker ── */}
+          {(()=>{
+            const comp = EXPORT_COMPLIANCE[buyer.country];
+            if(!comp) return null;
+            return (
+              <div style={{padding:16,borderRadius:10,background:"var(--bg-2)",border:"1px solid var(--border)",marginTop:16}}>
+                <div style={{fontSize:12,fontWeight:700,color:"var(--t2)",marginBottom:12,display:"flex",alignItems:"center",gap:6}}>
+                  <Ic.Shield s={13}/>수출 컴플라이언스 체커
+                  <span style={{marginLeft:"auto",fontSize:9,fontWeight:700,padding:"2px 8px",borderRadius:4,background:comp.riskLevel==="높음"?"rgba(255,69,58,.1)":comp.riskLevel==="중간"?"rgba(245,158,11,.1)":"rgba(52,199,89,.1)",color:comp.riskColor,border:`1px solid ${comp.riskLevel==="높음"?"rgba(255,69,58,.2)":comp.riskLevel==="중간"?"rgba(245,158,11,.2)":"rgba(52,199,89,.2)"}`}}>규제 난이도: {comp.riskLevel}</span>
+                </div>
+                <div style={{fontSize:11,color:"var(--t3)",marginBottom:12,padding:"8px 10px",borderRadius:8,background:"var(--bg-3)",border:"1px solid var(--border)"}}>
+                  {comp.flag} <strong style={{color:"var(--t1)"}}>{buyer.country}</strong> 수출 시 필요한 서류·인증·규제 요약
+                </div>
+                {/* Required Documents */}
+                <div style={{marginBottom:10}}>
+                  <div style={{fontSize:10,fontWeight:700,color:"var(--cyan)",marginBottom:6,display:"flex",alignItems:"center",gap:4}}>📄 필수 서류</div>
+                  <div style={{display:"grid",gap:3}}>
+                    {comp.docs.map((d,i)=>(
+                      <div key={i} style={{fontSize:10,color:"var(--t2)",padding:"4px 8px",borderRadius:5,background:"var(--bg-3)",display:"flex",alignItems:"center",gap:6}}>
+                        <span style={{color:"var(--green)",fontSize:10}}>✓</span>{d}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+                {/* Required Certifications */}
+                <div style={{marginBottom:10}}>
+                  <div style={{fontSize:10,fontWeight:700,color:"var(--violet)",marginBottom:6,display:"flex",alignItems:"center",gap:4}}>🏷 필수 인증</div>
+                  <div style={{display:"flex",gap:4,flexWrap:"wrap"}}>
+                    {comp.certs.map((c,i)=>{
+                      const has = (buyer.certifications||[]).includes(c);
+                      return (
+                        <span key={i} style={{padding:"3px 8px",borderRadius:5,fontSize:9,fontWeight:700,background:has?"rgba(52,199,89,.1)":"rgba(255,69,58,.08)",color:has?"var(--green)":"var(--red)",border:`1px solid ${has?"rgba(52,199,89,.2)":"rgba(255,69,58,.15)"}`}}>
+                          {has?"✓":"✗"} {c}
+                        </span>
+                      );
+                    })}
+                  </div>
+                </div>
+                {/* Key Regulations */}
+                <div style={{marginBottom:10}}>
+                  <div style={{fontSize:10,fontWeight:700,color:"var(--amber)",marginBottom:6,display:"flex",alignItems:"center",gap:4}}>⚖ 주요 규제</div>
+                  <div style={{display:"grid",gap:3}}>
+                    {comp.regulations.map((r,i)=>(
+                      <div key={i} style={{fontSize:10,color:"var(--t2)",padding:"4px 8px",borderRadius:5,background:"var(--bg-3)"}}>• {r}</div>
+                    ))}
+                  </div>
+                </div>
+                {/* Tips */}
+                <div>
+                  <div style={{fontSize:10,fontWeight:700,color:"var(--blue)",marginBottom:6,display:"flex",alignItems:"center",gap:4}}>💡 수출 팁</div>
+                  <div style={{display:"grid",gap:3}}>
+                    {comp.tips.map((t,i)=>(
+                      <div key={i} style={{fontSize:10,color:"var(--t3)",padding:"4px 8px",borderRadius:5,background:"rgba(10,132,255,.04)",border:"1px solid rgba(10,132,255,.08)",lineHeight:1.5}}>{t}</div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            );
+          })()}
 
           {/* ── Lookalike Section ── */}
           {showLookalikes && (
