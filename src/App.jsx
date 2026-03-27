@@ -863,6 +863,8 @@ function LandingHero({ onEnter, isMobile }) {
     }
   }, [typed, isTyping, qIdx]);
 
+  // ── Problem 섹션 inView ──
+  const [probRef, probInView] = useInView(0.15);
   // ── How it Works inView ──
   const [howRef, howInView] = useInView(0.2);
   // ── ROI 비교 inView ──
@@ -877,6 +879,10 @@ function LandingHero({ onEnter, isMobile }) {
   const [featRef, featInView] = useInView(0.15);
   // ── 인증·규제 섹션 inView ──
   const [regRef, regInView] = useInView(0.15);
+  // ── 팀 소개 inView ──
+  const [teamRef, teamInView] = useInView(0.15);
+  // ── 경쟁 비교 inView ──
+  const [compRef, compInView] = useInView(0.15);
   const [activeRegTab, setActiveRegTab] = useState("cert");
 
   const features = [
@@ -887,9 +893,10 @@ function LandingHero({ onEnter, isMobile }) {
   ];
 
   const steps = [
-    { num:"①", icon:<Ic.Search s={22}/>, title:"바이어 발굴", desc:"60개국 산업별 고급 필터링으로 최적 바이어 검색", color:"var(--blue)", dim:"var(--blue-dim)" },
-    { num:"②", icon:<Ic.Mail s={22}/>, title:"이메일 확보", desc:"Hunter.io 기반 직통 연락처를 5분 내 즉시 발굴", color:"var(--cyan)", dim:"var(--cyan-dim)" },
-    { num:"③", icon:<Ic.Sparkle s={22}/>, title:"AI 매칭", desc:"제조사 프로필 분석 후 TOP 15 바이어 자동 추천", color:"var(--violet)", dim:"var(--violet-dim)" },
+    { num:"①", icon:<Ic.Search s={22}/>, title:"프로필 입력", desc:"제조사 정보·제품·인증·수출 희망 지역을 입력하세요", color:"var(--blue)", dim:"var(--blue-dim)" },
+    { num:"②", icon:<Ic.Sparkle s={22}/>, title:"AI 바이어 매칭", desc:"AI가 산업·지역·규모 기반으로 적격 바이어를 자동 스코어링", color:"var(--violet)", dim:"var(--violet-dim)" },
+    { num:"③", icon:<Ic.Mail s={22}/>, title:"자동 아웃리치", desc:"개인화 콜드이메일 자동 생성·발송, 오픈/클릭 실시간 추적", color:"var(--cyan)", dim:"var(--cyan-dim)" },
+    { num:"④", icon:<Ic.Bar s={22}/>, title:"성과 관리", desc:"바이어 응답률·파이프라인 현황을 대시보드에서 한눈에 관리", color:"var(--green)", dim:"var(--green-dim)" },
   ];
 
   const mockBuyers = [
@@ -958,6 +965,84 @@ function LandingHero({ onEnter, isMobile }) {
           </div>
         </div>
 
+        {/* ②-B PROBLEM — 왜 NEXPORT가 필요한가 */}
+        <div ref={probRef} style={{padding:isMobile?"0 0 48px":"0 0 72px"}}>
+          <div style={{textAlign:"center",marginBottom:isMobile?28:48,opacity:probInView?1:0,transform:probInView?"none":"translateY(20px)",transition:"all .6s cubic-bezier(0.2,0,0,1)"}}>
+            <div style={{display:"inline-flex",alignItems:"center",gap:6,padding:"4px 14px",borderRadius:20,background:"rgba(255,69,58,.08)",border:"1px solid rgba(255,69,58,.22)",fontSize:11,fontWeight:700,color:"rgba(255,69,58,1)",marginBottom:12,letterSpacing:".04em"}}>
+              Problem
+            </div>
+            <h2 style={{fontSize:isMobile?22:32,fontWeight:800,letterSpacing:"-.03em",color:"var(--t1)"}}>
+              한국 중소기업 <span style={{color:"rgba(255,69,58,1)"}}>98.8%</span>가 수출을 못 합니다
+            </h2>
+            <p style={{fontSize:isMobile?13:15,color:"var(--t3)",marginTop:10,maxWidth:560,margin:"10px auto 0"}}>바이어를 찾지 못해 내수에 머무는 것이 가장 큰 원인입니다</p>
+          </div>
+
+          {/* 핵심 통계 카드 */}
+          <div style={{display:"grid",gridTemplateColumns:isMobile?"1fr":"repeat(3,1fr)",gap:isMobile?12:16,marginBottom:isMobile?24:40}}>
+            {[
+              {num:"762만",label:"국내 중소기업",sub:"그 중 수출 기업은 단 1.2% (9.4만 개)",icon:<Ic.Building s={20}/>,color:"rgba(255,69,58,1)",bg:"rgba(255,69,58,.06)",border:"rgba(255,69,58,.18)"},
+              {num:"3~6개월",label:"바이어 발굴 소요 기간",sub:"전시회·무역대행사 경유 시 평균 소요",icon:<Ic.Refresh s={20}/>,color:"var(--amber)",bg:"rgba(245,158,11,.06)",border:"rgba(245,158,11,.18)"},
+              {num:"17.2배",label:"수출 전환 시 매출 증가",sub:"내수 대비 영업이익 1.8배, 고용 5.1배",icon:<Ic.TrendUp s={20}/>,color:"var(--green)",bg:"rgba(16,185,129,.06)",border:"rgba(16,185,129,.18)"},
+            ].map((s,i)=>(
+              <div key={i} style={{padding:isMobile?"20px 18px":"28px 24px",borderRadius:14,background:s.bg,border:`1px solid ${s.border}`,opacity:probInView?1:0,animation:probInView?`staggerUp .55s cubic-bezier(0.2,0,0,1) ${i*120}ms both`:"none"}}>
+                <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:12}}>
+                  <div style={{color:s.color}}>{s.icon}</div>
+                  <div style={{fontSize:11,fontWeight:600,color:"var(--t3)",textTransform:"uppercase",letterSpacing:".06em"}}>{s.label}</div>
+                </div>
+                <div style={{fontSize:isMobile?28:36,fontWeight:900,color:s.color,letterSpacing:"-.03em",marginBottom:6}}>{s.num}</div>
+                <div style={{fontSize:12,color:"var(--t3)",lineHeight:1.5}}>{s.sub}</div>
+              </div>
+            ))}
+          </div>
+
+          {/* 기존 방식의 한계 vs NEXPORT */}
+          <div style={{display:"grid",gridTemplateColumns:isMobile?"1fr":"1fr 48px 1fr",gap:isMobile?12:0,alignItems:"stretch",opacity:probInView?1:0,transform:probInView?"none":"translateY(16px)",transition:"all .7s cubic-bezier(0.2,0,0,1) .3s"}}>
+            {/* 기존 방식 */}
+            <div style={{padding:isMobile?"22px 20px":"28px 24px",borderRadius:14,background:"rgba(255,69,58,.04)",border:"1px solid rgba(255,69,58,.15)"}}>
+              <div style={{fontSize:12,fontWeight:700,color:"rgba(255,69,58,.8)",textTransform:"uppercase",letterSpacing:".08em",marginBottom:16}}>기존 방식의 한계</div>
+              {[
+                "수출바우처 평균 경쟁률 10:1, 일회성 매칭에 그침",
+                "무역 대행사 수수료 15~30%, 소액 거래 수임 어려움",
+                "해외 영업 전담인력 채용 시 연 5,000만원+ 고정비",
+                "전시회 명함 90%+ 방치, 리드 전환 도구 부재",
+                "콜드이메일 회신율 1% 미만 — 검증 안 된 리스트",
+              ].map((t,i)=>(
+                <div key={i} style={{display:"flex",alignItems:"flex-start",gap:8,marginBottom:i<4?10:0}}>
+                  <span style={{color:"rgba(255,69,58,.7)",fontSize:14,lineHeight:1.6,flexShrink:0}}>✕</span>
+                  <span style={{fontSize:13,color:"var(--t2)",lineHeight:1.6}}>{t}</span>
+                </div>
+              ))}
+            </div>
+            {/* 화살표 */}
+            {!isMobile && (
+              <div style={{display:"flex",alignItems:"center",justifyContent:"center"}}>
+                <div style={{fontSize:24,color:"var(--t4)"}}>→</div>
+              </div>
+            )}
+            {isMobile && (
+              <div style={{textAlign:"center",padding:"4px 0"}}>
+                <div style={{fontSize:20,color:"var(--t4)"}}>↓</div>
+              </div>
+            )}
+            {/* NEXPORT 솔루션 */}
+            <div style={{padding:isMobile?"22px 20px":"28px 24px",borderRadius:14,background:"rgba(16,185,129,.04)",border:"1px solid rgba(16,185,129,.18)"}}>
+              <div style={{fontSize:12,fontWeight:700,color:"var(--green)",textTransform:"uppercase",letterSpacing:".08em",marginBottom:16}}>NEXPORT 솔루션</div>
+              {[
+                "AI가 수 분 내 적격 바이어 TOP 15 자동 추천",
+                "월 9.9만원~부터, 연간 비용 기존의 1/10 수준",
+                "영업 소요 시간 최소 70% 절감 (자체 베타 테스트)",
+                "개인화 콜드이메일 자동 생성 + 오픈/클릭 추적",
+                "인증·규제 필터로 한국산 유리 시장 즉시 발굴",
+              ].map((t,i)=>(
+                <div key={i} style={{display:"flex",alignItems:"flex-start",gap:8,marginBottom:i<4?10:0}}>
+                  <span style={{color:"var(--green)",fontSize:14,lineHeight:1.6,flexShrink:0}}>✓</span>
+                  <span style={{fontSize:13,color:"var(--t2)",lineHeight:1.6}}>{t}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+
         {/* ③ PRODUCT PREVIEW CARD — 데스크탑 전용 */}
         {!isMobile && <div style={{display:"flex",justifyContent:"center",padding:"0 0 72px",opacity:visible?1:0,transform:visible?"none":"translateY(30px)",transition:"all .9s cubic-bezier(0.2,0,0,1) .2s"}}>
           <div style={{width:"100%",maxWidth:720,borderRadius:16,overflow:"hidden",boxShadow:"var(--modal-shadow)",border:"1px solid var(--border)",background:"var(--bg-1)",animation:"floatCard 5s ease-in-out infinite",position:"relative"}}>
@@ -1001,9 +1086,9 @@ function LandingHero({ onEnter, isMobile }) {
           <div style={{textAlign:"center",marginBottom:48,opacity:howInView?1:0,transform:howInView?"none":"translateY(20px)",transition:"all .6s cubic-bezier(0.2,0,0,1)"}}>
             <div style={{fontSize:11,fontWeight:700,color:"var(--blue)",textTransform:"uppercase",letterSpacing:".12em",marginBottom:10}}>How it works</div>
             <h2 style={{fontSize:isMobile?22:32,fontWeight:800,letterSpacing:"-.03em",color:"var(--t1)"}}>NEXPORT로 수출 바이어를 찾는 방법</h2>
-            <p style={{fontSize:isMobile?13:15,color:"var(--t3)",marginTop:10}}>단 3단계로 검증된 글로벌 바이어와 연결하세요</p>
+            <p style={{fontSize:isMobile?13:15,color:"var(--t3)",marginTop:10}}>4단계로 수출 바이어 발굴부터 성과 관리까지 자동화하세요</p>
           </div>
-          <div className="hiw-grid" style={{display:isMobile?"flex":"grid",flexDirection:isMobile?"column":undefined,gridTemplateColumns:isMobile?undefined:"1fr auto 1fr auto 1fr",gap:isMobile?"16px":0,alignItems:isMobile?"stretch":"start"}}>
+          <div className="hiw-grid" style={{display:isMobile?"flex":"grid",flexDirection:isMobile?"column":undefined,gridTemplateColumns:isMobile?undefined:"1fr auto 1fr auto 1fr auto 1fr",gap:isMobile?"16px":0,alignItems:isMobile?"stretch":"start"}}>
             {steps.map((s,i) => (
               <Fragment key={i}>
                 <div style={{textAlign:"center",padding:"0 12px",opacity:howInView?1:0,animation:howInView?`staggerUp .6s cubic-bezier(0.2,0,0,1) ${i*200}ms both`:"none"}}>
@@ -1471,7 +1556,76 @@ function LandingHero({ onEnter, isMobile }) {
           </div>
         </div>
 
-        {/* ⑥-D 신뢰 요소 — 지원 기관 & 수상 */}
+        {/* ⑥-D 경쟁 비교 — 왜 NEXPORT인가 */}
+        <div ref={compRef} style={{padding:isMobile?"0 0 48px":"0 0 80px"}}>
+          <div style={{textAlign:"center",marginBottom:isMobile?24:44,opacity:compInView?1:0,transform:compInView?"none":"translateY(20px)",transition:"all .6s cubic-bezier(0.2,0,0,1)"}}>
+            <div style={{display:"inline-flex",alignItems:"center",gap:6,padding:"4px 14px",borderRadius:20,background:"var(--blue-dim)",border:"1px solid rgba(10,132,255,.25)",fontSize:11,fontWeight:700,color:"var(--blue)",marginBottom:12,letterSpacing:".04em"}}>
+              Comparison
+            </div>
+            <h2 style={{fontSize:isMobile?22:32,fontWeight:800,letterSpacing:"-.03em",color:"var(--t1)"}}>기존 수출 지원 방식과 비교</h2>
+            <p style={{fontSize:isMobile?13:15,color:"var(--t3)",marginTop:10}}>NEXPORT는 기존 인프라의 구조적 한계를 AI로 해결합니다</p>
+          </div>
+          <div style={{overflowX:isMobile?"auto":"visible",WebkitOverflowScrolling:"touch"}}>
+            <table style={{width:"100%",minWidth:isMobile?600:"auto",borderCollapse:"separate",borderSpacing:0,borderRadius:14,overflow:"hidden",border:"1px solid var(--border)",opacity:compInView?1:0,transform:compInView?"none":"translateY(16px)",transition:"all .7s cubic-bezier(0.2,0,0,1) .2s"}}>
+              <thead>
+                <tr style={{background:"var(--bg-2)"}}>
+                  <th style={{padding:"14px 18px",fontSize:12,fontWeight:700,color:"var(--t3)",textAlign:"left",borderBottom:"1px solid var(--border)",width:"28%"}}>비교 항목</th>
+                  <th style={{padding:"14px 18px",fontSize:12,fontWeight:700,color:"var(--t4)",textAlign:"center",borderBottom:"1px solid var(--border)"}}>전시회 / KOTRA</th>
+                  <th style={{padding:"14px 18px",fontSize:12,fontWeight:700,color:"var(--t4)",textAlign:"center",borderBottom:"1px solid var(--border)"}}>무역 대행사</th>
+                  <th style={{padding:"14px 18px",fontSize:12,fontWeight:700,color:"var(--blue)",textAlign:"center",borderBottom:"1px solid var(--border)",background:"rgba(10,132,255,.04)"}}>NEXPORT</th>
+                </tr>
+              </thead>
+              <tbody>
+                {[
+                  {item:"비용",a:"회당 3,000~5,000만원",b:"수수료 15~30%",nx:"월 9.9만원~"},
+                  {item:"바이어 발굴 속도",a:"3~6개월",b:"1~3개월",nx:"수 분"},
+                  {item:"바이어 검증",a:"명함 교환 수준",b:"제한적 DB",nx:"AI 스코어링 + 적합도 분석"},
+                  {item:"아웃리치",a:"수동 이메일",b:"대행 (추가 비용)",nx:"개인화 자동 발송 + 추적"},
+                  {item:"인증·규제 대응",a:"별도 컨설팅 필요",b:"일부 지원",nx:"자동 필터링 내장"},
+                  {item:"성과 추적",a:"없음",b:"보고서 (월 1회)",nx:"실시간 대시보드"},
+                  {item:"확장성",a:"연 1~2회 참가",b:"계약 기간 한정",nx:"무제한 / 24시간 가동"},
+                ].map((r,i)=>(
+                  <tr key={i} style={{borderBottom:i<6?"1px solid var(--border)":"none"}}>
+                    <td style={{padding:"12px 18px",fontSize:13,fontWeight:600,color:"var(--t1)",borderBottom:"1px solid var(--border)"}}>{r.item}</td>
+                    <td style={{padding:"12px 18px",fontSize:12,color:"var(--t3)",textAlign:"center",borderBottom:"1px solid var(--border)"}}>{r.a}</td>
+                    <td style={{padding:"12px 18px",fontSize:12,color:"var(--t3)",textAlign:"center",borderBottom:"1px solid var(--border)"}}>{r.b}</td>
+                    <td style={{padding:"12px 18px",fontSize:12,fontWeight:700,color:"var(--blue)",textAlign:"center",borderBottom:"1px solid var(--border)",background:"rgba(10,132,255,.02)"}}>{r.nx}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        {/* ⑥-E 팀 소개 */}
+        <div ref={teamRef} style={{padding:isMobile?"0 0 48px":"0 0 80px"}}>
+          <div style={{textAlign:"center",marginBottom:isMobile?24:44,opacity:teamInView?1:0,transform:teamInView?"none":"translateY(20px)",transition:"all .6s cubic-bezier(0.2,0,0,1)"}}>
+            <div style={{display:"inline-flex",alignItems:"center",gap:6,padding:"4px 14px",borderRadius:20,background:"var(--violet-dim)",border:"1px solid rgba(191,90,242,.25)",fontSize:11,fontWeight:700,color:"var(--violet)",marginBottom:12,letterSpacing:".04em"}}>
+              Team
+            </div>
+            <h2 style={{fontSize:isMobile?22:32,fontWeight:800,letterSpacing:"-.03em",color:"var(--t1)"}}>수출 현장을 아는 팀이 만듭니다</h2>
+            <p style={{fontSize:isMobile?13:15,color:"var(--t3)",marginTop:10}}>B2B 해외영업 실무 경험 + AI 기술력 + 30년 무역 노하우</p>
+          </div>
+          <div style={{display:"grid",gridTemplateColumns:isMobile?"1fr":"repeat(3,1fr)",gap:isMobile?12:20,maxWidth:860,margin:"0 auto"}}>
+            {[
+              {name:"Jay Jang",role:"CEO / Founder",desc:"B2B·B2C 해외영업 5년차, 글로벌 B2B 플랫폼 근무 경험, 수출 Pain Point 당사자 검증 및 VOC 인터뷰 주도",expertise:"사업기획 / 바이어 매칭 전략",color:"var(--blue)",gradient:"linear-gradient(135deg,var(--blue),var(--cyan))"},
+              {name:"CTO",role:"CTO (예정 '26.07)",desc:"컴퓨터공학 학사, 풀스택 개발 경력 3년+ (React, Node.js, Python), NLP 추천 시스템 개발 경험",expertise:"AI 엔진 / 풀스택 개발",color:"var(--violet)",gradient:"linear-gradient(135deg,var(--violet),var(--blue))"},
+              {name:"자문역",role:"수출입 전략 자문",desc:"무역업 종사 30년+, 대미·대유럽 수출 실무 총괄, 산업별 인증·규제(CE, FDA, IATF) 실무 이해",expertise:"수출입 전략 / 인증·규제 자문",color:"var(--green)",gradient:"linear-gradient(135deg,var(--green),var(--cyan))"},
+            ].map((m,i)=>(
+              <div key={i} style={{padding:isMobile?"22px 20px":"28px 24px",borderRadius:16,background:"var(--bg-2)",border:"1px solid var(--border)",boxShadow:"var(--card-shadow)",opacity:teamInView?1:0,animation:teamInView?`staggerUp .55s cubic-bezier(0.2,0,0,1) ${i*120}ms both`:"none",textAlign:"center"}}>
+                <div style={{width:64,height:64,borderRadius:"50%",background:m.gradient,display:"flex",alignItems:"center",justifyContent:"center",margin:"0 auto 16px",fontSize:22,fontWeight:800,color:"#fff",border:"3px solid var(--bg-0)"}}>
+                  {m.name[0]}
+                </div>
+                <div style={{fontSize:16,fontWeight:800,color:"var(--t1)",marginBottom:4}}>{m.name}</div>
+                <div style={{fontSize:12,fontWeight:600,color:m.color,marginBottom:12}}>{m.role}</div>
+                <div style={{fontSize:12,color:"var(--t3)",lineHeight:1.65,marginBottom:14}}>{m.desc}</div>
+                <div style={{padding:"6px 14px",borderRadius:8,background:m.color+"11",border:`1px solid ${m.color}22`,fontSize:11,fontWeight:600,color:m.color,display:"inline-block"}}>{m.expertise}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* ⑥-F 신뢰 요소 — 지원 기관 & 수상 */}
         <div style={{padding:isMobile?"0 0 48px":"0 0 80px",textAlign:"center"}}>
           <div style={{fontSize:11,fontWeight:700,color:"var(--t4)",textTransform:"uppercase",letterSpacing:".12em",marginBottom:isMobile?20:28}}>Trusted & Supported By</div>
           <div style={{display:"flex",flexWrap:"wrap",justifyContent:"center",alignItems:"center",gap:isMobile?16:32}}>
