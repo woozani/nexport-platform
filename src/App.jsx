@@ -3115,13 +3115,22 @@ function DashboardView({ buyers, savedSet, starred, buyerNotes }) {
   const funnelTotal = totalBuyers;
   const funnelData = pipelineOrder.map(s => ({status: s, count: pipeline[s], pct: Math.round((pipeline[s]/funnelTotal)*100)}));
 
-  // Recent activity (simulated) - More impressive for investors
+  // Recent activity (simulated) - Real-time feed
   const recentActivity = [
     {buyer: topBuyers[0], action: "🎉 $2.3M 계약 성사", time: "방금 전", type: "success"},
-    {buyer: topBuyers[1], action: "📋 LOI 체결 완료", time: "12분 전", type: "milestone"},
-    {buyer: topBuyers[2], action: "🤝 온라인 미팅 성공", time: "1시간 전", type: "meeting"},
-    {buyer: topBuyers[3], action: "⚡ AI 매칭 완료", time: "2시간 전", type: "match"}
+    {buyer: topBuyers[1], action: "📧 이메일 열람 (3회)", time: "3분 전", type: "email_open"},
+    {buyer: topBuyers[2], action: "📋 LOI 체결 완료", time: "12분 전", type: "milestone"},
+    {buyer: buyers[10], action: "🔍 프로필 조회", time: "18분 전", type: "view"},
+    {buyer: buyers[15], action: "📎 견적서 다운로드", time: "25분 전", type: "download"},
+    {buyer: topBuyers[3], action: "🤝 온라인 미팅 완료", time: "1시간 전", type: "meeting"},
+    {buyer: buyers[20], action: "💬 시퀀스 2단계 응답", time: "1시간 전", type: "reply"},
+    {buyer: buyers[25], action: "⚡ AI 매칭 점수 95점", time: "2시간 전", type: "match"},
+    {buyer: buyers[30], action: "📧 시퀀스 1단계 발송", time: "3시간 전", type: "sequence"},
+    {buyer: buyers[35], action: "🔔 구매팀 채용 감지", time: "4시간 전", type: "signal"},
+    {buyer: buyers[40], action: "🏭 신규 공장 설립 감지", time: "5시간 전", type: "signal"},
+    {buyer: buyers[45], action: "📧 이메일 열람 (1회)", time: "6시간 전", type: "email_open"},
   ];
+  const activityColors = {success:"var(--green)",milestone:"var(--blue)",meeting:"var(--cyan)",match:"var(--amber)",email_open:"var(--violet)",view:"var(--t3)",download:"var(--blue)",reply:"var(--green)",sequence:"var(--cyan)",signal:"var(--amber)"};
 
   // Avg match score
   const avgScore = Math.round(buyers.reduce((s,b) => s+b.score, 0) / totalBuyers);
@@ -3388,26 +3397,44 @@ function DashboardView({ buyers, savedSet, starred, buyerNotes }) {
           {/* Recent Activity */}
           <div className="fi fi5" style={cardStyle}>
             <KanbanPipeline buyers={buyers} />
-          <div style={{fontSize:14,fontWeight:700,marginBottom:14,display:"flex",alignItems:"center",gap:8}}><Ic.Sparkle s={14}/>최근 활동</div>
-            <div style={{display:"grid",gap:8}}>
+          <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:14}}>
+            <div style={{fontSize:14,fontWeight:700,display:"flex",alignItems:"center",gap:8}}>
+              <Ic.Zap s={14}/>실시간 활동 피드
+              <span style={{width:6,height:6,borderRadius:"50%",background:"var(--green)",animation:"pulse 1.5s infinite",display:"inline-block"}}/>
+              <span style={{fontSize:10,fontWeight:500,color:"var(--green)"}}>LIVE</span>
+            </div>
+            <span style={{fontSize:10,color:"var(--t4)"}}>{recentActivity.length}개 이벤트</span>
+          </div>
+            <div style={{display:"grid",gap:6,maxHeight:420,overflow:"auto"}}>
               {recentActivity.map((a,i) => (
                 <div key={i} style={{
-                  display:"flex",alignItems:"center",gap:10,padding:"8px 10px",borderRadius:6,
-                  background: a.type === "success" ? "var(--green-dim)" : "var(--bg-3)",
-                  border: a.type === "success" ? "1px solid rgba(16,185,129,.2)" : "1px solid var(--border)",
-                  animation: a.type === "success" ? "pulse 2s infinite" : "none"
-                }}>
-                  <div style={{
-                    width:6,height:6,borderRadius:"50%",
-                    background:{"success":"var(--green)","milestone":"var(--blue)","meeting":"var(--cyan)","match":"var(--amber)"}[a.type],
-                    flexShrink:0
-                  }} />
-                  <div style={{flex:1,minWidth:0}}>
-                    <div style={{fontSize:11,fontWeight:500}}>
-                      <span style={{color:"var(--blue-light)"}}>{a.buyer.company}</span> {a.action}
-                    </div>
+                  display:"flex",alignItems:"center",gap:10,padding:"10px 12px",borderRadius:8,
+                  background: a.type === "success" ? "rgba(16,185,129,.06)" : a.type === "reply" ? "rgba(16,185,129,.04)" : "var(--bg-3)",
+                  border: a.type === "success" ? "1px solid rgba(16,185,129,.2)" : a.type === "reply" ? "1px solid rgba(16,185,129,.12)" : "1px solid var(--border)",
+                  animation: i===0 ? "fadeIn .5s ease" : "none",
+                  transition:"all .2s"
+                }}
+                onMouseEnter={e=>e.currentTarget.style.background=a.type==="success"?"rgba(16,185,129,.1)":"var(--bg-hover)"}
+                onMouseLeave={e=>e.currentTarget.style.background=a.type==="success"?"rgba(16,185,129,.06)":a.type==="reply"?"rgba(16,185,129,.04)":"var(--bg-3)"}
+                >
+                  <div style={{position:"relative",flexShrink:0}}>
+                    <div style={{width:32,height:32,borderRadius:"50%",background:"linear-gradient(135deg,var(--blue-dim),var(--violet-dim))",display:"flex",alignItems:"center",justifyContent:"center",fontSize:11,fontWeight:700,color:"var(--blue)"}}>{a.buyer?.name?.charAt(0)||"?"}</div>
+                    {i===0&&<div style={{position:"absolute",bottom:-1,right:-1,width:8,height:8,borderRadius:"50%",background:"var(--green)",border:"2px solid var(--bg-2)"}}/>}
                   </div>
-                  <span style={{fontSize:10,color:"var(--t4)",flexShrink:0}}>{a.time}</span>
+                  <div style={{flex:1,minWidth:0}}>
+                    <div style={{fontSize:12,fontWeight:600,display:"flex",alignItems:"center",gap:4,flexWrap:"wrap"}}>
+                      <span style={{color:"var(--t1)"}}>{a.buyer?.name||"Unknown"}</span>
+                      <span style={{fontSize:10,color:"var(--t4)"}}>·</span>
+                      <span style={{fontSize:10,color:"var(--t3)"}}>{a.buyer?.company||""}</span>
+                    </div>
+                    <div style={{fontSize:11,color:activityColors[a.type]||"var(--t3)",marginTop:2,fontWeight:500}}>{a.action}</div>
+                  </div>
+                  <div style={{display:"flex",flexDirection:"column",alignItems:"flex-end",flexShrink:0}}>
+                    <span style={{fontSize:10,color:"var(--t4)"}}>{a.time}</span>
+                    <span style={{fontSize:8,padding:"1px 5px",borderRadius:3,marginTop:3,background:activityColors[a.type]+"15",color:activityColors[a.type],fontWeight:600}}>
+                      {({success:"계약",milestone:"마일스톤",meeting:"미팅",match:"매칭",email_open:"열람",view:"조회",download:"다운로드",reply:"응답",sequence:"시퀀스",signal:"시그널"})[a.type]||a.type}
+                    </span>
+                  </div>
                 </div>
               ))}
             </div>
