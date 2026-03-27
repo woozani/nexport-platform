@@ -1933,6 +1933,9 @@ function ColdEmailModal({ buyer, onClose }) {
   const [copied, setCopied] = useState(false);
   const [company, setCompany] = useState("한국정밀부품(주)");
   const [product, setProduct] = useState("CNC 정밀가공 부품");
+  const [mode, setMode] = useState("single"); // "single" | "sequence"
+  const [seqStep, setSeqStep] = useState(0);
+  const [seqStarted, setSeqStarted] = useState(false);
 
   const templates = {
     formal: {
@@ -2141,7 +2144,7 @@ ${company}
           <div style={{width:32,height:32,borderRadius:8,background:"var(--green-dim)",display:"flex",alignItems:"center",justifyContent:"center"}}><Ic.Mail s={16}/></div>
           <div style={{flex:1}}>
             <div style={{fontSize:14,fontWeight:700,display:"flex",alignItems:"center",gap:8}}>
-              AI 이메일 생성
+              AI 이메일
               {buyer.regulatoryShield?.length > 0 && <span style={{fontSize:9,fontWeight:700,padding:"2px 7px",borderRadius:4,background:"rgba(139,92,246,.15)",color:"var(--violet)",border:"1px solid rgba(139,92,246,.2)"}}>🛡 규제 우위 자동 선택됨</span>}
             </div>
             <div style={{fontSize:11,color:"var(--t3)"}}>To: {buyer.name} ({buyer.email})</div>
@@ -2149,7 +2152,90 @@ ${company}
           <div onClick={onClose} style={{cursor:"pointer",padding:4,color:"var(--t4)"}}><Ic.X s={16}/></div>
         </div>
 
+        {/* Mode Tabs */}
+        <div style={{display:"flex",gap:0,borderBottom:"1px solid var(--border)",padding:"0 20px"}}>
+          {[{key:"single",label:"단일 이메일",icon:"✉️"},{key:"sequence",label:"자동 시퀀스",icon:"🔄"}].map(m=>(
+            <div key={m.key} onClick={()=>{setMode(m.key);setSeqStarted(false);}} style={{padding:"10px 20px",fontSize:12,fontWeight:600,cursor:"pointer",color:mode===m.key?"var(--blue)":"var(--t3)",borderBottom:mode===m.key?"2px solid var(--blue)":"2px solid transparent",transition:"all .15s",display:"flex",alignItems:"center",gap:5}}>
+              <span style={{fontSize:13}}>{m.icon}</span>{m.label}
+            </div>
+          ))}
+        </div>
+
         <div style={{flex:1,overflow:"auto",padding:20}}>
+          {mode==="sequence" && (
+            <div>
+              {/* Sequence Timeline */}
+              <div style={{marginBottom:20}}>
+                <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:16}}>
+                  <span style={{fontSize:14}}>🔄</span>
+                  <div>
+                    <div style={{fontSize:13,fontWeight:700,color:"var(--t1)"}}>5단계 자동 팔로업 시퀀스</div>
+                    <div style={{fontSize:11,color:"var(--t3)"}}>바이어 응답이 없으면 자동으로 다음 단계를 발송합니다</div>
+                  </div>
+                </div>
+                <div style={{display:"grid",gap:0}}>
+                  {[
+                    {day:"Day 1",title:"첫 번째 접근",desc:"제품 소개 + 파트너십 제안",tone:"포멀",status:seqStarted?"sent":"ready",color:"var(--blue)"},
+                    {day:"Day 3",title:"가치 제안 강화",desc:"경쟁력 있는 가격 + 인증 강조",tone:"친근",status:seqStarted&&seqStep>=1?"sent":"scheduled",color:"var(--cyan)"},
+                    {day:"Day 7",title:"케이스 스터디",desc:"유사 업종 성공 사례 공유",tone:"친근",status:seqStarted&&seqStep>=2?"sent":"scheduled",color:"var(--green)"},
+                    {day:"Day 14",title:"한정 오퍼",desc:"신규 파트너 전용 할인 + 무료 샘플",tone:"긴급",status:seqStarted&&seqStep>=3?"sent":"scheduled",color:"var(--amber)"},
+                    {day:"Day 21",title:"최종 팔로업",desc:"마지막 확인 + 다음 스텝 제안",tone:"포멀",status:seqStarted&&seqStep>=4?"sent":"scheduled",color:"var(--violet)"},
+                  ].map((step,si)=>(
+                    <div key={si} style={{display:"flex",gap:12,position:"relative"}}>
+                      {/* Timeline line */}
+                      <div style={{display:"flex",flexDirection:"column",alignItems:"center",width:24,flexShrink:0}}>
+                        <div style={{width:10,height:10,borderRadius:"50%",background:step.status==="sent"?step.color:"var(--bg-4)",border:`2px solid ${step.status==="sent"?step.color:"var(--border)"}`,zIndex:1,transition:"all .3s"}}/>
+                        {si<4&&<div style={{width:2,flex:1,background:step.status==="sent"?step.color:"var(--border)",transition:"background .3s"}}/>}
+                      </div>
+                      {/* Step card */}
+                      <div onClick={()=>setSeqStep(si)} style={{flex:1,padding:"12px 14px",marginBottom:si<4?8:0,borderRadius:10,background:seqStep===si?"rgba(10,132,255,.06)":"var(--bg-2)",border:`1px solid ${seqStep===si?"var(--blue)":"var(--border)"}`,cursor:"pointer",transition:"all .2s"}}>
+                        <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:4}}>
+                          <div style={{display:"flex",alignItems:"center",gap:8}}>
+                            <span style={{fontSize:11,fontWeight:800,color:step.color,fontFamily:"var(--mono)"}}>{step.day}</span>
+                            <span style={{fontSize:12,fontWeight:700,color:"var(--t1)"}}>{step.title}</span>
+                          </div>
+                          <div style={{display:"flex",alignItems:"center",gap:6}}>
+                            <span style={{fontSize:9,padding:"2px 6px",borderRadius:4,background:step.status==="sent"?"rgba(16,185,129,.1)":"var(--bg-3)",color:step.status==="sent"?"var(--green)":"var(--t4)",fontWeight:600}}>{step.status==="sent"?"✓ 발송됨":step.status==="ready"?"대기 중":"예약됨"}</span>
+                          </div>
+                        </div>
+                        <div style={{fontSize:11,color:"var(--t3)"}}>{step.desc} · <span style={{color:"var(--t4)"}}>톤: {step.tone}</span></div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+              {/* Sequence Preview */}
+              <div style={{padding:14,borderRadius:10,background:"var(--bg-2)",border:"1px solid var(--border)",marginBottom:16}}>
+                <div style={{fontSize:10,fontWeight:600,color:"var(--t4)",textTransform:"uppercase",letterSpacing:".05em",marginBottom:8}}>Step {seqStep+1} 미리보기</div>
+                <div style={{fontSize:12,fontWeight:600,color:"var(--blue)",marginBottom:6}}>
+                  {["Partnership Inquiry","Value Proposition","Case Study","Limited Offer","Final Follow-up"][seqStep]} — {buyer.company}
+                </div>
+                <div style={{fontSize:11,color:"var(--t2)",lineHeight:1.7,maxHeight:120,overflow:"auto"}}>
+                  {[
+                    `Dear ${buyer.name},\n\nI'm reaching out from ${company}. We specialize in ${product} and believe there's a strong fit with ${buyer.company}'s needs in ${buyer.industry}.\n\nWould you be open to a brief conversation?`,
+                    `Hi ${buyer.name},\n\nFollowing up on my previous message. I wanted to share why ${company} stands out:\n• Certified manufacturing (ISO 9001)\n• 30% below market pricing\n• Direct export to ${buyer.country}\n\nHappy to send specs if you're interested.`,
+                    `Hi ${buyer.name},\n\nA quick success story: We recently helped a ${buyer.industry} company in ${buyer.country} reduce sourcing costs by 25% while improving quality.\n\nI'd love to explore if we can achieve similar results for ${buyer.company}.`,
+                    `Dear ${buyer.name},\n\nWe're offering an exclusive deal for new partners:\n• 15% introductory discount\n• Free sample shipment\n• Priority production slot\n\nThis offer is valid until end of month.`,
+                    `Hi ${buyer.name},\n\nI wanted to reach out one last time. If the timing isn't right, I completely understand.\n\nIf your sourcing needs change in the future, we'd welcome the opportunity to connect.\n\nWishing ${buyer.company} continued success.`,
+                  ][seqStep]}
+                </div>
+              </div>
+              {/* Sequence Stats */}
+              <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:8}}>
+                {[
+                  {label:"예상 오픈율",value:"45%",color:"var(--blue)"},
+                  {label:"예상 응답률",value:"12%",color:"var(--green)"},
+                  {label:"전체 소요일",value:"21일",color:"var(--amber)"},
+                ].map((s,si)=>(
+                  <div key={si} style={{padding:"10px 12px",borderRadius:8,background:"var(--bg-2)",border:"1px solid var(--border)",textAlign:"center"}}>
+                    <div style={{fontSize:18,fontWeight:900,color:s.color,fontFamily:"var(--mono)"}}>{s.value}</div>
+                    <div style={{fontSize:10,color:"var(--t4)",marginTop:2}}>{s.label}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+          {mode==="single" && (<>
           {/* Company/Product inputs */}
           <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10,marginBottom:16}}>
             <div>
@@ -2195,16 +2281,26 @@ ${company}
             <label style={{fontSize:10,color:"var(--t4)",fontWeight:600,marginBottom:4,display:"block",textTransform:"uppercase",letterSpacing:".05em"}}>본문</label>
             <div style={{padding:14,borderRadius:8,background:"var(--bg-2)",border:"1px solid var(--border)",fontSize:12,color:"var(--t2)",lineHeight:1.8,whiteSpace:"pre-wrap",maxHeight:280,overflow:"auto",fontFamily:"var(--font)"}}>{current.body}</div>
           </div>
+          </>)}
         </div>
 
         {/* Footer Actions */}
         <div style={{padding:"14px 20px",borderTop:"1px solid var(--border)",display:"flex",gap:8}}>
-          <div onClick={copyAll} style={{flex:1,padding:"10px 0",borderRadius:8,background:copied?"var(--green)":"var(--blue)",color:"#fff",textAlign:"center",fontSize:12,fontWeight:600,cursor:"pointer",transition:"all .2s",display:"flex",alignItems:"center",justifyContent:"center",gap:6}}>
-            {copied ? <><Ic.Check s={14}/>복사됨!</> : <><Ic.Filter s={14}/>전체 복사</>}
-          </div>
-          <div onClick={openMailto} style={{flex:1,padding:"10px 0",borderRadius:8,background:"var(--bg-3)",border:"1px solid var(--border)",color:"var(--t1)",textAlign:"center",fontSize:12,fontWeight:600,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",gap:6}}>
-            <Ic.Mail s={14}/>메일 앱으로 열기
-          </div>
+          {mode==="single" ? (<>
+            <div onClick={copyAll} style={{flex:1,padding:"10px 0",borderRadius:8,background:copied?"var(--green)":"var(--blue)",color:"#fff",textAlign:"center",fontSize:12,fontWeight:600,cursor:"pointer",transition:"all .2s",display:"flex",alignItems:"center",justifyContent:"center",gap:6}}>
+              {copied ? <><Ic.Check s={14}/>복사됨!</> : <><Ic.Filter s={14}/>전체 복사</>}
+            </div>
+            <div onClick={openMailto} style={{flex:1,padding:"10px 0",borderRadius:8,background:"var(--bg-3)",border:"1px solid var(--border)",color:"var(--t1)",textAlign:"center",fontSize:12,fontWeight:600,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",gap:6}}>
+              <Ic.Mail s={14}/>메일 앱으로 열기
+            </div>
+          </>) : (<>
+            <div onClick={()=>{setSeqStarted(true);setSeqStep(0);}} style={{flex:1,padding:"10px 0",borderRadius:8,background:seqStarted?"var(--green)":"var(--blue)",color:"#fff",textAlign:"center",fontSize:12,fontWeight:600,cursor:"pointer",transition:"all .2s",display:"flex",alignItems:"center",justifyContent:"center",gap:6}}>
+              {seqStarted ? <><Ic.Check s={14}/>시퀀스 활성화됨</> : <><Ic.Zap s={14}/>시퀀스 시작</>}
+            </div>
+            <div onClick={()=>{if(seqStarted&&seqStep<4)setSeqStep(s=>s+1);}} style={{flex:1,padding:"10px 0",borderRadius:8,background:"var(--bg-3)",border:"1px solid var(--border)",color:seqStarted&&seqStep<4?"var(--t1)":"var(--t4)",textAlign:"center",fontSize:12,fontWeight:600,cursor:seqStarted&&seqStep<4?"pointer":"default",display:"flex",alignItems:"center",justifyContent:"center",gap:6}}>
+              다음 단계 시뮬레이션 →
+            </div>
+          </>)}
         </div>
       </div>
     </>
