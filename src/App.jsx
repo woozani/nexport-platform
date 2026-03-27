@@ -879,8 +879,6 @@ function LandingHero({ onEnter, isMobile }) {
   const [featRef, featInView] = useInView(0.15);
   // ── 인증·규제 섹션 inView ──
   const [regRef, regInView] = useInView(0.15);
-  // ── 팀 소개 inView ──
-  const [teamRef, teamInView] = useInView(0.15);
   // ── 경쟁 비교 inView ──
   const [compRef, compInView] = useInView(0.15);
   const [activeRegTab, setActiveRegTab] = useState("cert");
@@ -1597,35 +1595,7 @@ function LandingHero({ onEnter, isMobile }) {
           </div>
         </div>
 
-        {/* ⑥-E 팀 소개 */}
-        <div ref={teamRef} style={{padding:isMobile?"0 0 48px":"0 0 80px"}}>
-          <div style={{textAlign:"center",marginBottom:isMobile?24:44,opacity:teamInView?1:0,transform:teamInView?"none":"translateY(20px)",transition:"all .6s cubic-bezier(0.2,0,0,1)"}}>
-            <div style={{display:"inline-flex",alignItems:"center",gap:6,padding:"4px 14px",borderRadius:20,background:"var(--violet-dim)",border:"1px solid rgba(191,90,242,.25)",fontSize:11,fontWeight:700,color:"var(--violet)",marginBottom:12,letterSpacing:".04em"}}>
-              Team
-            </div>
-            <h2 style={{fontSize:isMobile?22:32,fontWeight:800,letterSpacing:"-.03em",color:"var(--t1)"}}>수출 현장을 아는 팀이 만듭니다</h2>
-            <p style={{fontSize:isMobile?13:15,color:"var(--t3)",marginTop:10}}>B2B 해외영업 실무 경험 + AI 기술력 + 30년 무역 노하우</p>
-          </div>
-          <div style={{display:"grid",gridTemplateColumns:isMobile?"1fr":"repeat(3,1fr)",gap:isMobile?12:20,maxWidth:860,margin:"0 auto"}}>
-            {[
-              {name:"Jay Jang",role:"CEO / Founder",desc:"B2B·B2C 해외영업 5년차, 글로벌 B2B 플랫폼 근무 경험, 수출 Pain Point 당사자 검증 및 VOC 인터뷰 주도",expertise:"사업기획 / 바이어 매칭 전략",color:"var(--blue)",gradient:"linear-gradient(135deg,var(--blue),var(--cyan))"},
-              {name:"CTO",role:"CTO (예정 '26.07)",desc:"컴퓨터공학 학사, 풀스택 개발 경력 3년+ (React, Node.js, Python), NLP 추천 시스템 개발 경험",expertise:"AI 엔진 / 풀스택 개발",color:"var(--violet)",gradient:"linear-gradient(135deg,var(--violet),var(--blue))"},
-              {name:"자문역",role:"수출입 전략 자문",desc:"무역업 종사 30년+, 대미·대유럽 수출 실무 총괄, 산업별 인증·규제(CE, FDA, IATF) 실무 이해",expertise:"수출입 전략 / 인증·규제 자문",color:"var(--green)",gradient:"linear-gradient(135deg,var(--green),var(--cyan))"},
-            ].map((m,i)=>(
-              <div key={i} style={{padding:isMobile?"22px 20px":"28px 24px",borderRadius:16,background:"var(--bg-2)",border:"1px solid var(--border)",boxShadow:"var(--card-shadow)",opacity:teamInView?1:0,animation:teamInView?`staggerUp .55s cubic-bezier(0.2,0,0,1) ${i*120}ms both`:"none",textAlign:"center"}}>
-                <div style={{width:64,height:64,borderRadius:"50%",background:m.gradient,display:"flex",alignItems:"center",justifyContent:"center",margin:"0 auto 16px",fontSize:22,fontWeight:800,color:"#fff",border:"3px solid var(--bg-0)"}}>
-                  {m.name[0]}
-                </div>
-                <div style={{fontSize:16,fontWeight:800,color:"var(--t1)",marginBottom:4}}>{m.name}</div>
-                <div style={{fontSize:12,fontWeight:600,color:m.color,marginBottom:12}}>{m.role}</div>
-                <div style={{fontSize:12,color:"var(--t3)",lineHeight:1.65,marginBottom:14}}>{m.desc}</div>
-                <div style={{padding:"6px 14px",borderRadius:8,background:m.color+"11",border:`1px solid ${m.color}22`,fontSize:11,fontWeight:600,color:m.color,display:"inline-block"}}>{m.expertise}</div>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* ⑥-F 신뢰 요소 — 지원 기관 & 수상 */}
+        {/* ⑥-E 신뢰 요소 — 지원 기관 & 수상 */}
         <div style={{padding:isMobile?"0 0 48px":"0 0 80px",textAlign:"center"}}>
           <div style={{fontSize:11,fontWeight:700,color:"var(--t4)",textTransform:"uppercase",letterSpacing:".12em",marginBottom:isMobile?20:28}}>Trusted & Supported By</div>
           <div style={{display:"flex",flexWrap:"wrap",justifyContent:"center",alignItems:"center",gap:isMobile?16:32}}>
