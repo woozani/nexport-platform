@@ -231,6 +231,91 @@ function mockCreditInfo(idx) {
   const payScore = 95 - gradeIdx * 9;  // AAA=95 … D=23
   const riskLevel = CREDIT_RISK[gradeIdx];
   const gradeEntry = CREDIT_GRADE_COLOR[grade];
+
+  // Phase B: PAYDEX
+  const paydex = 55 + (idx * 7) % 46;  // 55–100
+
+  // Phase B: 국가 리스크
+  const countryRiskMap = [
+    { risk:"A",    label:"안정"   },
+    { risk:"A",    label:"안정"   },
+    { risk:"A",    label:"안정"   },
+    { risk:"BBB+", label:"주의"   },
+    { risk:"BBB+", label:"주의"   },
+    { risk:"BB",   label:"위험"   },
+    { risk:"BB",   label:"위험"   },
+    { risk:"B",    label:"매우위험" },
+    { risk:"B",    label:"매우위험" },
+  ];
+  const countryRisk = countryRiskMap[gradeIdx].risk;
+  const countryRiskLabel = countryRiskMap[gradeIdx].label;
+
+  // Phase B: 업종 연체율
+  const industryDelinquency = parseFloat((1.0 + (idx * 0.3) % 6.0).toFixed(1));
+
+  // Phase B: 결제 조건 (항상 3개)
+  const paymentConditionsMap = [
+    [
+      { label:"신용장(LC)",  status:"green",  reason:"AAA~A+ 등급 바이어에 적합" },
+      { label:"T/T 선불",   status:"green",  reason:"리스크 최소화" },
+      { label:"DA/DP",      status:"yellow", reason:"업종 연체율 확인 권장" },
+    ],
+    [
+      { label:"신용장(LC)",  status:"green",  reason:"AAA~A+ 등급 바이어에 적합" },
+      { label:"T/T 선불",   status:"green",  reason:"리스크 최소화" },
+      { label:"DA/DP",      status:"yellow", reason:"업종 연체율 확인 권장" },
+    ],
+    [
+      { label:"신용장(LC)",  status:"green",  reason:"AAA~A+ 등급 바이어에 적합" },
+      { label:"T/T 선불",   status:"green",  reason:"리스크 최소화" },
+      { label:"DA/DP",      status:"yellow", reason:"업종 연체율 확인 권장" },
+    ],
+    [
+      { label:"신용장(LC)",  status:"green",  reason:"안정적 결제 이력 확인됨" },
+      { label:"T/T 선불",   status:"yellow", reason:"PAYDEX 80 미만 시 주의" },
+      { label:"DA/DP",      status:"red",    reason:"BBB 등급 이하 지양 권장" },
+    ],
+    [
+      { label:"신용장(LC)",  status:"green",  reason:"안정적 결제 이력 확인됨" },
+      { label:"T/T 선불",   status:"yellow", reason:"PAYDEX 80 미만 시 주의" },
+      { label:"DA/DP",      status:"red",    reason:"BBB 등급 이하 지양 권장" },
+    ],
+    [
+      { label:"신용장(LC)",  status:"yellow", reason:"필수 아님, 협상 가능" },
+      { label:"T/T 선불",   status:"green",  reason:"선불 조건 강력 권장" },
+      { label:"DA/DP",      status:"red",    reason:"높은 미수채권 위험" },
+    ],
+    [
+      { label:"신용장(LC)",  status:"yellow", reason:"필수 아님, 협상 가능" },
+      { label:"T/T 선불",   status:"green",  reason:"선불 조건 강력 권장" },
+      { label:"DA/DP",      status:"red",    reason:"높은 미수채권 위험" },
+    ],
+    [
+      { label:"신용장(LC)",  status:"red",    reason:"발급 거절 가능성 높음" },
+      { label:"T/T 선불",   status:"green",  reason:"유일한 안전 결제 수단" },
+      { label:"DA/DP",      status:"red",    reason:"결제 불이행 위험 매우 높음" },
+    ],
+    [
+      { label:"신용장(LC)",  status:"red",    reason:"발급 거절 가능성 높음" },
+      { label:"T/T 선불",   status:"green",  reason:"유일한 안전 결제 수단" },
+      { label:"DA/DP",      status:"red",    reason:"결제 불이행 위험 매우 높음" },
+    ],
+  ];
+  const paymentConditions = paymentConditionsMap[gradeIdx];
+
+  // Phase B: K-SURE 추천 상품
+  let ksureProducts = [];
+  if (riskLevel === "중간") {
+    ksureProducts = [
+      { name:"단기수출보험", coverage:"결제금액의 95%", fit:"medium", reason:"중간 등급 바이어 선택적 권장" },
+    ];
+  } else if (riskLevel === "높음" || riskLevel === "매우높음") {
+    ksureProducts = [
+      { name:"단기수출보험", coverage:"결제금액의 95%", fit:"high",   reason:"BB 등급 이하 바이어 필수 권장" },
+      { name:"중장기수출보험", coverage:"계약금액의 90%", fit:"medium", reason:"고위험 시장 장기 거래 보호" },
+    ];
+  }
+
   return {
     grade,
     payScore,
@@ -240,6 +325,13 @@ function mockCreditInfo(idx) {
     riskColor: CREDIT_RISK_COLOR[riskLevel],
     lastUpdated: "2025-03",
     source: "mock",
+    // Phase B
+    paydex,
+    countryRisk,
+    countryRiskLabel,
+    industryDelinquency,
+    paymentConditions,
+    ksureProducts,
   };
 }
 
@@ -388,6 +480,132 @@ const CreditBadge = ({ grade, gradeColor, gradeDim, payScore, riskLevel }) => (
     <span style={{fontSize:10, fontWeight:700, color:gradeColor, letterSpacing:".02em"}}>{grade}</span>
   </div>
 );
+
+const PAYDEX_COLOR = (v) => v >= 80 ? "var(--green)" : v >= 60 ? "var(--amber)" : "var(--red)";
+const PC_ICON = { green:"🟢", yellow:"🟡", red:"🔴" };
+
+const CreditCard = ({ buyer }) => {
+  const ci = buyer.creditInfo;
+  if (!ci) return null;
+  const [activeTab, setActiveTab] = React.useState("요약");
+  const tabStyle = (t) => ({
+    padding:"6px 14px", fontSize:11, fontWeight:700, cursor:"pointer",
+    background:"none", border:"none",
+    borderBottom: activeTab===t ? "2px solid var(--blue)" : "2px solid transparent",
+    color: activeTab===t ? "var(--t1)" : "var(--t3)",
+  });
+  return (
+    <div style={{
+      padding:"14px 16px", borderRadius:10,
+      background:"var(--bg-2)", border:"1px solid var(--border)",
+      borderLeft:`3px solid ${ci.gradeColor}`, marginBottom:16,
+    }}>
+      {/* 헤더 */}
+      <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:8}}>
+        <div style={{fontSize:12,fontWeight:700,color:"var(--t2)",display:"flex",alignItems:"center",gap:6}}>
+          <Ic.Shield s={13}/>신용평가
+        </div>
+        {ci.source === "mock" && (
+          <span style={{fontSize:9,fontWeight:600,padding:"2px 6px",borderRadius:3,background:"var(--bg-4)",color:"var(--t4)"}}>Mock 데이터</span>
+        )}
+      </div>
+      {/* 탭 바 */}
+      <div style={{display:"flex",gap:0,marginBottom:12,borderBottom:"1px solid var(--border)"}}>
+        {["요약","풀 리포트"].map(t=>(
+          <button key={t} onClick={()=>setActiveTab(t)} style={tabStyle(t)}>{t}</button>
+        ))}
+      </div>
+      {/* 요약 탭 */}
+      {activeTab === "요약" && (
+        <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:8,textAlign:"center"}}>
+          <div style={{minWidth:0,overflow:"hidden"}}>
+            <div style={{fontSize:20,fontWeight:900,color:ci.gradeColor,fontFamily:"var(--mono)"}}>{ci.grade}</div>
+            <div style={{fontSize:10,color:"var(--t3)",marginTop:3,fontWeight:600}}>신용등급</div>
+          </div>
+          <div style={{minWidth:0,overflow:"hidden"}}>
+            <div style={{fontSize:20,fontWeight:900,color:ci.gradeColor,fontFamily:"var(--mono)"}}>{ci.payScore}</div>
+            <div style={{fontSize:10,color:"var(--t3)",marginTop:3,fontWeight:600}}>결제이력점수</div>
+          </div>
+          <div style={{minWidth:0,overflow:"hidden"}}>
+            <div style={{fontSize:14,fontWeight:800,color:ci.riskColor}}>{ci.riskLevel}</div>
+            <div style={{fontSize:10,color:"var(--t3)",marginTop:3,fontWeight:600}}>미수채권리스크</div>
+          </div>
+        </div>
+      )}
+      {/* 풀 리포트 탭 */}
+      {activeTab === "풀 리포트" && (
+        <div style={{display:"flex",flexDirection:"column",gap:12}}>
+          {/* PAYDEX */}
+          <div>
+            <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:4}}>
+              <span style={{fontSize:10,fontWeight:700,color:"var(--t3)"}}>PAYDEX 결제이력</span>
+              <span style={{fontSize:13,fontWeight:900,color:PAYDEX_COLOR(ci.paydex),fontFamily:"var(--mono)"}}>{ci.paydex}<span style={{fontSize:9,color:"var(--t4)"}}>/100</span></span>
+            </div>
+            <div style={{height:6,borderRadius:3,background:"var(--bg-4)",overflow:"hidden"}}>
+              <div style={{height:"100%",width:`${ci.paydex}%`,background:PAYDEX_COLOR(ci.paydex),borderRadius:3,transition:"width .4s ease"}}/>
+            </div>
+          </div>
+          {/* 리스크 그리드 */}
+          <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8}}>
+            <div style={{background:"var(--bg-3)",borderRadius:6,padding:"8px 10px"}}>
+              <div style={{fontSize:9,color:"var(--t4)",fontWeight:600,marginBottom:3}}>국가 리스크</div>
+              <div style={{fontSize:13,fontWeight:800,color:"var(--t1)"}}>{ci.countryRisk} <span style={{fontSize:10,color:"var(--t3)"}}>{ci.countryRiskLabel}</span></div>
+            </div>
+            <div style={{background:"var(--bg-3)",borderRadius:6,padding:"8px 10px"}}>
+              <div style={{fontSize:9,color:"var(--t4)",fontWeight:600,marginBottom:3}}>업종 연체율</div>
+              <div style={{fontSize:13,fontWeight:800,color:"var(--t1)"}}>{ci.industryDelinquency}<span style={{fontSize:10,color:"var(--t3)"}}> %</span></div>
+            </div>
+          </div>
+          {/* 결제 조건 */}
+          <div>
+            <div style={{fontSize:10,fontWeight:700,color:"var(--t3)",marginBottom:6}}>결제 조건</div>
+            <div style={{display:"flex",flexDirection:"column",gap:4}}>
+              {ci.paymentConditions.map((pc,i)=>(
+                <div key={i} style={{display:"flex",alignItems:"center",gap:8,fontSize:11}}>
+                  <span style={{fontSize:13}}>{PC_ICON[pc.status]}</span>
+                  <span style={{fontWeight:700,color:"var(--t2)",minWidth:72}}>{pc.label}</span>
+                  <span style={{color:"var(--t3)"}}>{pc.reason}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+          {/* K-SURE 추천 */}
+          <div>
+            <div style={{fontSize:10,fontWeight:700,color:"var(--t3)",marginBottom:6}}>K-SURE 추천 상품</div>
+            {ci.ksureProducts.length === 0 ? (
+              <div style={{fontSize:11,color:"var(--t4)",padding:"8px 0"}}>현재 등급에서 별도 보험 가입 불필요합니다.</div>
+            ) : (
+              <div style={{display:"flex",flexDirection:"column",gap:6}}>
+                {ci.ksureProducts.map((p,i)=>(
+                  <div key={i} style={{
+                    padding:"8px 10px", borderRadius:6,
+                    background: p.fit==="high" ? "var(--red-dim)" : "var(--blue-dim)",
+                    borderLeft: `3px solid ${p.fit==="high" ? "var(--red)" : "var(--blue)"}`,
+                    display:"flex",alignItems:"flex-start",gap:8,
+                  }}>
+                    <div style={{flex:1}}>
+                      <div style={{display:"flex",alignItems:"center",gap:6,marginBottom:2}}>
+                        <span style={{fontSize:12,fontWeight:800,color:"var(--t1)"}}>{p.name}</span>
+                        <span style={{
+                          fontSize:9,fontWeight:700,padding:"1px 5px",borderRadius:3,
+                          background: p.fit==="high" ? "var(--red)" : "var(--blue)",
+                          color:"#fff"
+                        }}>{p.fit==="high"?"필수":"선택"}</span>
+                      </div>
+                      <div style={{fontSize:10,color:"var(--t3)",marginBottom:1}}>{p.coverage}</div>
+                      <div style={{fontSize:10,color:"var(--t4)"}}>{p.reason}</div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+      <div style={{marginTop:10,fontSize:10,color:"var(--t4)",textAlign:"right"}}>{ci.lastUpdated} 기준 · K-SURE/D&B 연계 예정</div>
+    </div>
+  );
+};
 
 const ScoreBar = ({score}) => {
   const c = score >= 85 ? "var(--green)" : score >= 70 ? "var(--blue)" : score >= 55 ? "var(--amber)" : "var(--red)";
@@ -578,42 +796,7 @@ function BuyerDetailPanel({ buyer, onClose, onSave, isSaved, onEmailBuyer, onSho
             </div>
           </div>
           {/* ── 신용평가 카드 ── */}
-          {buyer.creditInfo && (() => {
-            const ci = buyer.creditInfo;
-            return (
-              <div style={{
-                padding:"14px 16px", borderRadius:10,
-                background:"var(--bg-2)",
-                border:"1px solid var(--border)",
-                borderLeft:`3px solid ${ci.gradeColor}`,
-                marginBottom:16,
-              }}>
-                <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:12}}>
-                  <div style={{fontSize:12,fontWeight:700,color:"var(--t2)",display:"flex",alignItems:"center",gap:6}}>
-                    <Ic.Shield s={13}/>신용평가
-                  </div>
-                  {ci.source === "mock" && (
-                    <span style={{fontSize:9,fontWeight:600,padding:"2px 6px",borderRadius:3,background:"var(--bg-4)",color:"var(--t4)"}}>Mock 데이터</span>
-                  )}
-                </div>
-                <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:8,textAlign:"center"}}>
-                  <div style={{minWidth:0,overflow:"hidden"}}>
-                    <div style={{fontSize:20,fontWeight:900,color:ci.gradeColor,fontFamily:"var(--mono)"}}>{ci.grade}</div>
-                    <div style={{fontSize:10,color:"var(--t3)",marginTop:3,fontWeight:600}}>신용등급</div>
-                  </div>
-                  <div style={{minWidth:0,overflow:"hidden"}}>
-                    <div style={{fontSize:20,fontWeight:900,color:ci.gradeColor,fontFamily:"var(--mono)"}}>{ci.payScore}</div>
-                    <div style={{fontSize:10,color:"var(--t3)",marginTop:3,fontWeight:600}}>결제이력점수</div>
-                  </div>
-                  <div style={{minWidth:0,overflow:"hidden"}}>
-                    <div style={{fontSize:14,fontWeight:800,color:ci.riskColor}}>{ci.riskLevel}</div>
-                    <div style={{fontSize:10,color:"var(--t3)",marginTop:3,fontWeight:600}}>미수채권리스크</div>
-                  </div>
-                </div>
-                <div style={{marginTop:10,fontSize:10,color:"var(--t4)",textAlign:"right"}}>{ci.lastUpdated} 기준 · K-SURE/D&B 연계 예정</div>
-              </div>
-            );
-          })()}
+          <CreditCard buyer={buyer} />
           <div style={{padding:16,borderRadius:10,background:"var(--bg-2)",border:"1px solid var(--border)",marginBottom:16}}>
             <div style={{fontSize:12,fontWeight:700,color:"var(--t2)",marginBottom:12,display:"flex",alignItems:"center",gap:6}}><Ic.Mail s={13}/>연락처</div>
             <div style={{display:"grid",gap:10}}>
@@ -2616,7 +2799,7 @@ function AIAssistant({ buyers, onClose }) {
 }
 
 function FilterSidebar({ filters, setFilters, collapsed, setCollapsed }) {
-  const [openSections, setOpenSections] = useState({"산업":true,"지역":true,"회사규모":false,"인증":false,"구매의향":false,"규제시장":false,"매칭점수":false});
+  const [openSections, setOpenSections] = useState({"산업":true,"지역":true,"회사규모":false,"인증":false,"구매의향":false,"규제시장":false,"신용등급":false,"매칭점수":false});
   const toggle = k => setOpenSections(p=>({...p,[k]:!p[k]}));
 
   const FilterSection = ({title, icon:Icon, children}) => (
@@ -2653,7 +2836,7 @@ function FilterSidebar({ filters, setFilters, collapsed, setCollapsed }) {
         <div style={{display:"flex",alignItems:"center",gap:6,fontSize:13,fontWeight:700}}><Ic.Filter s={14}/>필터</div>
         <div style={{display:"flex",gap:4}}>
           {Object.values(filters).some(v => Array.isArray(v) ? v.length : v) && (
-            <div onClick={()=>setFilters({industries:[],regions:[],sizes:[],certs:[],intents:[],regulations:[],scoreMin:0,scoreMax:100})} style={{fontSize:10,color:"var(--red)",cursor:"pointer",padding:"2px 6px",borderRadius:4,background:"var(--red-dim)"}}>초기화</div>
+            <div onClick={()=>setFilters({industries:[],regions:[],sizes:[],certs:[],intents:[],regulations:[],grades:[],scoreMin:0,scoreMax:100})} style={{fontSize:10,color:"var(--red)",cursor:"pointer",padding:"2px 6px",borderRadius:4,background:"var(--red-dim)"}}>초기화</div>
           )}
           <div onClick={()=>setCollapsed(true)} style={{cursor:"pointer",color:"var(--t4)",padding:2}}><Ic.ChevLeft s={14}/></div>
         </div>
@@ -2707,6 +2890,24 @@ function FilterSidebar({ filters, setFilters, collapsed, setCollapsed }) {
               checked={(filters.regulations||[]).includes(r)}
               onChange={()=>setFilters(p=>({...p,regulations:(p.regulations||[]).includes(r)?p.regulations.filter(x=>x!==r):[...(p.regulations||[]),r]}))} />
           ))}
+        </FilterSection>
+        <FilterSection title="신용등급" icon={Ic.Shield}>
+          <div style={{display:"flex",flexWrap:"wrap",gap:4}}>
+            {CREDIT_GRADES.map(g=>(
+              <label key={g} style={{display:"flex",alignItems:"center",gap:4,cursor:"pointer",
+                padding:"2px 6px",borderRadius:4,fontSize:11,fontWeight:600,
+                background: filters.grades.includes(g) ? CREDIT_GRADE_COLOR[g].dim : "transparent",
+                color: filters.grades.includes(g) ? CREDIT_GRADE_COLOR[g].color : "var(--t3)",
+                border: `1px solid ${filters.grades.includes(g) ? CREDIT_GRADE_COLOR[g].color+"60" : "var(--border)"}`,
+              }}>
+                <input type="checkbox" style={{display:"none"}}
+                  checked={filters.grades.includes(g)}
+                  onChange={()=>setFilters(p=>({...p,grades:p.grades.includes(g)?p.grades.filter(x=>x!==g):[...p.grades,g]}))}
+                />
+                {g}
+              </label>
+            ))}
+          </div>
         </FilterSection>
         <FilterSection title="매칭점수" icon={Ic.Bar}>
           <div style={{display:"flex",gap:8,alignItems:"center",fontSize:12}}>
@@ -3835,7 +4036,7 @@ function EmailFinderView() {
 }
 
 export default function App() {
-  const [filters, setFilters] = useState({industries:[],regions:[],sizes:[],certs:[],intents:[],regulations:[],scoreMin:0,scoreMax:100});
+  const [filters, setFilters] = useState({industries:[],regions:[],sizes:[],certs:[],intents:[],regulations:[],grades:[],scoreMin:0,scoreMax:100});
   const [sideCollapsed, setSideCollapsed] = useState(false);
   const [search, setSearch] = useState("");
   const [detailBuyer, setDetailBuyer] = useState(null);
@@ -3979,6 +4180,7 @@ export default function App() {
     if (filters.certs.length) d = d.filter(b => b.certifications.some(c => filters.certs.includes(c)));
     if (filters.intents.length) d = d.filter(b => filters.intents.includes(b.buyingIntent));
     if (filters.regulations&&filters.regulations.length) d = d.filter(b => filters.regulations.some(r => (b.regulatoryShield||[]).includes(r)));
+    if (filters.grades.length) d = d.filter(b => filters.grades.includes(b.creditInfo?.grade));
     if (filters.scoreMin > 0) d = d.filter(b => b.score >= filters.scoreMin);
     if (filters.scoreMax < 100) d = d.filter(b => b.score <= filters.scoreMax);
     // Size filter
@@ -3997,6 +4199,11 @@ export default function App() {
     }
     // Sort
     d.sort((a, b) => {
+      if (sort.field === "creditGrade") {
+        const ai = CREDIT_GRADES.indexOf(a.creditInfo?.grade ?? "D");
+        const bi = CREDIT_GRADES.indexOf(b.creditInfo?.grade ?? "D");
+        return sort.asc ? ai - bi : bi - ai;
+      }
       let va = a[sort.field], vb = b[sort.field];
       if (typeof va === "string") return sort.asc ? va.localeCompare(vb) : vb.localeCompare(va);
       return sort.asc ? va - vb : vb - va;
@@ -4034,6 +4241,7 @@ export default function App() {
     ...filters.certs.map(c => ({label:c,clear:()=>setFilters(p=>({...p,certs:p.certs.filter(x=>x!==c)}))})),
     ...filters.intents.map(i => ({label:`의향:${i}`,clear:()=>setFilters(p=>({...p,intents:p.intents.filter(x=>x!==i)}))})),
     ...(filters.regulations||[]).map(r => ({label:`규제:${r}`,clear:()=>setFilters(p=>({...p,regulations:p.regulations.filter(x=>x!==r)}))})),
+    ...( filters.grades.map(g => ({label:g, clear:()=>setFilters(p=>({...p,grades:p.grades.filter(x=>x!==g)}))}))),
   ];
 
   useEffect(() => { setPage(1); }, [filters, search, tab, quickFilter]);
@@ -4228,7 +4436,15 @@ export default function App() {
                       </div>
                     </th>
                   ))}
-                  <th style={{padding:"8px 10px",fontSize:10,fontWeight:700,color:"var(--t3)",textTransform:"uppercase",letterSpacing:".08em",textAlign:"left",whiteSpace:"nowrap",width:90,borderBottom:"1px solid var(--border)"}}>신용등급</th>
+                  <th onClick={()=>toggleSort("creditGrade")} style={{
+                    padding:"8px 10px",fontSize:10,fontWeight:700,color:"var(--t3)",textTransform:"uppercase",
+                    letterSpacing:".08em",textAlign:"left",cursor:"pointer",whiteSpace:"nowrap",
+                    width:90,borderBottom:"1px solid var(--border)",userSelect:"none"
+                  }}>
+                    <div style={{display:"flex",alignItems:"center",gap:4}}>
+                      신용등급<span style={{color:sort.field==="creditGrade"?"var(--blue)":"var(--t4)"}}><SortIcon field="creditGrade"/></span>
+                    </div>
+                  </th>
                   {[
                     ["demand","수요 품목",140],["volume","예상 규모",90],
                     ["buyingIntent","의향",90],["status","상태",75],["email","이메일",170]
