@@ -597,15 +597,15 @@ function BuyerDetailPanel({ buyer, onClose, onSave, isSaved, onEmailBuyer, onSho
                   )}
                 </div>
                 <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:8,textAlign:"center"}}>
-                  <div>
+                  <div style={{minWidth:0,overflow:"hidden"}}>
                     <div style={{fontSize:20,fontWeight:900,color:ci.gradeColor,fontFamily:"var(--mono)"}}>{ci.grade}</div>
                     <div style={{fontSize:10,color:"var(--t3)",marginTop:3,fontWeight:600}}>신용등급</div>
                   </div>
-                  <div>
+                  <div style={{minWidth:0,overflow:"hidden"}}>
                     <div style={{fontSize:20,fontWeight:900,color:ci.gradeColor,fontFamily:"var(--mono)"}}>{ci.payScore}</div>
                     <div style={{fontSize:10,color:"var(--t3)",marginTop:3,fontWeight:600}}>결제이력점수</div>
                   </div>
-                  <div>
+                  <div style={{minWidth:0,overflow:"hidden"}}>
                     <div style={{fontSize:14,fontWeight:800,color:ci.riskColor}}>{ci.riskLevel}</div>
                     <div style={{fontSize:10,color:"var(--t3)",marginTop:3,fontWeight:600}}>미수채권리스크</div>
                   </div>
