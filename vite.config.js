@@ -56,7 +56,35 @@ export default defineConfig(({ mode }) => {
             }
           })
         }
-      }
+      },
+      {
+        name: 'credit-api-dev',
+        configureServer(server) {
+          server.middlewares.use('/api/credit', (req, res) => {
+            res.setHeader('Content-Type', 'application/json')
+            res.setHeader('Access-Control-Allow-Origin', '*')
+            const url = new URL(req.url, 'http://localhost')
+            const idx = url.searchParams.get('idx') || '0'
+            const GRADES = ["AAA","AA","A+","A","BBB","BB","B","C","D"]
+            const RISKS  = ["낮음","낮음","낮음","중간","중간","높음","높음","매우높음","매우높음"]
+            const GRADE_COLOR = {
+              "AAA":"#34C759","AA":"#34C759","A+":"#34C759",
+              "A":"#0A84FF","BBB":"#0A84FF",
+              "BB":"#FF9F0A","B":"#FF9F0A",
+              "C":"#FF453A","D":"#FF453A",
+            }
+            const RISK_COLOR = { "낮음":"#34C759","중간":"#FF9F0A","높음":"#FF453A","매우높음":"#FF453A" }
+            const i = Math.abs(parseInt(idx) || 0) % GRADES.length
+            const grade = GRADES[i]
+            const riskLevel = RISKS[i]
+            res.end(JSON.stringify({
+              grade, payScore: 95 - i * 9, riskLevel,
+              gradeColor: GRADE_COLOR[grade], riskColor: RISK_COLOR[riskLevel],
+              lastUpdated: "2025-03", source: "mock",
+            }))
+          })
+        }
+      },
     ],
     build: {
       outDir: 'dist',
