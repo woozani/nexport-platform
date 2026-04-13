@@ -481,6 +481,132 @@ const CreditBadge = ({ grade, gradeColor, gradeDim, payScore, riskLevel }) => (
   </div>
 );
 
+const PAYDEX_COLOR = (v) => v >= 80 ? "var(--green)" : v >= 60 ? "var(--amber)" : "var(--red)";
+const PC_ICON = { green:"🟢", yellow:"🟡", red:"🔴" };
+
+const CreditCard = ({ buyer }) => {
+  const ci = buyer.creditInfo;
+  if (!ci) return null;
+  const [activeTab, setActiveTab] = React.useState("요약");
+  const tabStyle = (t) => ({
+    padding:"6px 14px", fontSize:11, fontWeight:700, cursor:"pointer",
+    background:"none", border:"none",
+    borderBottom: activeTab===t ? "2px solid var(--blue)" : "2px solid transparent",
+    color: activeTab===t ? "var(--t1)" : "var(--t3)",
+  });
+  return (
+    <div style={{
+      padding:"14px 16px", borderRadius:10,
+      background:"var(--bg-2)", border:"1px solid var(--border)",
+      borderLeft:`3px solid ${ci.gradeColor}`, marginBottom:16,
+    }}>
+      {/* 헤더 */}
+      <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:8}}>
+        <div style={{fontSize:12,fontWeight:700,color:"var(--t2)",display:"flex",alignItems:"center",gap:6}}>
+          <Ic.Shield s={13}/>신용평가
+        </div>
+        {ci.source === "mock" && (
+          <span style={{fontSize:9,fontWeight:600,padding:"2px 6px",borderRadius:3,background:"var(--bg-4)",color:"var(--t4)"}}>Mock 데이터</span>
+        )}
+      </div>
+      {/* 탭 바 */}
+      <div style={{display:"flex",gap:0,marginBottom:12,borderBottom:"1px solid var(--border)"}}>
+        {["요약","풀 리포트"].map(t=>(
+          <button key={t} onClick={()=>setActiveTab(t)} style={tabStyle(t)}>{t}</button>
+        ))}
+      </div>
+      {/* 요약 탭 */}
+      {activeTab === "요약" && (
+        <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:8,textAlign:"center"}}>
+          <div style={{minWidth:0,overflow:"hidden"}}>
+            <div style={{fontSize:20,fontWeight:900,color:ci.gradeColor,fontFamily:"var(--mono)"}}>{ci.grade}</div>
+            <div style={{fontSize:10,color:"var(--t3)",marginTop:3,fontWeight:600}}>신용등급</div>
+          </div>
+          <div style={{minWidth:0,overflow:"hidden"}}>
+            <div style={{fontSize:20,fontWeight:900,color:ci.gradeColor,fontFamily:"var(--mono)"}}>{ci.payScore}</div>
+            <div style={{fontSize:10,color:"var(--t3)",marginTop:3,fontWeight:600}}>결제이력점수</div>
+          </div>
+          <div style={{minWidth:0,overflow:"hidden"}}>
+            <div style={{fontSize:14,fontWeight:800,color:ci.riskColor}}>{ci.riskLevel}</div>
+            <div style={{fontSize:10,color:"var(--t3)",marginTop:3,fontWeight:600}}>미수채권리스크</div>
+          </div>
+        </div>
+      )}
+      {/* 풀 리포트 탭 */}
+      {activeTab === "풀 리포트" && (
+        <div style={{display:"flex",flexDirection:"column",gap:12}}>
+          {/* PAYDEX */}
+          <div>
+            <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:4}}>
+              <span style={{fontSize:10,fontWeight:700,color:"var(--t3)"}}>PAYDEX 결제이력</span>
+              <span style={{fontSize:13,fontWeight:900,color:PAYDEX_COLOR(ci.paydex),fontFamily:"var(--mono)"}}>{ci.paydex}<span style={{fontSize:9,color:"var(--t4)"}}>/100</span></span>
+            </div>
+            <div style={{height:6,borderRadius:3,background:"var(--bg-4)",overflow:"hidden"}}>
+              <div style={{height:"100%",width:`${ci.paydex}%`,background:PAYDEX_COLOR(ci.paydex),borderRadius:3,transition:"width .4s ease"}}/>
+            </div>
+          </div>
+          {/* 리스크 그리드 */}
+          <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8}}>
+            <div style={{background:"var(--bg-3)",borderRadius:6,padding:"8px 10px"}}>
+              <div style={{fontSize:9,color:"var(--t4)",fontWeight:600,marginBottom:3}}>국가 리스크</div>
+              <div style={{fontSize:13,fontWeight:800,color:"var(--t1)"}}>{ci.countryRisk} <span style={{fontSize:10,color:"var(--t3)"}}>{ci.countryRiskLabel}</span></div>
+            </div>
+            <div style={{background:"var(--bg-3)",borderRadius:6,padding:"8px 10px"}}>
+              <div style={{fontSize:9,color:"var(--t4)",fontWeight:600,marginBottom:3}}>업종 연체율</div>
+              <div style={{fontSize:13,fontWeight:800,color:"var(--t1)"}}>{ci.industryDelinquency}<span style={{fontSize:10,color:"var(--t3)"}}> %</span></div>
+            </div>
+          </div>
+          {/* 결제 조건 */}
+          <div>
+            <div style={{fontSize:10,fontWeight:700,color:"var(--t3)",marginBottom:6}}>결제 조건</div>
+            <div style={{display:"flex",flexDirection:"column",gap:4}}>
+              {ci.paymentConditions.map((pc,i)=>(
+                <div key={i} style={{display:"flex",alignItems:"center",gap:8,fontSize:11}}>
+                  <span style={{fontSize:13}}>{PC_ICON[pc.status]}</span>
+                  <span style={{fontWeight:700,color:"var(--t2)",minWidth:72}}>{pc.label}</span>
+                  <span style={{color:"var(--t3)"}}>{pc.reason}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+          {/* K-SURE 추천 */}
+          <div>
+            <div style={{fontSize:10,fontWeight:700,color:"var(--t3)",marginBottom:6}}>K-SURE 추천 상품</div>
+            {ci.ksureProducts.length === 0 ? (
+              <div style={{fontSize:11,color:"var(--t4)",padding:"8px 0"}}>현재 등급에서 별도 보험 가입 불필요합니다.</div>
+            ) : (
+              <div style={{display:"flex",flexDirection:"column",gap:6}}>
+                {ci.ksureProducts.map((p,i)=>(
+                  <div key={i} style={{
+                    padding:"8px 10px", borderRadius:6,
+                    background: p.fit==="high" ? "var(--red-dim)" : "var(--blue-dim)",
+                    borderLeft: `3px solid ${p.fit==="high" ? "var(--red)" : "var(--blue)"}`,
+                    display:"flex",alignItems:"flex-start",gap:8,
+                  }}>
+                    <div style={{flex:1}}>
+                      <div style={{display:"flex",alignItems:"center",gap:6,marginBottom:2}}>
+                        <span style={{fontSize:12,fontWeight:800,color:"var(--t1)"}}>{p.name}</span>
+                        <span style={{
+                          fontSize:9,fontWeight:700,padding:"1px 5px",borderRadius:3,
+                          background: p.fit==="high" ? "var(--red)" : "var(--blue)",
+                          color:"#fff"
+                        }}>{p.fit==="high"?"필수":"선택"}</span>
+                      </div>
+                      <div style={{fontSize:10,color:"var(--t3)",marginBottom:1}}>{p.coverage}</div>
+                      <div style={{fontSize:10,color:"var(--t4)"}}>{p.reason}</div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+      <div style={{marginTop:10,fontSize:10,color:"var(--t4)",textAlign:"right"}}>{ci.lastUpdated} 기준 · K-SURE/D&B 연계 예정</div>
+    </div>
+  );
+};
+
 const ScoreBar = ({score}) => {
   const c = score >= 85 ? "var(--green)" : score >= 70 ? "var(--blue)" : score >= 55 ? "var(--amber)" : "var(--red)";
   return (
