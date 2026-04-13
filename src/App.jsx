@@ -796,42 +796,7 @@ function BuyerDetailPanel({ buyer, onClose, onSave, isSaved, onEmailBuyer, onSho
             </div>
           </div>
           {/* ── 신용평가 카드 ── */}
-          {buyer.creditInfo && (() => {
-            const ci = buyer.creditInfo;
-            return (
-              <div style={{
-                padding:"14px 16px", borderRadius:10,
-                background:"var(--bg-2)",
-                border:"1px solid var(--border)",
-                borderLeft:`3px solid ${ci.gradeColor}`,
-                marginBottom:16,
-              }}>
-                <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:12}}>
-                  <div style={{fontSize:12,fontWeight:700,color:"var(--t2)",display:"flex",alignItems:"center",gap:6}}>
-                    <Ic.Shield s={13}/>신용평가
-                  </div>
-                  {ci.source === "mock" && (
-                    <span style={{fontSize:9,fontWeight:600,padding:"2px 6px",borderRadius:3,background:"var(--bg-4)",color:"var(--t4)"}}>Mock 데이터</span>
-                  )}
-                </div>
-                <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:8,textAlign:"center"}}>
-                  <div style={{minWidth:0,overflow:"hidden"}}>
-                    <div style={{fontSize:20,fontWeight:900,color:ci.gradeColor,fontFamily:"var(--mono)"}}>{ci.grade}</div>
-                    <div style={{fontSize:10,color:"var(--t3)",marginTop:3,fontWeight:600}}>신용등급</div>
-                  </div>
-                  <div style={{minWidth:0,overflow:"hidden"}}>
-                    <div style={{fontSize:20,fontWeight:900,color:ci.gradeColor,fontFamily:"var(--mono)"}}>{ci.payScore}</div>
-                    <div style={{fontSize:10,color:"var(--t3)",marginTop:3,fontWeight:600}}>결제이력점수</div>
-                  </div>
-                  <div style={{minWidth:0,overflow:"hidden"}}>
-                    <div style={{fontSize:14,fontWeight:800,color:ci.riskColor}}>{ci.riskLevel}</div>
-                    <div style={{fontSize:10,color:"var(--t3)",marginTop:3,fontWeight:600}}>미수채권리스크</div>
-                  </div>
-                </div>
-                <div style={{marginTop:10,fontSize:10,color:"var(--t4)",textAlign:"right"}}>{ci.lastUpdated} 기준 · K-SURE/D&B 연계 예정</div>
-              </div>
-            );
-          })()}
+          <CreditCard buyer={buyer} />
           <div style={{padding:16,borderRadius:10,background:"var(--bg-2)",border:"1px solid var(--border)",marginBottom:16}}>
             <div style={{fontSize:12,fontWeight:700,color:"var(--t2)",marginBottom:12,display:"flex",alignItems:"center",gap:6}}><Ic.Mail s={13}/>연락처</div>
             <div style={{display:"grid",gap:10}}>
