@@ -231,6 +231,91 @@ function mockCreditInfo(idx) {
   const payScore = 95 - gradeIdx * 9;  // AAA=95 … D=23
   const riskLevel = CREDIT_RISK[gradeIdx];
   const gradeEntry = CREDIT_GRADE_COLOR[grade];
+
+  // Phase B: PAYDEX
+  const paydex = 55 + (idx * 7) % 46;  // 55–100
+
+  // Phase B: 국가 리스크
+  const countryRiskMap = [
+    { risk:"A",    label:"안정"   },
+    { risk:"A",    label:"안정"   },
+    { risk:"A",    label:"안정"   },
+    { risk:"BBB+", label:"주의"   },
+    { risk:"BBB+", label:"주의"   },
+    { risk:"BB",   label:"위험"   },
+    { risk:"BB",   label:"위험"   },
+    { risk:"B",    label:"매우위험" },
+    { risk:"B",    label:"매우위험" },
+  ];
+  const countryRisk = countryRiskMap[gradeIdx].risk;
+  const countryRiskLabel = countryRiskMap[gradeIdx].label;
+
+  // Phase B: 업종 연체율
+  const industryDelinquency = parseFloat((1.0 + (idx * 0.3) % 6.0).toFixed(1));
+
+  // Phase B: 결제 조건 (항상 3개)
+  const paymentConditionsMap = [
+    [
+      { label:"신용장(LC)",  status:"green",  reason:"AAA~A+ 등급 바이어에 적합" },
+      { label:"T/T 선불",   status:"green",  reason:"리스크 최소화" },
+      { label:"DA/DP",      status:"yellow", reason:"업종 연체율 확인 권장" },
+    ],
+    [
+      { label:"신용장(LC)",  status:"green",  reason:"AAA~A+ 등급 바이어에 적합" },
+      { label:"T/T 선불",   status:"green",  reason:"리스크 최소화" },
+      { label:"DA/DP",      status:"yellow", reason:"업종 연체율 확인 권장" },
+    ],
+    [
+      { label:"신용장(LC)",  status:"green",  reason:"AAA~A+ 등급 바이어에 적합" },
+      { label:"T/T 선불",   status:"green",  reason:"리스크 최소화" },
+      { label:"DA/DP",      status:"yellow", reason:"업종 연체율 확인 권장" },
+    ],
+    [
+      { label:"신용장(LC)",  status:"green",  reason:"안정적 결제 이력 확인됨" },
+      { label:"T/T 선불",   status:"yellow", reason:"PAYDEX 80 미만 시 주의" },
+      { label:"DA/DP",      status:"red",    reason:"BBB 등급 이하 지양 권장" },
+    ],
+    [
+      { label:"신용장(LC)",  status:"green",  reason:"안정적 결제 이력 확인됨" },
+      { label:"T/T 선불",   status:"yellow", reason:"PAYDEX 80 미만 시 주의" },
+      { label:"DA/DP",      status:"red",    reason:"BBB 등급 이하 지양 권장" },
+    ],
+    [
+      { label:"신용장(LC)",  status:"yellow", reason:"필수 아님, 협상 가능" },
+      { label:"T/T 선불",   status:"green",  reason:"선불 조건 강력 권장" },
+      { label:"DA/DP",      status:"red",    reason:"높은 미수채권 위험" },
+    ],
+    [
+      { label:"신용장(LC)",  status:"yellow", reason:"필수 아님, 협상 가능" },
+      { label:"T/T 선불",   status:"green",  reason:"선불 조건 강력 권장" },
+      { label:"DA/DP",      status:"red",    reason:"높은 미수채권 위험" },
+    ],
+    [
+      { label:"신용장(LC)",  status:"red",    reason:"발급 거절 가능성 높음" },
+      { label:"T/T 선불",   status:"green",  reason:"유일한 안전 결제 수단" },
+      { label:"DA/DP",      status:"red",    reason:"결제 불이행 위험 매우 높음" },
+    ],
+    [
+      { label:"신용장(LC)",  status:"red",    reason:"발급 거절 가능성 높음" },
+      { label:"T/T 선불",   status:"green",  reason:"유일한 안전 결제 수단" },
+      { label:"DA/DP",      status:"red",    reason:"결제 불이행 위험 매우 높음" },
+    ],
+  ];
+  const paymentConditions = paymentConditionsMap[gradeIdx];
+
+  // Phase B: K-SURE 추천 상품
+  let ksureProducts = [];
+  if (riskLevel === "중간") {
+    ksureProducts = [
+      { name:"단기수출보험", coverage:"결제금액의 95%", fit:"medium", reason:"중간 등급 바이어 선택적 권장" },
+    ];
+  } else if (riskLevel === "높음" || riskLevel === "매우높음") {
+    ksureProducts = [
+      { name:"단기수출보험", coverage:"결제금액의 95%", fit:"high",   reason:"BB 등급 이하 바이어 필수 권장" },
+      { name:"중장기수출보험", coverage:"계약금액의 90%", fit:"medium", reason:"고위험 시장 장기 거래 보호" },
+    ];
+  }
+
   return {
     grade,
     payScore,
@@ -240,6 +325,13 @@ function mockCreditInfo(idx) {
     riskColor: CREDIT_RISK_COLOR[riskLevel],
     lastUpdated: "2025-03",
     source: "mock",
+    // Phase B
+    paydex,
+    countryRisk,
+    countryRiskLabel,
+    industryDelinquency,
+    paymentConditions,
+    ksureProducts,
   };
 }
 
