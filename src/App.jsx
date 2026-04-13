@@ -145,10 +145,47 @@ const FLAGS = {"독일":"🇩🇪","미국":"🇺🇸","일본":"🇯🇵","베�
 const REGIONS = {"독일":"유럽","미국":"북미","일본":"아시아","베트남":"동남아","스웨덴":"유럽","네덜란드":"유럽","영국":"유럽","호주":"오세아니아","캐나다":"북미","프랑스":"유럽","싱가포르":"동남아","태국":"동남아","인도":"아시아","브라질":"남미","멕시코":"북미","아랍에미리트":"중동","사우디아라비아":"중동","튀르키예":"중동","이스라엘":"중동","남아프리카공화국":"아프리카","나이지리아":"아프리카","이집트":"아프리카","케냐":"아프리카"};
 const INDUSTRIES = ["자동차 부품","전자부품","의료기기","항공우주","플라스틱 사출","금속가공","반도체 장비","화학소재","건설자재","에너지","식품기계","조선/해양","섬유/의류","포장재","냉동/공조","방산/방위","이차전지","로봇/자동화","철강/비철금속","공작기계"];
 const CERTS = ["ISO 9001","ISO 13485","IATF 16949","UL","CE","FDA","RoHS","REACH","JIS","AS9100"];
+
+// ─── 국가별 수출 컴플라이언스 데이터 ───
+const EXPORT_COMPLIANCE = {
+  "미국":{flag:"🇺🇸",riskLevel:"높음",riskColor:"var(--red)",docs:["상업 송장 (Commercial Invoice)","패킹 리스트 (Packing List)","선하증권 (B/L)","원산지 증명서 (C/O)","FDA 사전통보 (식품·의료기기)","FCC 인증 (전자제품)"],certs:["FDA","UL","FCC","CPSC"],regulations:["Buy American Act 적용 품목 확인","EAR/ITAR 수출통제 대상 여부 검토","TSCA (화학물질) 사전 등록","관세율: 평균 3.4% (MFN)"],tips:["HS 코드 사전 확인 필수 — 관세율 차이 큼","FDA 등록은 수출 전 최소 30일 전 완료","CPSIA (소비자 제품) 제3자 시험 필요"]},
+  "독일":{flag:"🇩🇪",riskLevel:"중간",riskColor:"var(--amber)",docs:["상업 송장","패킹 리스트","EUR.1 이동 증명서","적합성 선언서 (DoC)","CE 기술문서 (Technical File)"],certs:["CE","RoHS","REACH","TÜV"],regulations:["EU CE 마킹 필수 (기계·전기·의료)","REACH 화학물질 등록 (연 1톤 이상)","RoHS 유해물질 제한","WEEE 전자폐기물 등록"],tips:["한-EU FTA 활용 시 관세 0% 가능","CE 마킹 없으면 통관 불가","독일어 라벨·사용 설명서 필수"]},
+  "일본":{flag:"🇯🇵",riskLevel:"중간",riskColor:"var(--amber)",docs:["상업 송장","패킹 리스트","원산지 증명서","수입 신고서","식품위생 증명 (식품)"],certs:["JIS","PSE","JGMP","PMDA"],regulations:["PSE 마크 (전기용품)","식품위생법 검사 (식품·식기)","약기법 (의료기기) 사전 승인","화학물질 심사법 (화심법)"],tips:["한-일 RCEP 활용 관세 인하 가능","JIS 규격 적합 시 시장 진입 유리","일본어 표시 라벨 필수"]},
+  "영국":{flag:"🇬🇧",riskLevel:"중간",riskColor:"var(--amber)",docs:["상업 송장","패킹 리스트","UKCA 적합성 선언서","원산지 증명서"],certs:["UKCA","BSI","RoHS"],regulations:["UKCA 마킹 (CE 대체, 2025~)","UK RoHS 규정 준수","UK REACH 별도 등록 필요"],tips:["한-영 FTA 활용 관세 혜택","Brexit 이후 CE→UKCA 전환 주의","영국 수입업자(UK Importer) 지정 필수"]},
+  "프랑스":{flag:"🇫🇷",riskLevel:"중간",riskColor:"var(--amber)",docs:["상업 송장","패킹 리스트","EUR.1 이동 증명서","CE 적합성 선언서"],certs:["CE","NF","RoHS","REACH"],regulations:["EU CE 마킹 필수","프랑스어 라벨·설명서 의무","REACH 화학물질 등록","Triman 마크 (재활용 표시)"],tips:["한-EU FTA 원산지 기준 충족 시 무관세","프랑스어 번역 품질이 시장 신뢰도에 직결","화장품은 CPNP 등록 필수"]},
+  "캐나다":{flag:"🇨🇦",riskLevel:"중간",riskColor:"var(--amber)",docs:["상업 송장","패킹 리스트","원산지 증명서","CFIA 증명 (식품)"],certs:["CSA","SCC","CFIA"],regulations:["CCPSA (소비자 제품 안전)","이중 언어 (영어+프랑스어) 라벨 필수","PMRA (농약·화학) 등록","CRTC (통신기기) 인증"],tips:["한-캐 FTA 활용 관세 혜택","이중 언어 표시 미비 시 통관 거부","CBSA 사전 판정 활용 추천"]},
+  "호주":{flag:"🇦🇺",riskLevel:"낮음",riskColor:"var(--green)",docs:["상업 송장","패킹 리스트","원산지 증명서","검역 신고서 (해당 시)"],certs:["RCM","SAA","TGA"],regulations:["RCM 마크 (전기·통신)","TGA 등록 (의료기기)","ACCC 소비자 보호법","바이오시큐리티 검역"],tips:["한-호 FTA 대부분 품목 무관세","호주 전압 240V 규격 주의","목재 포장재 ISPM 15 처리 필수"]},
+  "베트남":{flag:"🇻🇳",riskLevel:"낮음",riskColor:"var(--green)",docs:["상업 송장","패킹 리스트","원산지 증명서 (Form AK)","수입 라이선스 (일부 품목)"],certs:["TCVN","MoIT"],regulations:["수입 라이선스 품목 확인","TCVN 베트남 국가표준 적용","라벨 베트남어 표시 필수"],tips:["한-ASEAN FTA / RCEP 활용","공산품 품질검사 면제 품목 확인","통관 절차 2~5일 소요"]},
+  "싱가포르":{flag:"🇸🇬",riskLevel:"낮음",riskColor:"var(--green)",docs:["상업 송장","패킹 리스트","원산지 증명서"],certs:["Safety Mark","NEA"],regulations:["Safety Mark (전기제품 33개 품목)","NEA 환경청 등록 (화학)","HSA 등록 (의료기기·식품)"],tips:["한-싱 FTA 대부분 무관세","자유무역항 — 관세 거의 없음","영어 서류로 진행 가능"]},
+  "태국":{flag:"🇹🇭",riskLevel:"낮음",riskColor:"var(--green)",docs:["상업 송장","패킹 리스트","원산지 증명서 (Form AK)","수입 라이선스"],certs:["TISI","FDA Thai"],regulations:["TISI 강제 표준 품목 확인","태국 FDA (식품·화장품·의료기기)","관세율: 평균 5~20%"],tips:["한-ASEAN FTA 활용 관세 절감","태국어 라벨 필수","BOI 투자 촉진 활용 가능"]},
+  "인도":{flag:"🇮🇳",riskLevel:"높음",riskColor:"var(--red)",docs:["상업 송장","패킹 리스트","원산지 증명서","BIS 라이선스","수입 라이선스 (제한 품목)"],certs:["BIS","ISI","FSSAI"],regulations:["BIS 강제 인증 (전자·철강·화학 등)","FSSAI 등록 (식품)","수입 라이선스 제한 품목 다수","비관세 장벽 높음"],tips:["한-인도 CEPA 활용 관세 인하","BIS 인증 6~12개월 소요 — 조기 착수","비관세 장벽(검사·라벨·표준) 주의"]},
+  "브라질":{flag:"🇧🇷",riskLevel:"높음",riskColor:"var(--red)",docs:["상업 송장","패킹 리스트","원산지 증명서","수입 라이선스 (LI)","INMETRO 인증서"],certs:["INMETRO","ANVISA","ANATEL"],regulations:["INMETRO 강제 인증 (광범위)","ANVISA 등록 (의료·식품·화장품)","ANATEL 인증 (통신기기)","관세율: 평균 11.5% + 내국세"],tips:["남미 최대 시장이나 규제 복잡","INMETRO 인증 3~6개월 소요","포르투갈어 라벨·설명서 필수"]},
+  "멕시코":{flag:"🇲🇽",riskLevel:"중간",riskColor:"var(--amber)",docs:["상업 송장","패킹 리스트","원산지 증명서","NOM 인증서","수입 페디멘토"],certs:["NOM","COFEPRIS"],regulations:["NOM 강제 표준 (전기·전자·식품 등)","COFEPRIS (식품·의료·화장품)","스페인어 라벨 필수"],tips:["한-멕시코 직접 FTA 없음 — 관세 주의","NOM 인증 현지 대리인 필수","USMCA 활용 시 미국 경유 전략 고려"]},
+  "스웨덴":{flag:"🇸🇪",riskLevel:"낮음",riskColor:"var(--green)",docs:["상업 송장","패킹 리스트","EUR.1 이동 증명서","CE 적합성 선언서"],certs:["CE","RoHS","REACH"],regulations:["EU CE 마킹 필수","스웨덴 화학물질청(KEMI) 규제","EU REACH/RoHS 준수"],tips:["한-EU FTA 활용 무관세 다수","영어 서류 수용 가능","높은 환경 기준 충족 필요"]},
+  "네덜란드":{flag:"🇳🇱",riskLevel:"낮음",riskColor:"var(--green)",docs:["상업 송장","패킹 리스트","EUR.1 이동 증명서","CE 적합성 선언서"],certs:["CE","RoHS","REACH"],regulations:["EU CE 마킹 필수","로테르담항 EU 물류 허브","REACH/RoHS 준수"],tips:["한-EU FTA 활용 무관세","유럽 물류 허브 — 재수출 전략 가능","영어 비즈니스 소통 원활"]},
+  "아랍에미리트":{flag:"🇦🇪",riskLevel:"중간",riskColor:"var(--amber)",docs:["상업 송장","패킹 리스트","원산지 증명서","적합성 인증서 (CoC)"],certs:["ECAS","ESMA","Halal"],regulations:["ECAS/ESMA 적합성 인증","할랄 인증 (식품·화장품)","두바이 자유무역지대 활용"],tips:["한-UAE FTA 없음 — 관세율 5%","할랄 인증 필수 (식품)","아랍어 라벨 권장"]},
+  "사우디아라비아":{flag:"🇸🇦",riskLevel:"높음",riskColor:"var(--red)",docs:["상업 송장","패킹 리스트","원산지 증명서","SABER 적합성 인증","할랄 인증"],certs:["SABER","SASO","Halal"],regulations:["SABER 플랫폼 사전 인증 필수","SASO 표준 적합성","할랄 인증 (식품·화장품)","이슬람 규정 준수"],tips:["SABER 인증 없이 통관 불가","아랍어 라벨 필수","사우디 비전 2030 관련 산업 유망"]},
+};
+
 const DEMANDS = ["CNC 정밀가공 부품","PCB 어셈블리","의료용 정밀 부품","항공기 구조 부품","플라스틱 사출 성형","스테인레스 정밀 부품","반도체 공정 부품","산업용 화학약품","알루미늄 패널/창호","태양광 모듈 부품","식품가공 설비","선박 엔진 부품","기능성 원단","산업용 포장 용기","냉동 컴프레서","방산용 정밀 부품","배터리 셀/모듈","산업용 로봇 부품","열연/냉연 강판","고정밀 공작기계"];
 const STATUSES = ["신규","검토중","협상중","LOI","계약완료"];
 const REGULATIONS = ["중국산 규제","인증 필수","한국산 우선","Buy American","공공 인프라"];
 const HOT_SIGNALS = ["채용 급증","최근 펀딩","RFQ 발송","전시회 참가","신규공장 건설"];
+const INTENT_SIGNALS = [
+  {type:"rfq",label:"RFQ 발송",icon:"📋",desc:"최근 30일 내 견적 요청"},
+  {type:"hiring",label:"구매팀 채용 중",icon:"👥",desc:"Procurement 직군 채용 공고 감지"},
+  {type:"funding",label:"최근 투자 유치",icon:"💰",desc:"시리즈 펀딩 또는 증자 완료"},
+  {type:"supplier_change",label:"공급업체 변경",icon:"🔄",desc:"기존 공급사 계약 만료 / 교체 움직임"},
+  {type:"expansion",label:"신규 공장/법인",icon:"🏭",desc:"생산시설 확장 또는 해외 법인 설립"},
+  {type:"trade_show",label:"전시회 참가 예정",icon:"🎪",desc:"관련 산업 전시회 등록 확인"},
+  {type:"price_inquiry",label:"가격 조회",icon:"🔍",desc:"NEXPORT에서 유사 제품 검색 이력"},
+  {type:"contract_renewal",label:"계약 갱신 시기",icon:"📅",desc:"기존 공급 계약 만료 3개월 전"},
+];
+const TRUST_LEVELS = [
+  {grade:"Gold",label:"Gold 인증",color:"#F59E0B",bg:"rgba(245,158,11,.08)",border:"rgba(245,158,11,.25)",minScore:85,desc:"거래이력 검증 완료 + 높은 응답률"},
+  {grade:"Silver",label:"Silver 인증",color:"#94A3B8",bg:"rgba(148,163,184,.08)",border:"rgba(148,163,184,.25)",minScore:70,desc:"기업 정보 검증 완료"},
+  {grade:"Bronze",label:"Bronze",color:"#CD7F32",bg:"rgba(205,127,50,.08)",border:"rgba(205,127,50,.25)",minScore:0,desc:"기본 프로필 등록"},
+];
 const REG_BY_INDUSTRY = {
   "의료기기":["인증 필수","한국산 우선"],
   "항공우주":["인증 필수","Buy American"],
@@ -168,6 +205,43 @@ const REG_BY_INDUSTRY = {
 const NAMES_FIRST = ["Hans","Sarah","Erik","Nguyen","Tanaka","Pierre","James","Maria","Sven","Akiko","John","Lisa","Marco","Priya","Carlos","Wei","Oliver","Sophie","Lars","Yuki","David","Anna","Michael","Julia","Robert","Nina","Thomas","Emma","Patrick","Linda"];
 const NAMES_LAST = ["Mueller","Chen","Johansson","Tran","Yamamoto","Dupont","Wilson","Garcia","Lindberg","Sato","Smith","Park","Rossi","Patel","Rodriguez","Zhang","Brown","Martin","Eriksson","Kim","Lee","Andersen","Fischer","Nakamura","Costa","Singh","Bergström","Hernandez","Novak","O'Brien"];
 const COMPANIES = ["TechParts GmbH","Pacific Trade Corp","Saigon Manufacturing","Nordic Solutions AB","Osaka Precision Co.","Rotterdam Metals BV","Thames Engineering","Sydney Industrial","Maple Leaf Tech","Lyon Aerospace","SG Components Pte","Bangkok Polymer","Delhi Precision","São Paulo Metals","Monterrey Auto Parts","Shanghai Tech Group","Manchester Steel","Paris Medical Devices","Stockholm Dynamics","Tokyo Electronics","Berlin Industrial AG","Melbourne Parts Co.","Toronto Precision Inc.","Seoul Components","Warsaw Engineering","Dubai Trade Solutions","Riyadh Industrial Group","Istanbul Precision Co.","Tel Aviv Tech Ltd","Cape Town Manufacturing","Lagos Export Corp","Cairo Industrial Co.","Nairobi Parts Ltd"];
+
+// ─────────── 신용평가 Mock 헬퍼 ───────────
+const CREDIT_GRADES = ["AAA","AA","A+","A","BBB","BB","B","C","D"];
+const CREDIT_GRADE_COLOR = {
+  "AAA":{ color:"var(--green)", dim:"var(--green-dim)" },
+  "AA": { color:"var(--green)", dim:"var(--green-dim)" },
+  "A+": { color:"var(--green)", dim:"var(--green-dim)" },
+  "A":  { color:"var(--blue)",  dim:"var(--blue-dim)"  },
+  "BBB":{ color:"var(--blue)",  dim:"var(--blue-dim)"  },
+  "BB": { color:"var(--amber)", dim:"var(--amber-dim)" },
+  "B":  { color:"var(--amber)", dim:"var(--amber-dim)" },
+  "C":  { color:"var(--red)",   dim:"var(--red-dim)"   },
+  "D":  { color:"var(--red)",   dim:"var(--red-dim)"   },
+};
+const CREDIT_RISK = ["낮음","낮음","낮음","중간","중간","높음","높음","매우높음","매우높음"];
+const CREDIT_RISK_COLOR = {
+  "낮음":"var(--green)","중간":"var(--amber)","높음":"var(--red)","매우높음":"var(--red)",
+};
+
+function mockCreditInfo(idx) {
+  // 인덱스 기반 결정론적 생성 — 새로고침해도 동일한 값 유지
+  const gradeIdx = Math.abs(idx % CREDIT_GRADES.length);
+  const grade = CREDIT_GRADES[gradeIdx];
+  const payScore = 95 - gradeIdx * 9;  // AAA=95 … D=23
+  const riskLevel = CREDIT_RISK[gradeIdx];
+  const gradeEntry = CREDIT_GRADE_COLOR[grade];
+  return {
+    grade,
+    payScore,
+    riskLevel,
+    gradeColor: gradeEntry.color,
+    gradeDim: gradeEntry.dim,
+    riskColor: CREDIT_RISK_COLOR[riskLevel],
+    lastUpdated: "2025-03",
+    source: "mock",
+  };
+}
 
 function generateBuyers(n) {
   const buyers = [];
@@ -211,9 +285,16 @@ function generateBuyers(n) {
       hotSignal,
       regulatoryShield,
       buyerType,
+      intentSignals: INTENT_SIGNALS.filter((_,si) => {
+        if (buyingIntent === "높음") return Math.random() > .55 && si < 5;
+        if (buyingIntent === "중간") return Math.random() > .78 && si < 4;
+        return Math.random() > .92;
+      }),
+      trustLevel: score >= 85 ? TRUST_LEVELS[0] : score >= 70 ? TRUST_LEVELS[1] : TRUST_LEVELS[2],
       saved: Math.random() > .7,
       starred: Math.random() > .85,
       lastActive: `${Math.floor(Math.random()*30)+1}일 전`,
+      creditInfo: mockCreditInfo(i),
     });
   }
   return buyers;
@@ -291,6 +372,21 @@ const getLookalikes = (target, buyers) => {
 // ─────────── SMALL COMPONENTS ───────────
 const Badge = ({children, color="var(--blue)", bg}) => (
   <span style={{fontSize:10,fontWeight:600,padding:"2px 7px",borderRadius:4,background:bg||`${color}15`,color,letterSpacing:".02em",whiteSpace:"nowrap"}}>{children}</span>
+);
+
+const CreditBadge = ({ grade, gradeColor, gradeDim, payScore, riskLevel }) => (
+  <div
+    title={`결제점수 ${payScore} · 리스크 ${riskLevel}`}
+    style={{
+      display:"inline-flex", alignItems:"center",
+      padding:"2px 7px", borderRadius:4,
+      background:gradeDim,
+      border:`1px solid ${gradeColor}40`,
+      cursor:"default",
+    }}
+  >
+    <span style={{fontSize:10, fontWeight:700, color:gradeColor, letterSpacing:".02em"}}>{grade}</span>
+  </div>
 );
 
 const ScoreBar = ({score}) => {
@@ -461,6 +557,7 @@ function BuyerDetailPanel({ buyer, onClose, onSave, isSaved, onEmailBuyer, onSho
             <div>
               <div style={{fontSize:16,fontWeight:800,display:"flex",alignItems:"center",gap:8,flexWrap:"wrap"}}>
                 {buyer.name}
+                {buyer.trustLevel&&<span style={{fontSize:9,fontWeight:700,padding:"2px 7px",borderRadius:5,background:buyer.trustLevel.bg,color:buyer.trustLevel.color,border:`1px solid ${buyer.trustLevel.border}`}}>{buyer.trustLevel.grade==="Gold"?"🏆":"🔹"} {buyer.trustLevel.label}</span>}
                 {buyer.hotSignal&&<span style={{fontSize:10,fontWeight:700,padding:"2px 8px",borderRadius:5,background:"rgba(245,158,11,.12)",color:"var(--amber)",border:"1px solid rgba(245,158,11,.25)"}}>⚡ {buyer.hotSignal}</span>}
               </div>
               <div style={{fontSize:12,color:"var(--t3)",marginTop:2}}>{buyer.title}</div>
@@ -480,6 +577,43 @@ function BuyerDetailPanel({ buyer, onClose, onSave, isSaved, onEmailBuyer, onSho
               <div style={{fontSize:11,color:"var(--t3)",marginTop:4}}>산업 적합도, 인증, 구매 이력 기반</div>
             </div>
           </div>
+          {/* ── 신용평가 카드 ── */}
+          {buyer.creditInfo && (() => {
+            const ci = buyer.creditInfo;
+            return (
+              <div style={{
+                padding:"14px 16px", borderRadius:10,
+                background:"var(--bg-2)",
+                border:"1px solid var(--border)",
+                borderLeft:`3px solid ${ci.gradeColor}`,
+                marginBottom:16,
+              }}>
+                <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:12}}>
+                  <div style={{fontSize:12,fontWeight:700,color:"var(--t2)",display:"flex",alignItems:"center",gap:6}}>
+                    <Ic.Shield s={13}/>신용평가
+                  </div>
+                  {ci.source === "mock" && (
+                    <span style={{fontSize:9,fontWeight:600,padding:"2px 6px",borderRadius:3,background:"var(--bg-4)",color:"var(--t4)"}}>Mock 데이터</span>
+                  )}
+                </div>
+                <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:8,textAlign:"center"}}>
+                  <div style={{minWidth:0,overflow:"hidden"}}>
+                    <div style={{fontSize:20,fontWeight:900,color:ci.gradeColor,fontFamily:"var(--mono)"}}>{ci.grade}</div>
+                    <div style={{fontSize:10,color:"var(--t3)",marginTop:3,fontWeight:600}}>신용등급</div>
+                  </div>
+                  <div style={{minWidth:0,overflow:"hidden"}}>
+                    <div style={{fontSize:20,fontWeight:900,color:ci.gradeColor,fontFamily:"var(--mono)"}}>{ci.payScore}</div>
+                    <div style={{fontSize:10,color:"var(--t3)",marginTop:3,fontWeight:600}}>결제이력점수</div>
+                  </div>
+                  <div style={{minWidth:0,overflow:"hidden"}}>
+                    <div style={{fontSize:14,fontWeight:800,color:ci.riskColor}}>{ci.riskLevel}</div>
+                    <div style={{fontSize:10,color:"var(--t3)",marginTop:3,fontWeight:600}}>미수채권리스크</div>
+                  </div>
+                </div>
+                <div style={{marginTop:10,fontSize:10,color:"var(--t4)",textAlign:"right"}}>{ci.lastUpdated} 기준 · K-SURE/D&B 연계 예정</div>
+              </div>
+            );
+          })()}
           <div style={{padding:16,borderRadius:10,background:"var(--bg-2)",border:"1px solid var(--border)",marginBottom:16}}>
             <div style={{fontSize:12,fontWeight:700,color:"var(--t2)",marginBottom:12,display:"flex",alignItems:"center",gap:6}}><Ic.Mail s={13}/>연락처</div>
             <div style={{display:"grid",gap:10}}>
@@ -507,6 +641,31 @@ function BuyerDetailPanel({ buyer, onClose, onSave, isSaved, onEmailBuyer, onSho
               {(!buyer.certifications||buyer.certifications.length===0)&&<span style={{fontSize:11,color:"var(--t4)"}}>인증 정보 없음</span>}
             </div>
           </div>
+          {buyer.intentSignals&&buyer.intentSignals.length>0&&(
+            <div style={{padding:16,borderRadius:10,background:"var(--bg-2)",border:"1px solid var(--border)",marginBottom:16}}>
+              <div style={{fontSize:12,fontWeight:700,color:"var(--t2)",marginBottom:12,display:"flex",alignItems:"center",gap:6}}><Ic.Zap s={13}/>인텐트 시그널</div>
+              <div style={{display:"grid",gap:8}}>
+                {buyer.intentSignals.map((sig,si)=>(
+                  <div key={si} style={{display:"flex",alignItems:"center",gap:10,padding:"8px 10px",borderRadius:8,background:"rgba(10,132,255,.04)",border:"1px solid rgba(10,132,255,.1)"}}>
+                    <span style={{fontSize:16,flexShrink:0}}>{sig.icon}</span>
+                    <div>
+                      <div style={{fontSize:12,fontWeight:700,color:"var(--blue)"}}>{sig.label}</div>
+                      <div style={{fontSize:10,color:"var(--t3)",marginTop:1}}>{sig.desc}</div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+          {buyer.trustLevel&&(
+            <div style={{padding:16,borderRadius:10,background:buyer.trustLevel.bg,border:`1px solid ${buyer.trustLevel.border}`,marginBottom:16,display:"flex",alignItems:"center",gap:12}}>
+              <span style={{fontSize:24}}>{buyer.trustLevel.grade==="Gold"?"🏆":buyer.trustLevel.grade==="Silver"?"🔹":"🔸"}</span>
+              <div>
+                <div style={{fontSize:13,fontWeight:700,color:buyer.trustLevel.color}}>{buyer.trustLevel.label} 바이어</div>
+                <div style={{fontSize:11,color:"var(--t3)",marginTop:2}}>{buyer.trustLevel.desc}</div>
+              </div>
+            </div>
+          )}
           <div style={{padding:16,borderRadius:10,background:"var(--bg-2)",border:"1px solid var(--border)"}}>
             <div style={{fontSize:12,fontWeight:700,color:"var(--t2)",marginBottom:12,display:"flex",alignItems:"center",gap:6}}><Ic.Sparkle s={13}/>AI 분석</div>
             <div style={{fontSize:12,color:"var(--t2)",lineHeight:1.7}}>
@@ -516,6 +675,66 @@ function BuyerDetailPanel({ buyer, onClose, onSave, isSaved, onEmailBuyer, onSho
               {buyer.score<60&&" 추가적인 니즈 파악이 필요합니다."}
             </div>
           </div>
+
+          {/* ── Export Compliance Checker ── */}
+          {(()=>{
+            const comp = EXPORT_COMPLIANCE[buyer.country];
+            if(!comp) return null;
+            return (
+              <div style={{padding:16,borderRadius:10,background:"var(--bg-2)",border:"1px solid var(--border)",marginTop:16}}>
+                <div style={{fontSize:12,fontWeight:700,color:"var(--t2)",marginBottom:12,display:"flex",alignItems:"center",gap:6}}>
+                  <Ic.Shield s={13}/>수출 컴플라이언스 체커
+                  <span style={{marginLeft:"auto",fontSize:9,fontWeight:700,padding:"2px 8px",borderRadius:4,background:comp.riskLevel==="높음"?"rgba(255,69,58,.1)":comp.riskLevel==="중간"?"rgba(245,158,11,.1)":"rgba(52,199,89,.1)",color:comp.riskColor,border:`1px solid ${comp.riskLevel==="높음"?"rgba(255,69,58,.2)":comp.riskLevel==="중간"?"rgba(245,158,11,.2)":"rgba(52,199,89,.2)"}`}}>규제 난이도: {comp.riskLevel}</span>
+                </div>
+                <div style={{fontSize:11,color:"var(--t3)",marginBottom:12,padding:"8px 10px",borderRadius:8,background:"var(--bg-3)",border:"1px solid var(--border)"}}>
+                  {comp.flag} <strong style={{color:"var(--t1)"}}>{buyer.country}</strong> 수출 시 필요한 서류·인증·규제 요약
+                </div>
+                {/* Required Documents */}
+                <div style={{marginBottom:10}}>
+                  <div style={{fontSize:10,fontWeight:700,color:"var(--cyan)",marginBottom:6,display:"flex",alignItems:"center",gap:4}}>📄 필수 서류</div>
+                  <div style={{display:"grid",gap:3}}>
+                    {comp.docs.map((d,i)=>(
+                      <div key={i} style={{fontSize:10,color:"var(--t2)",padding:"4px 8px",borderRadius:5,background:"var(--bg-3)",display:"flex",alignItems:"center",gap:6}}>
+                        <span style={{color:"var(--green)",fontSize:10}}>✓</span>{d}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+                {/* Required Certifications */}
+                <div style={{marginBottom:10}}>
+                  <div style={{fontSize:10,fontWeight:700,color:"var(--violet)",marginBottom:6,display:"flex",alignItems:"center",gap:4}}>🏷 필수 인증</div>
+                  <div style={{display:"flex",gap:4,flexWrap:"wrap"}}>
+                    {comp.certs.map((c,i)=>{
+                      const has = (buyer.certifications||[]).includes(c);
+                      return (
+                        <span key={i} style={{padding:"3px 8px",borderRadius:5,fontSize:9,fontWeight:700,background:has?"rgba(52,199,89,.1)":"rgba(255,69,58,.08)",color:has?"var(--green)":"var(--red)",border:`1px solid ${has?"rgba(52,199,89,.2)":"rgba(255,69,58,.15)"}`}}>
+                          {has?"✓":"✗"} {c}
+                        </span>
+                      );
+                    })}
+                  </div>
+                </div>
+                {/* Key Regulations */}
+                <div style={{marginBottom:10}}>
+                  <div style={{fontSize:10,fontWeight:700,color:"var(--amber)",marginBottom:6,display:"flex",alignItems:"center",gap:4}}>⚖ 주요 규제</div>
+                  <div style={{display:"grid",gap:3}}>
+                    {comp.regulations.map((r,i)=>(
+                      <div key={i} style={{fontSize:10,color:"var(--t2)",padding:"4px 8px",borderRadius:5,background:"var(--bg-3)"}}>• {r}</div>
+                    ))}
+                  </div>
+                </div>
+                {/* Tips */}
+                <div>
+                  <div style={{fontSize:10,fontWeight:700,color:"var(--blue)",marginBottom:6,display:"flex",alignItems:"center",gap:4}}>💡 수출 팁</div>
+                  <div style={{display:"grid",gap:3}}>
+                    {comp.tips.map((t,i)=>(
+                      <div key={i} style={{fontSize:10,color:"var(--t3)",padding:"4px 8px",borderRadius:5,background:"rgba(10,132,255,.04)",border:"1px solid rgba(10,132,255,.08)",lineHeight:1.5}}>{t}</div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            );
+          })()}
 
           {/* ── Lookalike Section ── */}
           {showLookalikes && (
@@ -863,6 +1082,8 @@ function LandingHero({ onEnter, isMobile }) {
     }
   }, [typed, isTyping, qIdx]);
 
+  // ── Problem 섹션 inView ──
+  const [probRef, probInView] = useInView(0.15);
   // ── How it Works inView ──
   const [howRef, howInView] = useInView(0.2);
   // ── ROI 비교 inView ──
@@ -877,6 +1098,8 @@ function LandingHero({ onEnter, isMobile }) {
   const [featRef, featInView] = useInView(0.15);
   // ── 인증·규제 섹션 inView ──
   const [regRef, regInView] = useInView(0.15);
+  // ── 경쟁 비교 inView ──
+  const [compRef, compInView] = useInView(0.15);
   const [activeRegTab, setActiveRegTab] = useState("cert");
 
   const features = [
@@ -887,9 +1110,10 @@ function LandingHero({ onEnter, isMobile }) {
   ];
 
   const steps = [
-    { num:"①", icon:<Ic.Search s={22}/>, title:"바이어 발굴", desc:"60개국 산업별 고급 필터링으로 최적 바이어 검색", color:"var(--blue)", dim:"var(--blue-dim)" },
-    { num:"②", icon:<Ic.Mail s={22}/>, title:"이메일 확보", desc:"Hunter.io 기반 직통 연락처를 5분 내 즉시 발굴", color:"var(--cyan)", dim:"var(--cyan-dim)" },
-    { num:"③", icon:<Ic.Sparkle s={22}/>, title:"AI 매칭", desc:"제조사 프로필 분석 후 TOP 15 바이어 자동 추천", color:"var(--violet)", dim:"var(--violet-dim)" },
+    { num:"①", icon:<Ic.Search s={22}/>, title:"프로필 입력", desc:"제조사 정보·제품·인증·수출 희망 지역을 입력하세요", color:"var(--blue)", dim:"var(--blue-dim)" },
+    { num:"②", icon:<Ic.Sparkle s={22}/>, title:"AI 바이어 매칭", desc:"AI가 산업·지역·규모 기반으로 적격 바이어를 자동 스코어링", color:"var(--violet)", dim:"var(--violet-dim)" },
+    { num:"③", icon:<Ic.Mail s={22}/>, title:"자동 아웃리치", desc:"개인화 콜드이메일 자동 생성·발송, 오픈/클릭 실시간 추적", color:"var(--cyan)", dim:"var(--cyan-dim)" },
+    { num:"④", icon:<Ic.Bar s={22}/>, title:"성과 관리", desc:"바이어 응답률·파이프라인 현황을 대시보드에서 한눈에 관리", color:"var(--green)", dim:"var(--green-dim)" },
   ];
 
   const mockBuyers = [
@@ -958,6 +1182,84 @@ function LandingHero({ onEnter, isMobile }) {
           </div>
         </div>
 
+        {/* ②-B PROBLEM — 왜 NEXPORT가 필요한가 */}
+        <div ref={probRef} style={{padding:isMobile?"0 0 48px":"0 0 72px"}}>
+          <div style={{textAlign:"center",marginBottom:isMobile?28:48,opacity:probInView?1:0,transform:probInView?"none":"translateY(20px)",transition:"all .6s cubic-bezier(0.2,0,0,1)"}}>
+            <div style={{display:"inline-flex",alignItems:"center",gap:6,padding:"4px 14px",borderRadius:20,background:"rgba(255,69,58,.08)",border:"1px solid rgba(255,69,58,.22)",fontSize:11,fontWeight:700,color:"rgba(255,69,58,1)",marginBottom:12,letterSpacing:".04em"}}>
+              Problem
+            </div>
+            <h2 style={{fontSize:isMobile?22:32,fontWeight:800,letterSpacing:"-.03em",color:"var(--t1)"}}>
+              한국 중소기업 <span style={{color:"rgba(255,69,58,1)"}}>98.8%</span>가 수출을 못 합니다
+            </h2>
+            <p style={{fontSize:isMobile?13:15,color:"var(--t3)",marginTop:10,maxWidth:560,margin:"10px auto 0"}}>바이어를 찾지 못해 내수에 머무는 것이 가장 큰 원인입니다</p>
+          </div>
+
+          {/* 핵심 통계 카드 */}
+          <div style={{display:"grid",gridTemplateColumns:isMobile?"1fr":"repeat(3,1fr)",gap:isMobile?12:16,marginBottom:isMobile?24:40}}>
+            {[
+              {num:"762만",label:"국내 중소기업",sub:"그 중 수출 기업은 단 1.2% (9.4만 개)",icon:<Ic.Building s={20}/>,color:"rgba(255,69,58,1)",bg:"rgba(255,69,58,.06)",border:"rgba(255,69,58,.18)"},
+              {num:"3~6개월",label:"바이어 발굴 소요 기간",sub:"전시회·무역대행사 경유 시 평균 소요",icon:<Ic.Refresh s={20}/>,color:"var(--amber)",bg:"rgba(245,158,11,.06)",border:"rgba(245,158,11,.18)"},
+              {num:"17.2배",label:"수출 전환 시 매출 증가",sub:"내수 대비 영업이익 1.8배, 고용 5.1배",icon:<Ic.TrendUp s={20}/>,color:"var(--green)",bg:"rgba(16,185,129,.06)",border:"rgba(16,185,129,.18)"},
+            ].map((s,i)=>(
+              <div key={i} style={{padding:isMobile?"20px 18px":"28px 24px",borderRadius:14,background:s.bg,border:`1px solid ${s.border}`,opacity:probInView?1:0,animation:probInView?`staggerUp .55s cubic-bezier(0.2,0,0,1) ${i*120}ms both`:"none"}}>
+                <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:12}}>
+                  <div style={{color:s.color}}>{s.icon}</div>
+                  <div style={{fontSize:11,fontWeight:600,color:"var(--t3)",textTransform:"uppercase",letterSpacing:".06em"}}>{s.label}</div>
+                </div>
+                <div style={{fontSize:isMobile?28:36,fontWeight:900,color:s.color,letterSpacing:"-.03em",marginBottom:6}}>{s.num}</div>
+                <div style={{fontSize:12,color:"var(--t3)",lineHeight:1.5}}>{s.sub}</div>
+              </div>
+            ))}
+          </div>
+
+          {/* 기존 방식의 한계 vs NEXPORT */}
+          <div style={{display:"grid",gridTemplateColumns:isMobile?"1fr":"1fr 48px 1fr",gap:isMobile?12:0,alignItems:"stretch",opacity:probInView?1:0,transform:probInView?"none":"translateY(16px)",transition:"all .7s cubic-bezier(0.2,0,0,1) .3s"}}>
+            {/* 기존 방식 */}
+            <div style={{padding:isMobile?"22px 20px":"28px 24px",borderRadius:14,background:"rgba(255,69,58,.04)",border:"1px solid rgba(255,69,58,.15)"}}>
+              <div style={{fontSize:12,fontWeight:700,color:"rgba(255,69,58,.8)",textTransform:"uppercase",letterSpacing:".08em",marginBottom:16}}>기존 방식의 한계</div>
+              {[
+                "수출바우처 평균 경쟁률 10:1, 일회성 매칭에 그침",
+                "무역 대행사 수수료 15~30%, 소액 거래 수임 어려움",
+                "해외 영업 전담인력 채용 시 연 5,000만원+ 고정비",
+                "전시회 명함 90%+ 방치, 리드 전환 도구 부재",
+                "콜드이메일 회신율 1% 미만 — 검증 안 된 리스트",
+              ].map((t,i)=>(
+                <div key={i} style={{display:"flex",alignItems:"flex-start",gap:8,marginBottom:i<4?10:0}}>
+                  <span style={{color:"rgba(255,69,58,.7)",fontSize:14,lineHeight:1.6,flexShrink:0}}>✕</span>
+                  <span style={{fontSize:13,color:"var(--t2)",lineHeight:1.6}}>{t}</span>
+                </div>
+              ))}
+            </div>
+            {/* 화살표 */}
+            {!isMobile && (
+              <div style={{display:"flex",alignItems:"center",justifyContent:"center"}}>
+                <div style={{fontSize:24,color:"var(--t4)"}}>→</div>
+              </div>
+            )}
+            {isMobile && (
+              <div style={{textAlign:"center",padding:"4px 0"}}>
+                <div style={{fontSize:20,color:"var(--t4)"}}>↓</div>
+              </div>
+            )}
+            {/* NEXPORT 솔루션 */}
+            <div style={{padding:isMobile?"22px 20px":"28px 24px",borderRadius:14,background:"rgba(16,185,129,.04)",border:"1px solid rgba(16,185,129,.18)"}}>
+              <div style={{fontSize:12,fontWeight:700,color:"var(--green)",textTransform:"uppercase",letterSpacing:".08em",marginBottom:16}}>NEXPORT 솔루션</div>
+              {[
+                "AI가 수 분 내 적격 바이어 TOP 15 자동 추천",
+                "월 9.9만원~부터, 연간 비용 기존의 1/10 수준",
+                "영업 소요 시간 최소 70% 절감 (자체 베타 테스트)",
+                "개인화 콜드이메일 자동 생성 + 오픈/클릭 추적",
+                "인증·규제 필터로 한국산 유리 시장 즉시 발굴",
+              ].map((t,i)=>(
+                <div key={i} style={{display:"flex",alignItems:"flex-start",gap:8,marginBottom:i<4?10:0}}>
+                  <span style={{color:"var(--green)",fontSize:14,lineHeight:1.6,flexShrink:0}}>✓</span>
+                  <span style={{fontSize:13,color:"var(--t2)",lineHeight:1.6}}>{t}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+
         {/* ③ PRODUCT PREVIEW CARD — 데스크탑 전용 */}
         {!isMobile && <div style={{display:"flex",justifyContent:"center",padding:"0 0 72px",opacity:visible?1:0,transform:visible?"none":"translateY(30px)",transition:"all .9s cubic-bezier(0.2,0,0,1) .2s"}}>
           <div style={{width:"100%",maxWidth:720,borderRadius:16,overflow:"hidden",boxShadow:"var(--modal-shadow)",border:"1px solid var(--border)",background:"var(--bg-1)",animation:"floatCard 5s ease-in-out infinite",position:"relative"}}>
@@ -1001,9 +1303,9 @@ function LandingHero({ onEnter, isMobile }) {
           <div style={{textAlign:"center",marginBottom:48,opacity:howInView?1:0,transform:howInView?"none":"translateY(20px)",transition:"all .6s cubic-bezier(0.2,0,0,1)"}}>
             <div style={{fontSize:11,fontWeight:700,color:"var(--blue)",textTransform:"uppercase",letterSpacing:".12em",marginBottom:10}}>How it works</div>
             <h2 style={{fontSize:isMobile?22:32,fontWeight:800,letterSpacing:"-.03em",color:"var(--t1)"}}>NEXPORT로 수출 바이어를 찾는 방법</h2>
-            <p style={{fontSize:isMobile?13:15,color:"var(--t3)",marginTop:10}}>단 3단계로 검증된 글로벌 바이어와 연결하세요</p>
+            <p style={{fontSize:isMobile?13:15,color:"var(--t3)",marginTop:10}}>4단계로 수출 바이어 발굴부터 성과 관리까지 자동화하세요</p>
           </div>
-          <div className="hiw-grid" style={{display:isMobile?"flex":"grid",flexDirection:isMobile?"column":undefined,gridTemplateColumns:isMobile?undefined:"1fr auto 1fr auto 1fr",gap:isMobile?"16px":0,alignItems:isMobile?"stretch":"start"}}>
+          <div className="hiw-grid" style={{display:isMobile?"flex":"grid",flexDirection:isMobile?"column":undefined,gridTemplateColumns:isMobile?undefined:"1fr auto 1fr auto 1fr auto 1fr",gap:isMobile?"16px":0,alignItems:isMobile?"stretch":"start"}}>
             {steps.map((s,i) => (
               <Fragment key={i}>
                 <div style={{textAlign:"center",padding:"0 12px",opacity:howInView?1:0,animation:howInView?`staggerUp .6s cubic-bezier(0.2,0,0,1) ${i*200}ms both`:"none"}}>
@@ -1471,7 +1773,48 @@ function LandingHero({ onEnter, isMobile }) {
           </div>
         </div>
 
-        {/* ⑥-D 신뢰 요소 — 지원 기관 & 수상 */}
+        {/* ⑥-D 경쟁 비교 — 왜 NEXPORT인가 */}
+        <div ref={compRef} style={{padding:isMobile?"0 0 48px":"0 0 80px"}}>
+          <div style={{textAlign:"center",marginBottom:isMobile?24:44,opacity:compInView?1:0,transform:compInView?"none":"translateY(20px)",transition:"all .6s cubic-bezier(0.2,0,0,1)"}}>
+            <div style={{display:"inline-flex",alignItems:"center",gap:6,padding:"4px 14px",borderRadius:20,background:"var(--blue-dim)",border:"1px solid rgba(10,132,255,.25)",fontSize:11,fontWeight:700,color:"var(--blue)",marginBottom:12,letterSpacing:".04em"}}>
+              Comparison
+            </div>
+            <h2 style={{fontSize:isMobile?22:32,fontWeight:800,letterSpacing:"-.03em",color:"var(--t1)"}}>기존 수출 지원 방식과 비교</h2>
+            <p style={{fontSize:isMobile?13:15,color:"var(--t3)",marginTop:10}}>NEXPORT는 기존 인프라의 구조적 한계를 AI로 해결합니다</p>
+          </div>
+          <div style={{overflowX:isMobile?"auto":"visible",WebkitOverflowScrolling:"touch"}}>
+            <table style={{width:"100%",minWidth:isMobile?600:"auto",borderCollapse:"separate",borderSpacing:0,borderRadius:14,overflow:"hidden",border:"1px solid var(--border)",opacity:compInView?1:0,transform:compInView?"none":"translateY(16px)",transition:"all .7s cubic-bezier(0.2,0,0,1) .2s"}}>
+              <thead>
+                <tr style={{background:"var(--bg-2)"}}>
+                  <th style={{padding:"14px 18px",fontSize:12,fontWeight:700,color:"var(--t3)",textAlign:"left",borderBottom:"1px solid var(--border)",width:"28%"}}>비교 항목</th>
+                  <th style={{padding:"14px 18px",fontSize:12,fontWeight:700,color:"var(--t4)",textAlign:"center",borderBottom:"1px solid var(--border)"}}>전시회 / KOTRA</th>
+                  <th style={{padding:"14px 18px",fontSize:12,fontWeight:700,color:"var(--t4)",textAlign:"center",borderBottom:"1px solid var(--border)"}}>무역 대행사</th>
+                  <th style={{padding:"14px 18px",fontSize:12,fontWeight:700,color:"var(--blue)",textAlign:"center",borderBottom:"1px solid var(--border)",background:"rgba(10,132,255,.04)"}}>NEXPORT</th>
+                </tr>
+              </thead>
+              <tbody>
+                {[
+                  {item:"비용",a:"회당 3,000~5,000만원",b:"수수료 15~30%",nx:"월 9.9만원~"},
+                  {item:"바이어 발굴 속도",a:"3~6개월",b:"1~3개월",nx:"수 분"},
+                  {item:"바이어 검증",a:"명함 교환 수준",b:"제한적 DB",nx:"AI 스코어링 + 적합도 분석"},
+                  {item:"아웃리치",a:"수동 이메일",b:"대행 (추가 비용)",nx:"개인화 자동 발송 + 추적"},
+                  {item:"인증·규제 대응",a:"별도 컨설팅 필요",b:"일부 지원",nx:"자동 필터링 내장"},
+                  {item:"성과 추적",a:"없음",b:"보고서 (월 1회)",nx:"실시간 대시보드"},
+                  {item:"확장성",a:"연 1~2회 참가",b:"계약 기간 한정",nx:"무제한 / 24시간 가동"},
+                ].map((r,i)=>(
+                  <tr key={i} style={{borderBottom:i<6?"1px solid var(--border)":"none"}}>
+                    <td style={{padding:"12px 18px",fontSize:13,fontWeight:600,color:"var(--t1)",borderBottom:"1px solid var(--border)"}}>{r.item}</td>
+                    <td style={{padding:"12px 18px",fontSize:12,color:"var(--t3)",textAlign:"center",borderBottom:"1px solid var(--border)"}}>{r.a}</td>
+                    <td style={{padding:"12px 18px",fontSize:12,color:"var(--t3)",textAlign:"center",borderBottom:"1px solid var(--border)"}}>{r.b}</td>
+                    <td style={{padding:"12px 18px",fontSize:12,fontWeight:700,color:"var(--blue)",textAlign:"center",borderBottom:"1px solid var(--border)",background:"rgba(10,132,255,.02)"}}>{r.nx}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        {/* ⑥-E 신뢰 요소 — 지원 기관 & 수상 */}
         <div style={{padding:isMobile?"0 0 48px":"0 0 80px",textAlign:"center"}}>
           <div style={{fontSize:11,fontWeight:700,color:"var(--t4)",textTransform:"uppercase",letterSpacing:".12em",marginBottom:isMobile?20:28}}>Trusted & Supported By</div>
           <div style={{display:"flex",flexWrap:"wrap",justifyContent:"center",alignItems:"center",gap:isMobile?16:32}}>
@@ -1762,6 +2105,9 @@ function ColdEmailModal({ buyer, onClose }) {
   const [copied, setCopied] = useState(false);
   const [company, setCompany] = useState("한국정밀부품(주)");
   const [product, setProduct] = useState("CNC 정밀가공 부품");
+  const [mode, setMode] = useState("single"); // "single" | "sequence"
+  const [seqStep, setSeqStep] = useState(0);
+  const [seqStarted, setSeqStarted] = useState(false);
 
   const templates = {
     formal: {
@@ -1970,7 +2316,7 @@ ${company}
           <div style={{width:32,height:32,borderRadius:8,background:"var(--green-dim)",display:"flex",alignItems:"center",justifyContent:"center"}}><Ic.Mail s={16}/></div>
           <div style={{flex:1}}>
             <div style={{fontSize:14,fontWeight:700,display:"flex",alignItems:"center",gap:8}}>
-              AI 이메일 생성
+              AI 이메일
               {buyer.regulatoryShield?.length > 0 && <span style={{fontSize:9,fontWeight:700,padding:"2px 7px",borderRadius:4,background:"rgba(139,92,246,.15)",color:"var(--violet)",border:"1px solid rgba(139,92,246,.2)"}}>🛡 규제 우위 자동 선택됨</span>}
             </div>
             <div style={{fontSize:11,color:"var(--t3)"}}>To: {buyer.name} ({buyer.email})</div>
@@ -1978,7 +2324,90 @@ ${company}
           <div onClick={onClose} style={{cursor:"pointer",padding:4,color:"var(--t4)"}}><Ic.X s={16}/></div>
         </div>
 
+        {/* Mode Tabs */}
+        <div style={{display:"flex",gap:0,borderBottom:"1px solid var(--border)",padding:"0 20px"}}>
+          {[{key:"single",label:"단일 이메일",icon:"✉️"},{key:"sequence",label:"자동 시퀀스",icon:"🔄"}].map(m=>(
+            <div key={m.key} onClick={()=>{setMode(m.key);setSeqStarted(false);}} style={{padding:"10px 20px",fontSize:12,fontWeight:600,cursor:"pointer",color:mode===m.key?"var(--blue)":"var(--t3)",borderBottom:mode===m.key?"2px solid var(--blue)":"2px solid transparent",transition:"all .15s",display:"flex",alignItems:"center",gap:5}}>
+              <span style={{fontSize:13}}>{m.icon}</span>{m.label}
+            </div>
+          ))}
+        </div>
+
         <div style={{flex:1,overflow:"auto",padding:20}}>
+          {mode==="sequence" && (
+            <div>
+              {/* Sequence Timeline */}
+              <div style={{marginBottom:20}}>
+                <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:16}}>
+                  <span style={{fontSize:14}}>🔄</span>
+                  <div>
+                    <div style={{fontSize:13,fontWeight:700,color:"var(--t1)"}}>5단계 자동 팔로업 시퀀스</div>
+                    <div style={{fontSize:11,color:"var(--t3)"}}>바이어 응답이 없으면 자동으로 다음 단계를 발송합니다</div>
+                  </div>
+                </div>
+                <div style={{display:"grid",gap:0}}>
+                  {[
+                    {day:"Day 1",title:"첫 번째 접근",desc:"제품 소개 + 파트너십 제안",tone:"포멀",status:seqStarted?"sent":"ready",color:"var(--blue)"},
+                    {day:"Day 3",title:"가치 제안 강화",desc:"경쟁력 있는 가격 + 인증 강조",tone:"친근",status:seqStarted&&seqStep>=1?"sent":"scheduled",color:"var(--cyan)"},
+                    {day:"Day 7",title:"케이스 스터디",desc:"유사 업종 성공 사례 공유",tone:"친근",status:seqStarted&&seqStep>=2?"sent":"scheduled",color:"var(--green)"},
+                    {day:"Day 14",title:"한정 오퍼",desc:"신규 파트너 전용 할인 + 무료 샘플",tone:"긴급",status:seqStarted&&seqStep>=3?"sent":"scheduled",color:"var(--amber)"},
+                    {day:"Day 21",title:"최종 팔로업",desc:"마지막 확인 + 다음 스텝 제안",tone:"포멀",status:seqStarted&&seqStep>=4?"sent":"scheduled",color:"var(--violet)"},
+                  ].map((step,si)=>(
+                    <div key={si} style={{display:"flex",gap:12,position:"relative"}}>
+                      {/* Timeline line */}
+                      <div style={{display:"flex",flexDirection:"column",alignItems:"center",width:24,flexShrink:0}}>
+                        <div style={{width:10,height:10,borderRadius:"50%",background:step.status==="sent"?step.color:"var(--bg-4)",border:`2px solid ${step.status==="sent"?step.color:"var(--border)"}`,zIndex:1,transition:"all .3s"}}/>
+                        {si<4&&<div style={{width:2,flex:1,background:step.status==="sent"?step.color:"var(--border)",transition:"background .3s"}}/>}
+                      </div>
+                      {/* Step card */}
+                      <div onClick={()=>setSeqStep(si)} style={{flex:1,padding:"12px 14px",marginBottom:si<4?8:0,borderRadius:10,background:seqStep===si?"rgba(10,132,255,.06)":"var(--bg-2)",border:`1px solid ${seqStep===si?"var(--blue)":"var(--border)"}`,cursor:"pointer",transition:"all .2s"}}>
+                        <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:4}}>
+                          <div style={{display:"flex",alignItems:"center",gap:8}}>
+                            <span style={{fontSize:11,fontWeight:800,color:step.color,fontFamily:"var(--mono)"}}>{step.day}</span>
+                            <span style={{fontSize:12,fontWeight:700,color:"var(--t1)"}}>{step.title}</span>
+                          </div>
+                          <div style={{display:"flex",alignItems:"center",gap:6}}>
+                            <span style={{fontSize:9,padding:"2px 6px",borderRadius:4,background:step.status==="sent"?"rgba(16,185,129,.1)":"var(--bg-3)",color:step.status==="sent"?"var(--green)":"var(--t4)",fontWeight:600}}>{step.status==="sent"?"✓ 발송됨":step.status==="ready"?"대기 중":"예약됨"}</span>
+                          </div>
+                        </div>
+                        <div style={{fontSize:11,color:"var(--t3)"}}>{step.desc} · <span style={{color:"var(--t4)"}}>톤: {step.tone}</span></div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+              {/* Sequence Preview */}
+              <div style={{padding:14,borderRadius:10,background:"var(--bg-2)",border:"1px solid var(--border)",marginBottom:16}}>
+                <div style={{fontSize:10,fontWeight:600,color:"var(--t4)",textTransform:"uppercase",letterSpacing:".05em",marginBottom:8}}>Step {seqStep+1} 미리보기</div>
+                <div style={{fontSize:12,fontWeight:600,color:"var(--blue)",marginBottom:6}}>
+                  {["Partnership Inquiry","Value Proposition","Case Study","Limited Offer","Final Follow-up"][seqStep]} — {buyer.company}
+                </div>
+                <div style={{fontSize:11,color:"var(--t2)",lineHeight:1.7,maxHeight:120,overflow:"auto"}}>
+                  {[
+                    `Dear ${buyer.name},\n\nI'm reaching out from ${company}. We specialize in ${product} and believe there's a strong fit with ${buyer.company}'s needs in ${buyer.industry}.\n\nWould you be open to a brief conversation?`,
+                    `Hi ${buyer.name},\n\nFollowing up on my previous message. I wanted to share why ${company} stands out:\n• Certified manufacturing (ISO 9001)\n• 30% below market pricing\n• Direct export to ${buyer.country}\n\nHappy to send specs if you're interested.`,
+                    `Hi ${buyer.name},\n\nA quick success story: We recently helped a ${buyer.industry} company in ${buyer.country} reduce sourcing costs by 25% while improving quality.\n\nI'd love to explore if we can achieve similar results for ${buyer.company}.`,
+                    `Dear ${buyer.name},\n\nWe're offering an exclusive deal for new partners:\n• 15% introductory discount\n• Free sample shipment\n• Priority production slot\n\nThis offer is valid until end of month.`,
+                    `Hi ${buyer.name},\n\nI wanted to reach out one last time. If the timing isn't right, I completely understand.\n\nIf your sourcing needs change in the future, we'd welcome the opportunity to connect.\n\nWishing ${buyer.company} continued success.`,
+                  ][seqStep]}
+                </div>
+              </div>
+              {/* Sequence Stats */}
+              <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:8}}>
+                {[
+                  {label:"예상 오픈율",value:"45%",color:"var(--blue)"},
+                  {label:"예상 응답률",value:"12%",color:"var(--green)"},
+                  {label:"전체 소요일",value:"21일",color:"var(--amber)"},
+                ].map((s,si)=>(
+                  <div key={si} style={{padding:"10px 12px",borderRadius:8,background:"var(--bg-2)",border:"1px solid var(--border)",textAlign:"center"}}>
+                    <div style={{fontSize:18,fontWeight:900,color:s.color,fontFamily:"var(--mono)"}}>{s.value}</div>
+                    <div style={{fontSize:10,color:"var(--t4)",marginTop:2}}>{s.label}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+          {mode==="single" && (<>
           {/* Company/Product inputs */}
           <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10,marginBottom:16}}>
             <div>
@@ -2024,16 +2453,26 @@ ${company}
             <label style={{fontSize:10,color:"var(--t4)",fontWeight:600,marginBottom:4,display:"block",textTransform:"uppercase",letterSpacing:".05em"}}>본문</label>
             <div style={{padding:14,borderRadius:8,background:"var(--bg-2)",border:"1px solid var(--border)",fontSize:12,color:"var(--t2)",lineHeight:1.8,whiteSpace:"pre-wrap",maxHeight:280,overflow:"auto",fontFamily:"var(--font)"}}>{current.body}</div>
           </div>
+          </>)}
         </div>
 
         {/* Footer Actions */}
         <div style={{padding:"14px 20px",borderTop:"1px solid var(--border)",display:"flex",gap:8}}>
-          <div onClick={copyAll} style={{flex:1,padding:"10px 0",borderRadius:8,background:copied?"var(--green)":"var(--blue)",color:"#fff",textAlign:"center",fontSize:12,fontWeight:600,cursor:"pointer",transition:"all .2s",display:"flex",alignItems:"center",justifyContent:"center",gap:6}}>
-            {copied ? <><Ic.Check s={14}/>복사됨!</> : <><Ic.Filter s={14}/>전체 복사</>}
-          </div>
-          <div onClick={openMailto} style={{flex:1,padding:"10px 0",borderRadius:8,background:"var(--bg-3)",border:"1px solid var(--border)",color:"var(--t1)",textAlign:"center",fontSize:12,fontWeight:600,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",gap:6}}>
-            <Ic.Mail s={14}/>메일 앱으로 열기
-          </div>
+          {mode==="single" ? (<>
+            <div onClick={copyAll} style={{flex:1,padding:"10px 0",borderRadius:8,background:copied?"var(--green)":"var(--blue)",color:"#fff",textAlign:"center",fontSize:12,fontWeight:600,cursor:"pointer",transition:"all .2s",display:"flex",alignItems:"center",justifyContent:"center",gap:6}}>
+              {copied ? <><Ic.Check s={14}/>복사됨!</> : <><Ic.Filter s={14}/>전체 복사</>}
+            </div>
+            <div onClick={openMailto} style={{flex:1,padding:"10px 0",borderRadius:8,background:"var(--bg-3)",border:"1px solid var(--border)",color:"var(--t1)",textAlign:"center",fontSize:12,fontWeight:600,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",gap:6}}>
+              <Ic.Mail s={14}/>메일 앱으로 열기
+            </div>
+          </>) : (<>
+            <div onClick={()=>{setSeqStarted(true);setSeqStep(0);}} style={{flex:1,padding:"10px 0",borderRadius:8,background:seqStarted?"var(--green)":"var(--blue)",color:"#fff",textAlign:"center",fontSize:12,fontWeight:600,cursor:"pointer",transition:"all .2s",display:"flex",alignItems:"center",justifyContent:"center",gap:6}}>
+              {seqStarted ? <><Ic.Check s={14}/>시퀀스 활성화됨</> : <><Ic.Zap s={14}/>시퀀스 시작</>}
+            </div>
+            <div onClick={()=>{if(seqStarted&&seqStep<4)setSeqStep(s=>s+1);}} style={{flex:1,padding:"10px 0",borderRadius:8,background:"var(--bg-3)",border:"1px solid var(--border)",color:seqStarted&&seqStep<4?"var(--t1)":"var(--t4)",textAlign:"center",fontSize:12,fontWeight:600,cursor:seqStarted&&seqStep<4?"pointer":"default",display:"flex",alignItems:"center",justifyContent:"center",gap:6}}>
+              다음 단계 시뮬레이션 →
+            </div>
+          </>)}
         </div>
       </div>
     </>
@@ -2588,50 +3027,86 @@ function PlaybookView({ buyers, savedSet, onRunPlaybook }) {
 
 function KanbanPipeline({ buyers }) {
   const stages = [
-    { key:"신규 리드", color:"var(--blue)", dim:"var(--blue-dim)", count:12 },
-    { key:"검토 중", color:"var(--violet)", dim:"var(--violet-dim)", count:8 },
-    { key:"협상 중", color:"var(--amber)", dim:"var(--amber-dim)", count:4 },
-    { key:"LOI 발행", color:"var(--cyan)", dim:"var(--cyan-dim)", count:3 },
-    { key:"계약 완료", color:"var(--green)", dim:"var(--green-dim)", count:2 },
+    { key:"신규 리드", color:"var(--blue)", dim:"var(--blue-dim)", count:12, convRate:65, avgDays:3 },
+    { key:"검토 중", color:"var(--violet)", dim:"var(--violet-dim)", count:8, convRate:50, avgDays:7 },
+    { key:"협상 중", color:"var(--amber)", dim:"var(--amber-dim)", count:4, convRate:60, avgDays:14 },
+    { key:"LOI 발행", color:"var(--cyan)", dim:"var(--cyan-dim)", count:3, convRate:80, avgDays:10 },
+    { key:"계약 완료", color:"var(--green)", dim:"var(--green-dim)", count:2, convRate:100, avgDays:0 },
   ];
   const allBuyers = buyers || [];
   const getBuyers = (si) => {
     const start = stages.slice(0,si).reduce((a,s)=>a+s.count,0);
-    return allBuyers.slice(start, start+stages[si].count).slice(0,5);
+    return allBuyers.slice(start, start+stages[si].count).slice(0,4);
   };
+  // Stage value calculation
+  const stageValues = stages.map((st,si)=>{
+    const cards = getBuyers(si);
+    const val = cards.reduce((s,b)=>{const m=b.volume?.match(/\$(\d+\.?\d*)/);return s+(m?parseFloat(m[1]):0);},0);
+    return val;
+  });
+  const totalValue = stageValues.reduce((a,b)=>a+b,0);
+
   return (
     <div style={{marginTop:16}}>
-      <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:14}}>
+      <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:6}}>
         <Ic.Grid s={14}/>
-        <span style={{fontSize:13,fontWeight:700}}>세일즈 파이프라인</span>
-        <span style={{fontSize:11,color:"var(--t4)",marginLeft:"auto"}}>{allBuyers.length}건 관리 중</span>
+        <span style={{fontSize:13,fontWeight:700}}>딜 파이프라인</span>
+        <span style={{fontSize:11,color:"var(--t4)",marginLeft:"auto"}}>{stages.reduce((a,s)=>a+s.count,0)}건 · 예상 총 매출 <span style={{fontWeight:700,color:"var(--green)",fontFamily:"var(--mono)"}}>${totalValue.toFixed(1)}M</span></span>
+      </div>
+      {/* Funnel progress bar */}
+      <div style={{display:"flex",gap:2,marginBottom:14,height:6,borderRadius:3,overflow:"hidden"}}>
+        {stages.map((st,si)=>(
+          <div key={si} style={{flex:st.count,background:st.color,transition:"flex .3s"}} title={`${st.key}: ${st.count}건`}/>
+        ))}
       </div>
       <div style={{display:"grid",gridTemplateColumns:"repeat(5,1fr)",gap:10,overflow:"auto"}}>
         {stages.map((st,si)=>{
           const cards = getBuyers(si);
+          const stageVal = stageValues[si];
           return (
-            <div key={st.key} style={{background:"var(--bg-2)",borderRadius:12,border:"1px solid var(--border)",boxShadow:"var(--card-shadow)",overflow:"hidden",minWidth:160}}>
-              <div style={{padding:"10px 12px",borderBottom:"1px solid var(--border)",display:"flex",alignItems:"center",gap:8}}>
-                <div style={{width:8,height:8,borderRadius:"50%",background:st.color}}/>
-                <span style={{fontSize:11,fontWeight:700,flex:1}}>{st.key}</span>
-                <span style={{fontSize:10,fontWeight:700,color:st.color,background:st.dim,padding:"2px 6px",borderRadius:4}}>{st.count}</span>
+            <div key={st.key} style={{background:"var(--bg-2)",borderRadius:12,border:"1px solid var(--border)",boxShadow:"var(--card-shadow)",overflow:"hidden",minWidth:150}}>
+              {/* Stage header */}
+              <div style={{padding:"10px 12px",borderBottom:"1px solid var(--border)"}}>
+                <div style={{display:"flex",alignItems:"center",gap:6,marginBottom:6}}>
+                  <div style={{width:8,height:8,borderRadius:"50%",background:st.color}}/>
+                  <span style={{fontSize:11,fontWeight:700,flex:1}}>{st.key}</span>
+                  <span style={{fontSize:10,fontWeight:700,color:st.color,background:st.dim,padding:"2px 6px",borderRadius:4}}>{st.count}</span>
+                </div>
+                <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+                  <span style={{fontSize:10,color:"var(--green)",fontWeight:700,fontFamily:"var(--mono)"}}>${stageVal.toFixed(1)}M</span>
+                  {si<4&&<span style={{fontSize:9,color:"var(--t4)"}}>→ 전환 {st.convRate}%</span>}
+                  {si===4&&<span style={{fontSize:9,color:"var(--green)",fontWeight:600}}>성사</span>}
+                </div>
               </div>
-              <div style={{padding:8,display:"grid",gap:6,minHeight:100}}>
-                {cards.map((b,i)=>(
-                  <div key={b.id||i} style={{padding:"8px 10px",borderRadius:8,background:"var(--bg-3)",border:"1px solid var(--border)",fontSize:11,transition:"all .15s cubic-bezier(0.2,0,0,1)",cursor:"pointer"}}
-                    onMouseEnter={e=>{e.currentTarget.style.borderColor="var(--border-h)";e.currentTarget.style.transform="translateY(-1px)"}}
-                    onMouseLeave={e=>{e.currentTarget.style.borderColor="var(--border)";e.currentTarget.style.transform="none"}}>
-                    <div style={{fontWeight:700,fontSize:11,marginBottom:3}}>{b.name}</div>
-                    <div style={{color:"var(--t3)",fontSize:10,display:"flex",alignItems:"center",gap:4}}>{b.flag} {b.company}</div>
-                    <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginTop:6}}>
-                      <span style={{fontSize:9,color:"var(--t4)"}}>{b.volume}</span>
-                      <span style={{fontSize:10,fontWeight:700,fontFamily:"var(--mono)",color:st.color}}>{b.score}</span>
+              {/* Cards */}
+              <div style={{padding:6,display:"grid",gap:4,minHeight:80}}>
+                {cards.map((b,i)=>{
+                  const daysInStage = parseInt(b.lastActive)||1;
+                  const isStale = daysInStage > 14 && si < 4;
+                  return (
+                    <div key={b.id||i} style={{padding:"7px 9px",borderRadius:8,background:isStale?"rgba(255,69,58,.03)":"var(--bg-3)",border:`1px solid ${isStale?"rgba(255,69,58,.15)":"var(--border)"}`,fontSize:11,transition:"all .15s",cursor:"pointer"}}
+                      onMouseEnter={e=>{e.currentTarget.style.borderColor="var(--border-h)";e.currentTarget.style.transform="translateY(-1px)"}}
+                      onMouseLeave={e=>{e.currentTarget.style.borderColor=isStale?"rgba(255,69,58,.15)":"var(--border)";e.currentTarget.style.transform="none"}}>
+                      <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:3}}>
+                        <span style={{fontWeight:700,fontSize:10}}>{b.name}</span>
+                        {isStale&&<span style={{fontSize:8,padding:"1px 4px",borderRadius:3,background:"rgba(255,69,58,.1)",color:"rgba(255,69,58,1)",fontWeight:700}}>정체</span>}
+                      </div>
+                      <div style={{color:"var(--t3)",fontSize:9,display:"flex",alignItems:"center",gap:3}}>{b.flag} {b.company}</div>
+                      <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginTop:4}}>
+                        <span style={{fontSize:9,color:"var(--green)",fontWeight:600,fontFamily:"var(--mono)"}}>{b.volume}</span>
+                        <span style={{fontSize:8,color:"var(--t4)"}}>{b.lastActive}</span>
+                      </div>
                     </div>
-                  </div>
-                ))}
-                {cards.length===0&&<div style={{textAlign:"center",padding:12,fontSize:10,color:"var(--t4)"}}>비어있음</div>}
-                {st.count>5&&<div style={{textAlign:"center",padding:4,fontSize:9,color:"var(--t4)"}}>+{st.count-5}건 더보기</div>}
+                  );
+                })}
+                {cards.length===0&&<div style={{textAlign:"center",padding:10,fontSize:9,color:"var(--t4)"}}>비어있음</div>}
+                {st.count>4&&<div style={{textAlign:"center",padding:3,fontSize:9,color:"var(--t4)"}}>+{st.count-4}건 더</div>}
               </div>
+              {/* Stage footer — avg days */}
+              {si<4&&<div style={{padding:"6px 10px",borderTop:"1px solid var(--border)",display:"flex",alignItems:"center",justifyContent:"center",gap:4}}>
+                <span style={{fontSize:9,color:"var(--t4)"}}>평균 체류</span>
+                <span style={{fontSize:10,fontWeight:700,color:st.avgDays>10?"var(--amber)":"var(--t2)",fontFamily:"var(--mono)"}}>{st.avgDays}일</span>
+              </div>}
             </div>
           );
         })}
@@ -2848,13 +3323,22 @@ function DashboardView({ buyers, savedSet, starred, buyerNotes }) {
   const funnelTotal = totalBuyers;
   const funnelData = pipelineOrder.map(s => ({status: s, count: pipeline[s], pct: Math.round((pipeline[s]/funnelTotal)*100)}));
 
-  // Recent activity (simulated) - More impressive for investors
+  // Recent activity (simulated) - Real-time feed
   const recentActivity = [
     {buyer: topBuyers[0], action: "🎉 $2.3M 계약 성사", time: "방금 전", type: "success"},
-    {buyer: topBuyers[1], action: "📋 LOI 체결 완료", time: "12분 전", type: "milestone"},
-    {buyer: topBuyers[2], action: "🤝 온라인 미팅 성공", time: "1시간 전", type: "meeting"},
-    {buyer: topBuyers[3], action: "⚡ AI 매칭 완료", time: "2시간 전", type: "match"}
+    {buyer: topBuyers[1], action: "📧 이메일 열람 (3회)", time: "3분 전", type: "email_open"},
+    {buyer: topBuyers[2], action: "📋 LOI 체결 완료", time: "12분 전", type: "milestone"},
+    {buyer: buyers[10], action: "🔍 프로필 조회", time: "18분 전", type: "view"},
+    {buyer: buyers[15], action: "📎 견적서 다운로드", time: "25분 전", type: "download"},
+    {buyer: topBuyers[3], action: "🤝 온라인 미팅 완료", time: "1시간 전", type: "meeting"},
+    {buyer: buyers[20], action: "💬 시퀀스 2단계 응답", time: "1시간 전", type: "reply"},
+    {buyer: buyers[25], action: "⚡ AI 매칭 점수 95점", time: "2시간 전", type: "match"},
+    {buyer: buyers[30], action: "📧 시퀀스 1단계 발송", time: "3시간 전", type: "sequence"},
+    {buyer: buyers[35], action: "🔔 구매팀 채용 감지", time: "4시간 전", type: "signal"},
+    {buyer: buyers[40], action: "🏭 신규 공장 설립 감지", time: "5시간 전", type: "signal"},
+    {buyer: buyers[45], action: "📧 이메일 열람 (1회)", time: "6시간 전", type: "email_open"},
   ];
+  const activityColors = {success:"var(--green)",milestone:"var(--blue)",meeting:"var(--cyan)",match:"var(--amber)",email_open:"var(--violet)",view:"var(--t3)",download:"var(--blue)",reply:"var(--green)",sequence:"var(--cyan)",signal:"var(--amber)"};
 
   // Avg match score
   const avgScore = Math.round(buyers.reduce((s,b) => s+b.score, 0) / totalBuyers);
@@ -3121,26 +3605,44 @@ function DashboardView({ buyers, savedSet, starred, buyerNotes }) {
           {/* Recent Activity */}
           <div className="fi fi5" style={cardStyle}>
             <KanbanPipeline buyers={buyers} />
-          <div style={{fontSize:14,fontWeight:700,marginBottom:14,display:"flex",alignItems:"center",gap:8}}><Ic.Sparkle s={14}/>최근 활동</div>
-            <div style={{display:"grid",gap:8}}>
+          <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:14}}>
+            <div style={{fontSize:14,fontWeight:700,display:"flex",alignItems:"center",gap:8}}>
+              <Ic.Zap s={14}/>실시간 활동 피드
+              <span style={{width:6,height:6,borderRadius:"50%",background:"var(--green)",animation:"pulse 1.5s infinite",display:"inline-block"}}/>
+              <span style={{fontSize:10,fontWeight:500,color:"var(--green)"}}>LIVE</span>
+            </div>
+            <span style={{fontSize:10,color:"var(--t4)"}}>{recentActivity.length}개 이벤트</span>
+          </div>
+            <div style={{display:"grid",gap:6,maxHeight:420,overflow:"auto"}}>
               {recentActivity.map((a,i) => (
                 <div key={i} style={{
-                  display:"flex",alignItems:"center",gap:10,padding:"8px 10px",borderRadius:6,
-                  background: a.type === "success" ? "var(--green-dim)" : "var(--bg-3)",
-                  border: a.type === "success" ? "1px solid rgba(16,185,129,.2)" : "1px solid var(--border)",
-                  animation: a.type === "success" ? "pulse 2s infinite" : "none"
-                }}>
-                  <div style={{
-                    width:6,height:6,borderRadius:"50%",
-                    background:{"success":"var(--green)","milestone":"var(--blue)","meeting":"var(--cyan)","match":"var(--amber)"}[a.type],
-                    flexShrink:0
-                  }} />
-                  <div style={{flex:1,minWidth:0}}>
-                    <div style={{fontSize:11,fontWeight:500}}>
-                      <span style={{color:"var(--blue-light)"}}>{a.buyer.company}</span> {a.action}
-                    </div>
+                  display:"flex",alignItems:"center",gap:10,padding:"10px 12px",borderRadius:8,
+                  background: a.type === "success" ? "rgba(16,185,129,.06)" : a.type === "reply" ? "rgba(16,185,129,.04)" : "var(--bg-3)",
+                  border: a.type === "success" ? "1px solid rgba(16,185,129,.2)" : a.type === "reply" ? "1px solid rgba(16,185,129,.12)" : "1px solid var(--border)",
+                  animation: i===0 ? "fadeIn .5s ease" : "none",
+                  transition:"all .2s"
+                }}
+                onMouseEnter={e=>e.currentTarget.style.background=a.type==="success"?"rgba(16,185,129,.1)":"var(--bg-hover)"}
+                onMouseLeave={e=>e.currentTarget.style.background=a.type==="success"?"rgba(16,185,129,.06)":a.type==="reply"?"rgba(16,185,129,.04)":"var(--bg-3)"}
+                >
+                  <div style={{position:"relative",flexShrink:0}}>
+                    <div style={{width:32,height:32,borderRadius:"50%",background:"linear-gradient(135deg,var(--blue-dim),var(--violet-dim))",display:"flex",alignItems:"center",justifyContent:"center",fontSize:11,fontWeight:700,color:"var(--blue)"}}>{a.buyer?.name?.charAt(0)||"?"}</div>
+                    {i===0&&<div style={{position:"absolute",bottom:-1,right:-1,width:8,height:8,borderRadius:"50%",background:"var(--green)",border:"2px solid var(--bg-2)"}}/>}
                   </div>
-                  <span style={{fontSize:10,color:"var(--t4)",flexShrink:0}}>{a.time}</span>
+                  <div style={{flex:1,minWidth:0}}>
+                    <div style={{fontSize:12,fontWeight:600,display:"flex",alignItems:"center",gap:4,flexWrap:"wrap"}}>
+                      <span style={{color:"var(--t1)"}}>{a.buyer?.name||"Unknown"}</span>
+                      <span style={{fontSize:10,color:"var(--t4)"}}>·</span>
+                      <span style={{fontSize:10,color:"var(--t3)"}}>{a.buyer?.company||""}</span>
+                    </div>
+                    <div style={{fontSize:11,color:activityColors[a.type]||"var(--t3)",marginTop:2,fontWeight:500}}>{a.action}</div>
+                  </div>
+                  <div style={{display:"flex",flexDirection:"column",alignItems:"flex-end",flexShrink:0}}>
+                    <span style={{fontSize:10,color:"var(--t4)"}}>{a.time}</span>
+                    <span style={{fontSize:8,padding:"1px 5px",borderRadius:3,marginTop:3,background:activityColors[a.type]+"15",color:activityColors[a.type],fontWeight:600}}>
+                      {({success:"계약",milestone:"마일스톤",meeting:"미팅",match:"매칭",email_open:"열람",view:"조회",download:"다운로드",reply:"응답",sequence:"시퀀스",signal:"시그널"})[a.type]||a.type}
+                    </span>
+                  </div>
                 </div>
               ))}
             </div>
@@ -3714,7 +4216,21 @@ export default function App() {
                   <th style={{width:30}}/>
                   {[
                     ["name","바이어",180],["company","기업명",150],["country","국가",105],["industry","산업",110],
-                    ["score","매칭점수",120],["demand","수요 품목",140],["volume","예상 규모",90],
+                    ["score","매칭점수",120]
+                  ].map(([field,label,w])=>(
+                    <th key={field} onClick={()=>toggleSort(field)} style={{
+                      padding:"8px 10px",fontSize:10,fontWeight:700,color:"var(--t3)",textTransform:"uppercase",
+                      letterSpacing:".08em",textAlign:"left",cursor:"pointer",whiteSpace:"nowrap",
+                      width:w,borderBottom:"1px solid var(--border)",userSelect:"none"
+                    }}>
+                      <div style={{display:"flex",alignItems:"center",gap:4}}>
+                        {label}<span style={{color:sort.field===field?"var(--blue)":"var(--t4)"}}><SortIcon field={field}/></span>
+                      </div>
+                    </th>
+                  ))}
+                  <th style={{padding:"8px 10px",fontSize:10,fontWeight:700,color:"var(--t3)",textTransform:"uppercase",letterSpacing:".08em",textAlign:"left",whiteSpace:"nowrap",width:90,borderBottom:"1px solid var(--border)"}}>신용등급</th>
+                  {[
+                    ["demand","수요 품목",140],["volume","예상 규모",90],
                     ["buyingIntent","의향",90],["status","상태",75],["email","이메일",170]
                   ].map(([field,label,w])=>(
                     <th key={field} onClick={()=>toggleSort(field)} style={{
@@ -3805,11 +4321,15 @@ fi fi${Math.min(i+1,5)}`}
                       <td style={{padding:"8px 10px"}}>
                         <div style={{fontWeight:600,fontSize:13,display:"flex",alignItems:"center",gap:5}}>
                           {b.name}
+                          {b.trustLevel&&<span style={{fontSize:9,fontWeight:700,padding:"1px 6px",borderRadius:3,background:b.trustLevel.bg,color:b.trustLevel.color,border:`1px solid ${b.trustLevel.border}`,whiteSpace:"nowrap"}}>{b.trustLevel.grade==="Gold"?"🏆":"🔹"} {b.trustLevel.label}</span>}
                           {b.hotSignal&&<span style={{fontSize:9,fontWeight:700,padding:"1px 6px",borderRadius:3,background:"rgba(245,158,11,.15)",color:"var(--amber)",border:"1px solid rgba(245,158,11,.25)",whiteSpace:"nowrap",animation:"pulse 2s infinite"}}>⚡ {b.hotSignal}</span>}
                         </div>
                         <div style={{fontSize:11,color:"var(--t3)",marginTop:1,display:"flex",alignItems:"center",gap:4,flexWrap:"wrap"}}>
                           <span>{b.title}</span>
                           {b.regulatoryShield&&b.regulatoryShield.length>0&&<span style={{fontSize:9,fontWeight:700,padding:"1px 5px",borderRadius:3,background:"rgba(139,92,246,.15)",color:"var(--violet)",whiteSpace:"nowrap"}}>🛡 규제보호</span>}
+                          {b.intentSignals&&b.intentSignals.length>0&&b.intentSignals.slice(0,2).map((sig,si)=>(
+                            <span key={si} style={{fontSize:9,fontWeight:600,padding:"1px 5px",borderRadius:3,background:"rgba(10,132,255,.08)",color:"var(--blue)",whiteSpace:"nowrap"}}>{sig.icon} {sig.label}</span>
+                          ))}
                         </div>
                       </td>
                       <td style={{padding:"8px 10px"}}>
@@ -3819,6 +4339,17 @@ fi fi${Math.min(i+1,5)}`}
                       <td style={{padding:"8px 10px",fontSize:12,whiteSpace:"nowrap"}}><span>{b.flag}</span> <span style={{color:"var(--t2)"}}>{b.country}</span></td>
                       <td style={{padding:"8px 10px",fontSize:12,color:"var(--t2)"}}>{b.industry}</td>
                       <td style={{padding:"8px 10px"}}><ScoreBar score={b.score}/></td>
+                      <td style={{padding:"8px 10px"}}>
+                        {b.creditInfo && (
+                          <CreditBadge
+                            grade={b.creditInfo.grade}
+                            gradeColor={b.creditInfo.gradeColor}
+                            gradeDim={b.creditInfo.gradeDim}
+                            payScore={b.creditInfo.payScore}
+                            riskLevel={b.creditInfo.riskLevel}
+                          />
+                        )}
+                      </td>
                       <td style={{padding:"8px 10px",fontSize:12,color:"var(--t2)"}}>{b.demand}</td>
                       <td style={{padding:"8px 10px"}}><span style={{fontFamily:"var(--mono)",fontSize:12,fontWeight:600,color:"var(--green)"}}>{b.volume}</span></td>
                       <td style={{padding:"8px 10px",whiteSpace:"nowrap"}}>
