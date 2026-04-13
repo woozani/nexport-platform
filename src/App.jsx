@@ -2799,7 +2799,7 @@ function AIAssistant({ buyers, onClose }) {
 }
 
 function FilterSidebar({ filters, setFilters, collapsed, setCollapsed }) {
-  const [openSections, setOpenSections] = useState({"산업":true,"지역":true,"회사규모":false,"인증":false,"구매의향":false,"규제시장":false,"매칭점수":false});
+  const [openSections, setOpenSections] = useState({"산업":true,"지역":true,"회사규모":false,"인증":false,"구매의향":false,"규제시장":false,"신용등급":false,"매칭점수":false});
   const toggle = k => setOpenSections(p=>({...p,[k]:!p[k]}));
 
   const FilterSection = ({title, icon:Icon, children}) => (
@@ -2836,7 +2836,7 @@ function FilterSidebar({ filters, setFilters, collapsed, setCollapsed }) {
         <div style={{display:"flex",alignItems:"center",gap:6,fontSize:13,fontWeight:700}}><Ic.Filter s={14}/>필터</div>
         <div style={{display:"flex",gap:4}}>
           {Object.values(filters).some(v => Array.isArray(v) ? v.length : v) && (
-            <div onClick={()=>setFilters({industries:[],regions:[],sizes:[],certs:[],intents:[],regulations:[],scoreMin:0,scoreMax:100})} style={{fontSize:10,color:"var(--red)",cursor:"pointer",padding:"2px 6px",borderRadius:4,background:"var(--red-dim)"}}>초기화</div>
+            <div onClick={()=>setFilters({industries:[],regions:[],sizes:[],certs:[],intents:[],regulations:[],grades:[],scoreMin:0,scoreMax:100})} style={{fontSize:10,color:"var(--red)",cursor:"pointer",padding:"2px 6px",borderRadius:4,background:"var(--red-dim)"}}>초기화</div>
           )}
           <div onClick={()=>setCollapsed(true)} style={{cursor:"pointer",color:"var(--t4)",padding:2}}><Ic.ChevLeft s={14}/></div>
         </div>
@@ -2890,6 +2890,24 @@ function FilterSidebar({ filters, setFilters, collapsed, setCollapsed }) {
               checked={(filters.regulations||[]).includes(r)}
               onChange={()=>setFilters(p=>({...p,regulations:(p.regulations||[]).includes(r)?p.regulations.filter(x=>x!==r):[...(p.regulations||[]),r]}))} />
           ))}
+        </FilterSection>
+        <FilterSection title="신용등급" icon={Ic.Shield}>
+          <div style={{display:"flex",flexWrap:"wrap",gap:4}}>
+            {CREDIT_GRADES.map(g=>(
+              <label key={g} style={{display:"flex",alignItems:"center",gap:4,cursor:"pointer",
+                padding:"2px 6px",borderRadius:4,fontSize:11,fontWeight:600,
+                background: filters.grades.includes(g) ? CREDIT_GRADE_COLOR[g].dim : "transparent",
+                color: filters.grades.includes(g) ? CREDIT_GRADE_COLOR[g].color : "var(--t3)",
+                border: `1px solid ${filters.grades.includes(g) ? CREDIT_GRADE_COLOR[g].color+"60" : "var(--border)"}`,
+              }}>
+                <input type="checkbox" style={{display:"none"}}
+                  checked={filters.grades.includes(g)}
+                  onChange={()=>setFilters(p=>({...p,grades:p.grades.includes(g)?p.grades.filter(x=>x!==g):[...p.grades,g]}))}
+                />
+                {g}
+              </label>
+            ))}
+          </div>
         </FilterSection>
         <FilterSection title="매칭점수" icon={Ic.Bar}>
           <div style={{display:"flex",gap:8,alignItems:"center",fontSize:12}}>
@@ -4018,7 +4036,7 @@ function EmailFinderView() {
 }
 
 export default function App() {
-  const [filters, setFilters] = useState({industries:[],regions:[],sizes:[],certs:[],intents:[],regulations:[],scoreMin:0,scoreMax:100});
+  const [filters, setFilters] = useState({industries:[],regions:[],sizes:[],certs:[],intents:[],regulations:[],grades:[],scoreMin:0,scoreMax:100});
   const [sideCollapsed, setSideCollapsed] = useState(false);
   const [search, setSearch] = useState("");
   const [detailBuyer, setDetailBuyer] = useState(null);
@@ -4162,6 +4180,7 @@ export default function App() {
     if (filters.certs.length) d = d.filter(b => b.certifications.some(c => filters.certs.includes(c)));
     if (filters.intents.length) d = d.filter(b => filters.intents.includes(b.buyingIntent));
     if (filters.regulations&&filters.regulations.length) d = d.filter(b => filters.regulations.some(r => (b.regulatoryShield||[]).includes(r)));
+    if (filters.grades.length) d = d.filter(b => filters.grades.includes(b.creditInfo?.grade));
     if (filters.scoreMin > 0) d = d.filter(b => b.score >= filters.scoreMin);
     if (filters.scoreMax < 100) d = d.filter(b => b.score <= filters.scoreMax);
     // Size filter
@@ -4222,6 +4241,7 @@ export default function App() {
     ...filters.certs.map(c => ({label:c,clear:()=>setFilters(p=>({...p,certs:p.certs.filter(x=>x!==c)}))})),
     ...filters.intents.map(i => ({label:`의향:${i}`,clear:()=>setFilters(p=>({...p,intents:p.intents.filter(x=>x!==i)}))})),
     ...(filters.regulations||[]).map(r => ({label:`규제:${r}`,clear:()=>setFilters(p=>({...p,regulations:p.regulations.filter(x=>x!==r)}))})),
+    ...( filters.grades.map(g => ({label:g, clear:()=>setFilters(p=>({...p,grades:p.grades.filter(x=>x!==g)}))}))),
   ];
 
   useEffect(() => { setPage(1); }, [filters, search, tab, quickFilter]);
