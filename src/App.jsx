@@ -206,6 +206,36 @@ const NAMES_FIRST = ["Hans","Sarah","Erik","Nguyen","Tanaka","Pierre","James","M
 const NAMES_LAST = ["Mueller","Chen","Johansson","Tran","Yamamoto","Dupont","Wilson","Garcia","Lindberg","Sato","Smith","Park","Rossi","Patel","Rodriguez","Zhang","Brown","Martin","Eriksson","Kim","Lee","Andersen","Fischer","Nakamura","Costa","Singh","Bergström","Hernandez","Novak","O'Brien"];
 const COMPANIES = ["TechParts GmbH","Pacific Trade Corp","Saigon Manufacturing","Nordic Solutions AB","Osaka Precision Co.","Rotterdam Metals BV","Thames Engineering","Sydney Industrial","Maple Leaf Tech","Lyon Aerospace","SG Components Pte","Bangkok Polymer","Delhi Precision","São Paulo Metals","Monterrey Auto Parts","Shanghai Tech Group","Manchester Steel","Paris Medical Devices","Stockholm Dynamics","Tokyo Electronics","Berlin Industrial AG","Melbourne Parts Co.","Toronto Precision Inc.","Seoul Components","Warsaw Engineering","Dubai Trade Solutions","Riyadh Industrial Group","Istanbul Precision Co.","Tel Aviv Tech Ltd","Cape Town Manufacturing","Lagos Export Corp","Cairo Industrial Co.","Nairobi Parts Ltd"];
 
+// ─────────── 신용평가 Mock 헬퍼 ───────────
+const CREDIT_GRADES = ["AAA","AA","A+","A","BBB","BB","B","C","D"];
+const CREDIT_GRADE_COLOR = {
+  "AAA":"var(--green)","AA":"var(--green)","A+":"var(--green)",
+  "A":"var(--blue)","BBB":"var(--blue)",
+  "BB":"var(--amber)","B":"var(--amber)",
+  "C":"var(--red)","D":"var(--red)",
+};
+const CREDIT_RISK = ["낮음","낮음","낮음","중간","중간","높음","높음","매우높음","매우높음"];
+const CREDIT_RISK_COLOR = {
+  "낮음":"var(--green)","중간":"var(--amber)","높음":"var(--red)","매우높음":"var(--red)",
+};
+
+function mockCreditInfo(idx) {
+  // 인덱스 기반 결정론적 생성 — 새로고침해도 동일한 값 유지
+  const gradeIdx = idx % CREDIT_GRADES.length;
+  const grade = CREDIT_GRADES[gradeIdx];
+  const payScore = 95 - gradeIdx * 9;  // AAA=95 … D=23
+  const riskLevel = CREDIT_RISK[gradeIdx];
+  return {
+    grade,
+    payScore,
+    riskLevel,
+    gradeColor: CREDIT_GRADE_COLOR[grade],
+    riskColor: CREDIT_RISK_COLOR[riskLevel],
+    lastUpdated: "2025-03",
+    source: "mock",
+  };
+}
+
 function generateBuyers(n) {
   const buyers = [];
   for (let i = 0; i < n; i++) {
@@ -257,6 +287,7 @@ function generateBuyers(n) {
       saved: Math.random() > .7,
       starred: Math.random() > .85,
       lastActive: `${Math.floor(Math.random()*30)+1}일 전`,
+      creditInfo: mockCreditInfo(i),
     });
   }
   return buyers;
@@ -334,6 +365,21 @@ const getLookalikes = (target, buyers) => {
 // ─────────── SMALL COMPONENTS ───────────
 const Badge = ({children, color="var(--blue)", bg}) => (
   <span style={{fontSize:10,fontWeight:600,padding:"2px 7px",borderRadius:4,background:bg||`${color}15`,color,letterSpacing:".02em",whiteSpace:"nowrap"}}>{children}</span>
+);
+
+const CreditBadge = ({ grade, gradeColor, payScore, riskLevel }) => (
+  <div
+    title={`결제점수 ${payScore} · 리스크 ${riskLevel}`}
+    style={{
+      display:"inline-flex", alignItems:"center", gap:3,
+      padding:"2px 7px", borderRadius:4,
+      background:`${gradeColor}18`,
+      border:`1px solid ${gradeColor}40`,
+      cursor:"default",
+    }}
+  >
+    <span style={{fontSize:10, fontWeight:700, color:gradeColor, letterSpacing:".02em"}}>{grade}</span>
+  </div>
 );
 
 const ScoreBar = ({score}) => {
