@@ -209,10 +209,15 @@ const COMPANIES = ["TechParts GmbH","Pacific Trade Corp","Saigon Manufacturing",
 // ─────────── 신용평가 Mock 헬퍼 ───────────
 const CREDIT_GRADES = ["AAA","AA","A+","A","BBB","BB","B","C","D"];
 const CREDIT_GRADE_COLOR = {
-  "AAA":"var(--green)","AA":"var(--green)","A+":"var(--green)",
-  "A":"var(--blue)","BBB":"var(--blue)",
-  "BB":"var(--amber)","B":"var(--amber)",
-  "C":"var(--red)","D":"var(--red)",
+  "AAA":{ color:"var(--green)", dim:"var(--green-dim)" },
+  "AA": { color:"var(--green)", dim:"var(--green-dim)" },
+  "A+": { color:"var(--green)", dim:"var(--green-dim)" },
+  "A":  { color:"var(--blue)",  dim:"var(--blue-dim)"  },
+  "BBB":{ color:"var(--blue)",  dim:"var(--blue-dim)"  },
+  "BB": { color:"var(--amber)", dim:"var(--amber-dim)" },
+  "B":  { color:"var(--amber)", dim:"var(--amber-dim)" },
+  "C":  { color:"var(--red)",   dim:"var(--red-dim)"   },
+  "D":  { color:"var(--red)",   dim:"var(--red-dim)"   },
 };
 const CREDIT_RISK = ["낮음","낮음","낮음","중간","중간","높음","높음","매우높음","매우높음"];
 const CREDIT_RISK_COLOR = {
@@ -221,15 +226,17 @@ const CREDIT_RISK_COLOR = {
 
 function mockCreditInfo(idx) {
   // 인덱스 기반 결정론적 생성 — 새로고침해도 동일한 값 유지
-  const gradeIdx = idx % CREDIT_GRADES.length;
+  const gradeIdx = Math.abs(idx % CREDIT_GRADES.length);
   const grade = CREDIT_GRADES[gradeIdx];
   const payScore = 95 - gradeIdx * 9;  // AAA=95 … D=23
   const riskLevel = CREDIT_RISK[gradeIdx];
+  const gradeEntry = CREDIT_GRADE_COLOR[grade];
   return {
     grade,
     payScore,
     riskLevel,
-    gradeColor: CREDIT_GRADE_COLOR[grade],
+    gradeColor: gradeEntry.color,
+    gradeDim: gradeEntry.dim,
     riskColor: CREDIT_RISK_COLOR[riskLevel],
     lastUpdated: "2025-03",
     source: "mock",
@@ -367,13 +374,13 @@ const Badge = ({children, color="var(--blue)", bg}) => (
   <span style={{fontSize:10,fontWeight:600,padding:"2px 7px",borderRadius:4,background:bg||`${color}15`,color,letterSpacing:".02em",whiteSpace:"nowrap"}}>{children}</span>
 );
 
-const CreditBadge = ({ grade, gradeColor, payScore, riskLevel }) => (
+const CreditBadge = ({ grade, gradeColor, gradeDim, payScore, riskLevel }) => (
   <div
     title={`결제점수 ${payScore} · 리스크 ${riskLevel}`}
     style={{
-      display:"inline-flex", alignItems:"center", gap:3,
+      display:"inline-flex", alignItems:"center",
       padding:"2px 7px", borderRadius:4,
-      background:`${gradeColor}18`,
+      background:gradeDim,
       border:`1px solid ${gradeColor}40`,
       cursor:"default",
     }}
