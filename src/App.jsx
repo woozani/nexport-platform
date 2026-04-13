@@ -4179,8 +4179,7 @@ export default function App() {
                   <th style={{width:30}}/>
                   {[
                     ["name","바이어",180],["company","기업명",150],["country","국가",105],["industry","산업",110],
-                    ["score","매칭점수",120],["demand","수요 품목",140],["volume","예상 규모",90],
-                    ["buyingIntent","의향",90],["status","상태",75],["email","이메일",170]
+                    ["score","매칭점수",120]
                   ].map(([field,label,w])=>(
                     <th key={field} onClick={()=>toggleSort(field)} style={{
                       padding:"8px 10px",fontSize:10,fontWeight:700,color:"var(--t3)",textTransform:"uppercase",
@@ -4193,6 +4192,20 @@ export default function App() {
                     </th>
                   ))}
                   <th style={{padding:"8px 10px",fontSize:10,fontWeight:700,color:"var(--t3)",textTransform:"uppercase",letterSpacing:".08em",textAlign:"left",whiteSpace:"nowrap",width:90,borderBottom:"1px solid var(--border)"}}>신용등급</th>
+                  {[
+                    ["demand","수요 품목",140],["volume","예상 규모",90],
+                    ["buyingIntent","의향",90],["status","상태",75],["email","이메일",170]
+                  ].map(([field,label,w])=>(
+                    <th key={field} onClick={()=>toggleSort(field)} style={{
+                      padding:"8px 10px",fontSize:10,fontWeight:700,color:"var(--t3)",textTransform:"uppercase",
+                      letterSpacing:".08em",textAlign:"left",cursor:"pointer",whiteSpace:"nowrap",
+                      width:w,borderBottom:"1px solid var(--border)",userSelect:"none"
+                    }}>
+                      <div style={{display:"flex",alignItems:"center",gap:4}}>
+                        {label}<span style={{color:sort.field===field?"var(--blue)":"var(--t4)"}}><SortIcon field={field}/></span>
+                      </div>
+                    </th>
+                  ))}
                   <th style={{width:50,borderBottom:"1px solid var(--border)"}}/>
                 </tr>
               </thead>
