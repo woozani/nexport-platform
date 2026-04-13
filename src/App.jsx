@@ -4192,6 +4192,7 @@ export default function App() {
                       </div>
                     </th>
                   ))}
+                  <th style={{padding:"8px 10px",fontSize:10,fontWeight:700,color:"var(--t3)",textTransform:"uppercase",letterSpacing:".08em",textAlign:"left",whiteSpace:"nowrap",width:90,borderBottom:"1px solid var(--border)"}}>신용등급</th>
                   <th style={{width:50,borderBottom:"1px solid var(--border)"}}/>
                 </tr>
               </thead>
@@ -4288,6 +4289,17 @@ fi fi${Math.min(i+1,5)}`}
                       <td style={{padding:"8px 10px",fontSize:12,whiteSpace:"nowrap"}}><span>{b.flag}</span> <span style={{color:"var(--t2)"}}>{b.country}</span></td>
                       <td style={{padding:"8px 10px",fontSize:12,color:"var(--t2)"}}>{b.industry}</td>
                       <td style={{padding:"8px 10px"}}><ScoreBar score={b.score}/></td>
+                      <td style={{padding:"8px 10px"}}>
+                        {b.creditInfo && (
+                          <CreditBadge
+                            grade={b.creditInfo.grade}
+                            gradeColor={b.creditInfo.gradeColor}
+                            gradeDim={b.creditInfo.gradeDim}
+                            payScore={b.creditInfo.payScore}
+                            riskLevel={b.creditInfo.riskLevel}
+                          />
+                        )}
+                      </td>
                       <td style={{padding:"8px 10px",fontSize:12,color:"var(--t2)"}}>{b.demand}</td>
                       <td style={{padding:"8px 10px"}}><span style={{fontFamily:"var(--mono)",fontSize:12,fontWeight:600,color:"var(--green)"}}>{b.volume}</span></td>
                       <td style={{padding:"8px 10px",whiteSpace:"nowrap"}}>
