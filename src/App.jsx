@@ -4180,6 +4180,11 @@ export default function App() {
     }
     // Sort
     d.sort((a, b) => {
+      if (sort.field === "creditGrade") {
+        const ai = CREDIT_GRADES.indexOf(a.creditInfo?.grade ?? "D");
+        const bi = CREDIT_GRADES.indexOf(b.creditInfo?.grade ?? "D");
+        return sort.asc ? ai - bi : bi - ai;
+      }
       let va = a[sort.field], vb = b[sort.field];
       if (typeof va === "string") return sort.asc ? va.localeCompare(vb) : vb.localeCompare(va);
       return sort.asc ? va - vb : vb - va;
@@ -4411,7 +4416,15 @@ export default function App() {
                       </div>
                     </th>
                   ))}
-                  <th style={{padding:"8px 10px",fontSize:10,fontWeight:700,color:"var(--t3)",textTransform:"uppercase",letterSpacing:".08em",textAlign:"left",whiteSpace:"nowrap",width:90,borderBottom:"1px solid var(--border)"}}>신용등급</th>
+                  <th onClick={()=>toggleSort("creditGrade")} style={{
+                    padding:"8px 10px",fontSize:10,fontWeight:700,color:"var(--t3)",textTransform:"uppercase",
+                    letterSpacing:".08em",textAlign:"left",cursor:"pointer",whiteSpace:"nowrap",
+                    width:90,borderBottom:"1px solid var(--border)",userSelect:"none"
+                  }}>
+                    <div style={{display:"flex",alignItems:"center",gap:4}}>
+                      신용등급<span style={{color:sort.field==="creditGrade"?"var(--blue)":"var(--t4)"}}><SortIcon field="creditGrade"/></span>
+                    </div>
+                  </th>
                   {[
                     ["demand","수요 품목",140],["volume","예상 규모",90],
                     ["buyingIntent","의향",90],["status","상태",75],["email","이메일",170]
