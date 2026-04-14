@@ -487,7 +487,7 @@ const PC_ICON = { green:"🟢", yellow:"🟡", red:"🔴" };
 const CreditCard = ({ buyer }) => {
   const ci = buyer.creditInfo;
   if (!ci) return null;
-  const [activeTab, setActiveTab] = React.useState("요약");
+  const [activeTab, setActiveTab] = useState("요약");
   const tabStyle = (t) => ({
     padding:"6px 14px", fontSize:11, fontWeight:700, cursor:"pointer",
     background:"none", border:"none",
