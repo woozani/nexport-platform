@@ -119,8 +119,147 @@ const Ic = {
 };
 
 // ─────────── NEXPORT LOGO ───────────
+// ─────────── UPGRADE MODAL ───────────
+const PLANS = [
+  {
+    id:"free", name:"Free", price:"무료", period:"",
+    color:"--t2", badge:"현재 플랜",
+    features:["바이어 탐색 30명/월","기본 필터 (산업·지역)","이메일 발굴 5건/월","저장 리스트 10개"],
+    locked:["AI 매칭","플레이북 실행","고급 신용등급 필터","CSV 내보내기","팀 협업","API 연동"],
+  },
+  {
+    id:"pro", name:"Pro", price:"₩79,000", period:"/월",
+    color:"--blue", badge:"인기",
+    features:["바이어 탐색 무제한","고급 필터 전체 (신용등급·규제·인증)","이메일 발굴 무제한","AI 매칭 & 추천","플레이북 전체 실행","CSV 내보내기","저장 리스트 무제한"],
+    locked:["팀 협업 (3인 이상)","전용 API 연동","전담 CS 지원"],
+  },
+  {
+    id:"enterprise", name:"Enterprise", price:"문의", period:"",
+    color:"--violet", badge:"맞춤형",
+    features:["Pro 기능 전체 포함","팀 멤버 무제한","전용 API 연동","화이트라벨 옵션","전담 CS + 온보딩","SLA 보장 (99.9%)","커스텀 데이터 연동"],
+    locked:[],
+  },
+];
+
+function UpgradeModal({ currentPlan, onClose, onUpgrade }) {
+  const [selected, setSelected] = useState(currentPlan==="free"?"pro":currentPlan);
+  return (
+    <div style={{position:"fixed",inset:0,zIndex:2000,display:"flex",alignItems:"center",justifyContent:"center"}} onClick={onClose}>
+      <div style={{position:"absolute",inset:0,background:"rgba(0,0,0,.5)",backdropFilter:"blur(4px)"}}/>
+      <div onClick={e=>e.stopPropagation()} style={{position:"relative",background:"var(--bg-0)",border:"1px solid var(--border)",borderRadius:16,padding:32,width:720,maxWidth:"95vw",maxHeight:"90vh",overflowY:"auto",animation:"scaleIn .2s ease",boxShadow:"var(--modal-shadow)"}}>
+        {/* Header */}
+        <div style={{display:"flex",alignItems:"flex-start",justifyContent:"space-between",marginBottom:24}}>
+          <div>
+            <h2 style={{fontSize:20,fontWeight:800,color:"var(--t1)",marginBottom:4}}>플랜 업그레이드</h2>
+            <p style={{fontSize:13,color:"var(--t3)"}}>더 많은 바이어를 발굴하고 수출 성과를 높이세요</p>
+          </div>
+          <div onClick={onClose} style={{cursor:"pointer",color:"var(--t3)",padding:4,borderRadius:6,background:"var(--bg-2)"}}><Ic.X s={16}/></div>
+        </div>
+        {/* Plans */}
+        <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:12,marginBottom:24}}>
+          {PLANS.map(p=>{
+            const isActive = selected===p.id;
+            const isCurrent = currentPlan===p.id;
+            return (
+              <div key={p.id} onClick={()=>setSelected(p.id)} style={{border:`2px solid ${isActive?`var(${p.color})`:"var(--border)"}`,borderRadius:12,padding:20,cursor:"pointer",background:isActive?`color-mix(in srgb, var(${p.color}) 6%, var(--bg-0))`:"var(--bg-0)",transition:"all .15s",position:"relative"}}>
+                {/* Badge */}
+                <div style={{position:"absolute",top:-10,left:"50%",transform:"translateX(-50%)",padding:"2px 10px",borderRadius:10,background:isActive?`var(${p.color})`:"var(--bg-3)",color:isActive?"#fff":"var(--t3)",fontSize:10,fontWeight:700,whiteSpace:"nowrap"}}>
+                  {isCurrent?"현재 플랜":p.badge}
+                </div>
+                <div style={{marginBottom:12,marginTop:8}}>
+                  <div style={{fontSize:15,fontWeight:800,color:"var(--t1)",marginBottom:4}}>{p.name}</div>
+                  <div style={{display:"flex",alignItems:"baseline",gap:2}}>
+                    <span style={{fontSize:22,fontWeight:800,color:`var(${p.color})`}}>{p.price}</span>
+                    <span style={{fontSize:11,color:"var(--t3)"}}>{p.period}</span>
+                  </div>
+                </div>
+                <div style={{display:"flex",flexDirection:"column",gap:5}}>
+                  {p.features.map((f,i)=>(
+                    <div key={i} style={{display:"flex",alignItems:"center",gap:6,fontSize:11,color:"var(--t2)"}}>
+                      <span style={{color:"var(--green)",flexShrink:0}}><Ic.Check s={11}/></span>{f}
+                    </div>
+                  ))}
+                  {p.locked.map((f,i)=>(
+                    <div key={i} style={{display:"flex",alignItems:"center",gap:6,fontSize:11,color:"var(--t4)"}}>
+                      <span style={{flexShrink:0,opacity:.4}}><Ic.X s={10}/></span><span style={{textDecoration:"line-through"}}>{f}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+        {/* CTA */}
+        <div style={{display:"flex",alignItems:"center",justifyContent:"space-between"}}>
+          <p style={{fontSize:11,color:"var(--t4)"}}>* 연간 결제 시 20% 할인 · 언제든지 해지 가능</p>
+          <div style={{display:"flex",gap:8}}>
+            <button onClick={onClose} style={{padding:"9px 20px",borderRadius:8,border:"1px solid var(--border)",background:"transparent",color:"var(--t2)",fontSize:13,cursor:"pointer",fontWeight:500}}>취소</button>
+            {selected!==currentPlan && (
+              <button onClick={()=>{onUpgrade(selected);onClose();}} style={{padding:"9px 24px",borderRadius:8,border:"none",background:"linear-gradient(135deg,var(--blue),var(--violet))",color:"#fff",fontSize:13,fontWeight:700,cursor:"pointer",display:"flex",alignItems:"center",gap:6}}>
+                <Ic.Zap s={13}/>{selected==="enterprise"?"영업팀 문의":"업그레이드"}
+              </button>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─────────── ACCOUNT MENU ───────────
+function AccountMenu({ user, plan, onClose, onUpgrade }) {
+  const planMeta = PLANS.find(p=>p.id===plan);
+  return (
+    <div style={{position:"absolute",bottom:"100%",left:0,right:0,marginBottom:6,background:"var(--bg-0)",border:"1px solid var(--border)",borderRadius:10,boxShadow:"var(--modal-shadow)",overflow:"hidden",zIndex:500,animation:"fadeIn .15s ease"}}>
+      {/* User info */}
+      <div style={{padding:"12px 14px",borderBottom:"1px solid var(--border)"}}>
+        <div style={{display:"flex",alignItems:"center",gap:8}}>
+          <div style={{width:32,height:32,borderRadius:"50%",background:"linear-gradient(135deg,var(--blue),var(--violet))",display:"flex",alignItems:"center",justifyContent:"center",color:"#fff",fontSize:13,fontWeight:700,flexShrink:0}}>
+            {user.name[0]}
+          </div>
+          <div style={{minWidth:0}}>
+            <div style={{fontSize:12,fontWeight:700,color:"var(--t1)",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{user.name}</div>
+            <div style={{fontSize:10,color:"var(--t3)",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{user.email}</div>
+          </div>
+        </div>
+        <div style={{marginTop:8,display:"inline-flex",alignItems:"center",gap:4,padding:"2px 8px",borderRadius:4,background:`color-mix(in srgb, var(${planMeta.color}) 12%, transparent)`,border:`1px solid color-mix(in srgb, var(${planMeta.color}) 30%, transparent)`}}>
+          <span style={{width:6,height:6,borderRadius:"50%",background:`var(${planMeta.color})`}}/>
+          <span style={{fontSize:10,fontWeight:700,color:`var(${planMeta.color})`}}>{planMeta.name} 플랜</span>
+        </div>
+      </div>
+      {/* Menu items */}
+      {[
+        {icon:<Ic.Users s={12}/>,label:"프로필 설정"},
+        {icon:<Ic.Bell s={12}/>,label:"알림 설정"},
+        {icon:<Ic.Globe s={12}/>,label:"언어 / 지역"},
+      ].map(({icon,label})=>(
+        <div key={label} onClick={onClose} style={{display:"flex",alignItems:"center",gap:8,padding:"8px 14px",cursor:"pointer",fontSize:12,color:"var(--t2)"}}
+          onMouseEnter={e=>e.currentTarget.style.background="var(--bg-hover)"}
+          onMouseLeave={e=>e.currentTarget.style.background="transparent"}>
+          {icon}{label}
+        </div>
+      ))}
+      <div style={{borderTop:"1px solid var(--border)"}}>
+        {plan==="free" && (
+          <div onClick={()=>{onClose();onUpgrade();}} style={{display:"flex",alignItems:"center",gap:8,padding:"8px 14px",cursor:"pointer",fontSize:12,color:"var(--blue)",fontWeight:600}}
+            onMouseEnter={e=>e.currentTarget.style.background="var(--blue-dim)"}
+            onMouseLeave={e=>e.currentTarget.style.background="transparent"}>
+            <Ic.Zap s={12}/>Pro로 업그레이드
+          </div>
+        )}
+        <div onClick={onClose} style={{display:"flex",alignItems:"center",gap:8,padding:"8px 14px",cursor:"pointer",fontSize:12,color:"var(--red)"}}
+          onMouseEnter={e=>e.currentTarget.style.background="var(--red-dim)"}
+          onMouseLeave={e=>e.currentTarget.style.background="transparent"}>
+          <Ic.X s={12}/>로그아웃
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ─────────── APOLLO-STYLE LEFT NAV ───────────
-function LeftNav({ view, navigateTo, search, setSearch, canBack, canForward, goBack, goForward, isDark, setIsDark, notifUnread, setShowNotifications }) {
+function LeftNav({ view, navigateTo, search, setSearch, canBack, canForward, goBack, goForward, isDark, setIsDark, notifUnread, setShowNotifications, plan, user, onUpgrade }) {
+  const [showAccount, setShowAccount] = useState(false);
   const NavItem = ({ icon, label, viewKey, badge, onClick }) => {
     const active = viewKey ? view === viewKey : false;
     return (
@@ -162,23 +301,47 @@ function LeftNav({ view, navigateTo, search, setSearch, canBack, canForward, goB
         <NavItem viewKey="dashboard" icon={<Ic.Bar s={13}/>} label="대시보드"/>
       </div>
       {/* Bottom */}
-      <div style={{borderTop:"1px solid var(--border)",padding:"8px 10px",flexShrink:0,display:"flex",flexDirection:"column",gap:6}}>
-        <div style={{display:"flex",alignItems:"center",gap:6}}>
-          <div onClick={()=>setShowNotifications(p=>!p)} style={{position:"relative",cursor:"pointer",width:28,height:28,borderRadius:6,display:"flex",alignItems:"center",justifyContent:"center",background:"var(--bg-hover)",color:"var(--t2)"}}>
-            <Ic.Bell s={13}/>
-            {notifUnread>0 && <div style={{position:"absolute",top:-3,right:-3,minWidth:14,height:14,borderRadius:7,background:"var(--red)",color:"#fff",fontSize:8,fontWeight:700,display:"flex",alignItems:"center",justifyContent:"center",padding:"0 3px"}}>{notifUnread}</div>}
+      <div style={{borderTop:"1px solid var(--border)",padding:"8px 10px",flexShrink:0,display:"flex",flexDirection:"column",gap:6,position:"relative"}}>
+        {/* Account menu popup */}
+        {showAccount && <AccountMenu user={user} plan={plan} onClose={()=>setShowAccount(false)} onUpgrade={onUpgrade}/>}
+        {/* Icon row */}
+        <div style={{display:"flex",alignItems:"center",gap:4}}>
+          <div onClick={()=>setShowNotifications(p=>!p)} style={{position:"relative",cursor:"pointer",width:26,height:26,borderRadius:6,display:"flex",alignItems:"center",justifyContent:"center",background:"var(--bg-hover)",color:"var(--t2)"}}>
+            <Ic.Bell s={12}/>
+            {notifUnread>0 && <div style={{position:"absolute",top:-3,right:-3,minWidth:13,height:13,borderRadius:7,background:"var(--red)",color:"#fff",fontSize:8,fontWeight:700,display:"flex",alignItems:"center",justifyContent:"center",padding:"0 3px"}}>{notifUnread}</div>}
           </div>
-          <button onClick={()=>setIsDark(d=>!d)} style={{width:28,height:28,borderRadius:6,display:"flex",alignItems:"center",justifyContent:"center",cursor:"pointer",background:"var(--bg-hover)",border:"none",color:"var(--t2)",outline:"none"}}>
-            {isDark?<Ic.Sun s={13}/>:<Ic.Moon s={13}/>}
+          <button onClick={()=>setIsDark(d=>!d)} style={{width:26,height:26,borderRadius:6,display:"flex",alignItems:"center",justifyContent:"center",cursor:"pointer",background:"var(--bg-hover)",border:"none",color:"var(--t2)",outline:"none"}}>
+            {isDark?<Ic.Sun s={12}/>:<Ic.Moon s={12}/>}
           </button>
-          <div style={{display:"flex",gap:4,marginLeft:"auto"}}>
-            <div onClick={canBack?goBack:undefined} style={{width:22,height:22,borderRadius:4,display:"flex",alignItems:"center",justifyContent:"center",cursor:canBack?"pointer":"not-allowed",color:canBack?"var(--t2)":"var(--t4)",background:"var(--bg-hover)"}}><Ic.ChevLeft s={11}/></div>
-            <div onClick={canForward?goForward:undefined} style={{width:22,height:22,borderRadius:4,display:"flex",alignItems:"center",justifyContent:"center",cursor:canForward?"pointer":"not-allowed",color:canForward?"var(--t2)":"var(--t4)",background:"var(--bg-hover)"}}><Ic.ChevRight s={11}/></div>
+          <div style={{display:"flex",gap:3,marginLeft:"auto"}}>
+            <div onClick={canBack?goBack:undefined} style={{width:22,height:22,borderRadius:4,display:"flex",alignItems:"center",justifyContent:"center",cursor:canBack?"pointer":"not-allowed",color:canBack?"var(--t2)":"var(--t4)",background:"var(--bg-hover)"}}><Ic.ChevLeft s={10}/></div>
+            <div onClick={canForward?goForward:undefined} style={{width:22,height:22,borderRadius:4,display:"flex",alignItems:"center",justifyContent:"center",cursor:canForward?"pointer":"not-allowed",color:canForward?"var(--t2)":"var(--t4)",background:"var(--bg-hover)"}}><Ic.ChevRight s={10}/></div>
           </div>
         </div>
-        <div onClick={()=>{}} style={{display:"flex",alignItems:"center",justifyContent:"center",gap:6,padding:"7px 10px",borderRadius:7,background:"linear-gradient(135deg,var(--violet),var(--blue))",color:"#fff",fontSize:11,fontWeight:700,cursor:"pointer",letterSpacing:".02em"}}>
-          <Ic.Zap s={11}/> 업그레이드
+        {/* Account row */}
+        <div onClick={()=>setShowAccount(p=>!p)} style={{display:"flex",alignItems:"center",gap:8,padding:"6px 8px",borderRadius:8,cursor:"pointer",border:"1px solid var(--border)",background:"var(--bg-0)",transition:"all .15s"}}
+          onMouseEnter={e=>e.currentTarget.style.background="var(--bg-hover)"}
+          onMouseLeave={e=>e.currentTarget.style.background="var(--bg-0)"}>
+          <div style={{width:26,height:26,borderRadius:"50%",background:"linear-gradient(135deg,var(--blue),var(--violet))",display:"flex",alignItems:"center",justifyContent:"center",color:"#fff",fontSize:11,fontWeight:700,flexShrink:0}}>
+            {user.name[0]}
+          </div>
+          <div style={{flex:1,minWidth:0}}>
+            <div style={{fontSize:11,fontWeight:600,color:"var(--t1)",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{user.name}</div>
+            <div style={{fontSize:9,color:"var(--t3)",textTransform:"uppercase",letterSpacing:".04em"}}>{PLANS.find(p=>p.id===plan)?.name} 플랜</div>
+          </div>
+          <Ic.ChevDown s={10} style={{color:"var(--t4)",flexShrink:0}}/>
         </div>
+        {/* Upgrade CTA */}
+        {plan==="free" && (
+          <div onClick={onUpgrade} style={{display:"flex",alignItems:"center",justifyContent:"center",gap:5,padding:"7px 10px",borderRadius:7,background:"linear-gradient(135deg,var(--violet),var(--blue))",color:"#fff",fontSize:11,fontWeight:700,cursor:"pointer",letterSpacing:".02em"}}>
+            <Ic.Zap s={11}/> 업그레이드
+          </div>
+        )}
+        {plan==="pro" && (
+          <div onClick={onUpgrade} style={{display:"flex",alignItems:"center",justifyContent:"center",gap:5,padding:"7px 10px",borderRadius:7,border:"1px solid var(--border)",background:"var(--bg-0)",color:"var(--t2)",fontSize:11,fontWeight:600,cursor:"pointer"}}>
+            <Ic.Zap s={11}/> Enterprise 문의
+          </div>
+        )}
       </div>
     </div>
   );
@@ -4190,6 +4353,11 @@ export default function App() {
   const [notifUnread, setNotifUnread] = useState(0);
   const [quickFilter, setQuickFilter] = useState(null);
   const [toast, setToast] = useState(null);
+  // ── Membership ──
+  const [userPlan, setUserPlan] = useState(()=>{ try{return localStorage.getItem('nx-plan')||'free'}catch(e){return 'free'} });
+  const [showUpgrade, setShowUpgrade] = useState(false);
+  const [userAccount] = useState({name:"Jay Jang", email:"jay.jyjang@gmail.com"});
+  const handleUpgrade = (plan) => { setUserPlan(plan); try{localStorage.setItem('nx-plan',plan)}catch(e){} setToast(`✅ ${PLANS.find(p=>p.id===plan)?.name} 플랜으로 업그레이드됐습니다!`); };
   // ── Apple Theme ──
   const [isDark, setIsDark] = useState(() => {
     try {
@@ -4398,12 +4566,15 @@ export default function App() {
       {showCompare && compareSet.size >= 2 && <BuyerCompareModal buyers={ALL_BUYERS.filter(b=>compareSet.has(b.id))} onClose={()=>{setShowCompare(false);setCompareSet(new Set());}} />}
       {detailBuyer && <BuyerDetailPanel buyer={detailBuyer} onClose={()=>setDetailBuyer(null)} onSave={(b)=>{savedSet.has(b.id)?setSavedSet(p=>{const n=new Set(p);n.delete(b.id);return n}):setSavedSet(p=>new Set([...p,b.id]))}} isSaved={savedSet.has(detailBuyer.id)} onEmailBuyer={b=>setEmailBuyer(b)} onShowNotes={b=>setNotesBuyer(b)} onDetailBuyer={b=>setDetailBuyer(b)} />}
 
+      {showUpgrade && <UpgradeModal currentPlan={userPlan} onClose={()=>setShowUpgrade(false)} onUpgrade={handleUpgrade}/>}
+
       <div style={{display:"flex",height:"100vh",overflow:"hidden",background:"var(--bg-0)"}}>
         {/* Apollo-style Left Nav */}
         <LeftNav view={view} navigateTo={navigateTo} search={search} setSearch={setSearch}
           canBack={canBack} canForward={canForward} goBack={goBack} goForward={goForward}
           isDark={isDark} setIsDark={setIsDark} notifUnread={notifUnread}
-          setShowNotifications={setShowNotifications}/>
+          setShowNotifications={setShowNotifications}
+          plan={userPlan} user={userAccount} onUpgrade={()=>setShowUpgrade(true)}/>
 
         {/* Main Content */}
         <div style={{flex:1,display:"flex",flexDirection:"column",overflow:"hidden"}}>
