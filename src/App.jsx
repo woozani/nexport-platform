@@ -65,6 +65,13 @@ input,textarea,select,button{font-family:inherit}
 @media(max-width:768px){.hiw-grid{display:flex!important;flex-direction:column!important;gap:16px!important;align-items:stretch!important}.hiw-grid>div{width:100%!important;box-sizing:border-box!important;padding:24px 20px!important;text-align:center!important;background:var(--bg-2);border-radius:16px;border:1px solid var(--border)}.hiw-connector{display:none!important}}
 .fi{animation:fadeIn .4s cubic-bezier(0.2,0,0,1) forwards;opacity:0}
 .fi1{animation-delay:.04s}.fi2{animation-delay:.08s}.fi3{animation-delay:.12s}.fi4{animation-delay:.16s}.fi5{animation-delay:.2s}
+/* ── Apollo-style Left Nav ── */
+.nx-leftnav{width:200px;min-width:200px;height:100vh;background:var(--bg-1);border-right:1px solid var(--border);display:flex;flex-direction:column;flex-shrink:0;overflow:hidden}
+.nx-nav-item{display:flex;align-items:center;gap:8px;padding:6px 10px;border-radius:6px;margin:1px 6px;cursor:pointer;font-size:12px;font-weight:500;color:var(--t2);transition:all .15s;white-space:nowrap}
+.nx-nav-item:hover{background:var(--bg-hover);color:var(--t1)}
+.nx-nav-item.active{background:var(--blue-dim);color:var(--blue);font-weight:700}
+.nx-nav-section{font-size:10px;font-weight:700;color:var(--t3);letter-spacing:.08em;text-transform:uppercase;padding:12px 16px 4px}
+@media(max-width:768px){.nx-leftnav{display:none!important}}
 `;
 
 // ─────────── ICONS ───────────
@@ -80,6 +87,8 @@ const Ic = {
   Mail:({s=14})=><svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>,
   Download:({s=14})=><svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>,
   List:({s=14})=><svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>,
+  Home:({s=14})=><svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>,
+  Sequence:({s=14})=><svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>,
   Zap:({s=14})=><svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>,
   Globe:({s=14})=><svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><circle cx="12" cy="12" r="10"/><path d="M2 12h20"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>,
   Building:({s=14})=><svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><rect x="4" y="2" width="16" height="20" rx="2"/><path d="M9 22v-4h6v4"/><path d="M8 6h.01M16 6h.01M12 6h.01M12 10h.01M12 14h.01M16 10h.01M16 14h.01M8 10h.01M8 14h.01"/></svg>,
@@ -110,6 +119,71 @@ const Ic = {
 };
 
 // ─────────── NEXPORT LOGO ───────────
+// ─────────── APOLLO-STYLE LEFT NAV ───────────
+function LeftNav({ view, navigateTo, search, setSearch, canBack, canForward, goBack, goForward, isDark, setIsDark, notifUnread, setShowNotifications }) {
+  const NavItem = ({ icon, label, viewKey, badge, onClick }) => {
+    const active = viewKey ? view === viewKey : false;
+    return (
+      <div className={`nx-nav-item${active?" active":""}`} onClick={onClick || (()=>navigateTo(viewKey))}>
+        <span style={{opacity: active?1:0.7, flexShrink:0}}>{icon}</span>
+        <span style={{flex:1}}>{label}</span>
+        {badge && <span style={{fontSize:9,fontWeight:700,padding:"1px 5px",borderRadius:4,background:active?"var(--blue)":"var(--bg-3)",color:active?"#fff":"var(--t3)",letterSpacing:".03em"}}>{badge}</span>}
+      </div>
+    );
+  };
+  const NavSection = ({ label }) => (
+    <div className="nx-nav-section">{label}</div>
+  );
+  return (
+    <div className="nx-leftnav">
+      {/* Logo */}
+      <div style={{padding:"14px 14px 10px",borderBottom:"1px solid var(--border)",flexShrink:0}}>
+        <NexportLogo iconSize={22} textSize={14}/>
+      </div>
+      {/* Search */}
+      <div style={{padding:"8px 10px",borderBottom:"1px solid var(--border)",flexShrink:0}}>
+        <div style={{display:"flex",alignItems:"center",gap:6,padding:"5px 8px",borderRadius:6,background:"var(--bg-0)",border:"1px solid var(--border)"}}>
+          <Ic.Search s={11} style={{color:"var(--t3)"}}/>
+          <input value={search} onChange={e=>setSearch(e.target.value)} placeholder="검색..."
+            style={{flex:1,background:"transparent",border:"none",outline:"none",color:"var(--t1)",fontSize:11,minWidth:0}}/>
+          {search && <span onClick={()=>setSearch("")} style={{cursor:"pointer",color:"var(--t4)"}}><Ic.X s={10}/></span>}
+        </div>
+      </div>
+      {/* Nav Items */}
+      <div style={{flex:1,overflowY:"auto",padding:"4px 0"}}>
+        <NavSection label="Prospect & Enrich"/>
+        <NavItem viewKey="buyers" icon={<Ic.Users s={13}/>} label="바이어 탐색"/>
+        <NavItem viewKey="aiMatch" icon={<Ic.Sparkle s={13}/>} label="AI 매칭" badge="AI"/>
+        <NavItem icon={<Ic.Bookmark s={13}/>} label="저장 리스트" viewKey="buyers" onClick={()=>{navigateTo("buyers");}}/>
+        <NavSection label="Engage"/>
+        <NavItem viewKey="playbook" icon={<Ic.BookOpen s={13}/>} label="플레이북"/>
+        <NavItem viewKey="emailfinder" icon={<Ic.Mail s={13}/>} label="이메일 발굴"/>
+        <NavSection label="Analyze"/>
+        <NavItem viewKey="dashboard" icon={<Ic.Bar s={13}/>} label="대시보드"/>
+      </div>
+      {/* Bottom */}
+      <div style={{borderTop:"1px solid var(--border)",padding:"8px 10px",flexShrink:0,display:"flex",flexDirection:"column",gap:6}}>
+        <div style={{display:"flex",alignItems:"center",gap:6}}>
+          <div onClick={()=>setShowNotifications(p=>!p)} style={{position:"relative",cursor:"pointer",width:28,height:28,borderRadius:6,display:"flex",alignItems:"center",justifyContent:"center",background:"var(--bg-hover)",color:"var(--t2)"}}>
+            <Ic.Bell s={13}/>
+            {notifUnread>0 && <div style={{position:"absolute",top:-3,right:-3,minWidth:14,height:14,borderRadius:7,background:"var(--red)",color:"#fff",fontSize:8,fontWeight:700,display:"flex",alignItems:"center",justifyContent:"center",padding:"0 3px"}}>{notifUnread}</div>}
+          </div>
+          <button onClick={()=>setIsDark(d=>!d)} style={{width:28,height:28,borderRadius:6,display:"flex",alignItems:"center",justifyContent:"center",cursor:"pointer",background:"var(--bg-hover)",border:"none",color:"var(--t2)",outline:"none"}}>
+            {isDark?<Ic.Sun s={13}/>:<Ic.Moon s={13}/>}
+          </button>
+          <div style={{display:"flex",gap:4,marginLeft:"auto"}}>
+            <div onClick={canBack?goBack:undefined} style={{width:22,height:22,borderRadius:4,display:"flex",alignItems:"center",justifyContent:"center",cursor:canBack?"pointer":"not-allowed",color:canBack?"var(--t2)":"var(--t4)",background:"var(--bg-hover)"}}><Ic.ChevLeft s={11}/></div>
+            <div onClick={canForward?goForward:undefined} style={{width:22,height:22,borderRadius:4,display:"flex",alignItems:"center",justifyContent:"center",cursor:canForward?"pointer":"not-allowed",color:canForward?"var(--t2)":"var(--t4)",background:"var(--bg-hover)"}}><Ic.ChevRight s={11}/></div>
+          </div>
+        </div>
+        <div onClick={()=>{}} style={{display:"flex",alignItems:"center",justifyContent:"center",gap:6,padding:"7px 10px",borderRadius:7,background:"linear-gradient(135deg,var(--violet),var(--blue))",color:"#fff",fontSize:11,fontWeight:700,cursor:"pointer",letterSpacing:".02em"}}>
+          <Ic.Zap s={11}/> 업그레이드
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function NexportLogo({ iconSize = 28, textSize = 17 }) {
   return (
     <div style={{display:"flex",alignItems:"center",gap:8}}>
@@ -4325,57 +4399,33 @@ export default function App() {
       {detailBuyer && <BuyerDetailPanel buyer={detailBuyer} onClose={()=>setDetailBuyer(null)} onSave={(b)=>{savedSet.has(b.id)?setSavedSet(p=>{const n=new Set(p);n.delete(b.id);return n}):setSavedSet(p=>new Set([...p,b.id]))}} isSaved={savedSet.has(detailBuyer.id)} onEmailBuyer={b=>setEmailBuyer(b)} onShowNotes={b=>setNotesBuyer(b)} onDetailBuyer={b=>setDetailBuyer(b)} />}
 
       <div style={{display:"flex",height:"100vh",overflow:"hidden",background:"var(--bg-0)"}}>
-        {/* Filter Sidebar */}
-        {view==="buyers" && <FilterSidebar filters={filters} setFilters={setFilters} collapsed={sideCollapsed} setCollapsed={setSideCollapsed} />}
+        {/* Apollo-style Left Nav */}
+        <LeftNav view={view} navigateTo={navigateTo} search={search} setSearch={setSearch}
+          canBack={canBack} canForward={canForward} goBack={goBack} goForward={goForward}
+          isDark={isDark} setIsDark={setIsDark} notifUnread={notifUnread}
+          setShowNotifications={setShowNotifications}/>
 
         {/* Main Content */}
         <div style={{flex:1,display:"flex",flexDirection:"column",overflow:"hidden"}}>
-          {/* Top Header */}
-          <div className="nx-header" style={{padding:"10px 20px",borderBottom:"1px solid var(--border)",background:"var(--bg-0)",display:"flex",alignItems:"center",gap:16,flexShrink:0,position:"sticky",top:0,zIndex:100}}>
-            <div style={{display:"flex",alignItems:"center",gap:10}}>
-              <div style={{width:28,height:28,borderRadius:7,background:"linear-gradient(135deg,var(--blue),var(--violet))",display:"flex",alignItems:"center",justifyContent:"center"}}><Ic.Users s={14}/></div>
-              <div>
-                <h1 className="nx-header-brand" style={{fontSize:16,fontWeight:800,letterSpacing:"-.03em",fontFamily:"var(--font)"}}>NEXPORT</h1>
-              </div>
+          {/* Page Header (Apollo-style: title + context actions) */}
+          <div style={{padding:"10px 20px",borderBottom:"1px solid var(--border)",background:"var(--bg-0)",display:"flex",alignItems:"center",gap:12,flexShrink:0}}>
+            <div>
+              <h1 style={{fontSize:15,fontWeight:800,color:"var(--t1)"}}>
+                {view==="buyers"?"바이어 탐색":view==="dashboard"?"대시보드":view==="emailfinder"?"이메일 발굴":view==="aiMatch"?"AI 매칭":"플레이북"}
+              </h1>
+              <p style={{fontSize:11,color:"var(--t3)",marginTop:1}}>
+                {view==="buyers"?`${filtered.length.toLocaleString()}명의 검증된 글로벌 바이어`:view==="dashboard"?"성과 분석 및 인사이트":view==="emailfinder"?"이메일 주소 발굴 및 검증":view==="aiMatch"?"AI 기반 바이어 추천":"아웃리치 전략 실행"}
+              </p>
             </div>
-            <div style={{display:"flex",alignItems:"center",gap:2}}>
-              <div onClick={canBack?goBack:undefined} title="뒤로 (Alt+←)" style={{width:26,height:26,borderRadius:6,display:"flex",alignItems:"center",justifyContent:"center",cursor:canBack?"pointer":"not-allowed",color:canBack?"var(--t1)":"var(--t4)",background:"var(--bg-3)",border:"1px solid var(--border)",opacity:canBack?1:0.35,transition:"all .15s"}}><Ic.ChevLeft s={14}/></div>
-              <div onClick={canForward?goForward:undefined} title="앞으로 (Alt+→)" style={{width:26,height:26,borderRadius:6,display:"flex",alignItems:"center",justifyContent:"center",cursor:canForward?"pointer":"not-allowed",color:canForward?"var(--t1)":"var(--t4)",background:"var(--bg-3)",border:"1px solid var(--border)",opacity:canForward?1:0.35,transition:"all .15s"}}><Ic.ChevRight s={14}/></div>
-            </div>
-            <div className="nx-header-search" style={{flex:1,maxWidth:420}}>
-              <div style={{display:"flex",alignItems:"center",gap:8,padding:"7px 12px",borderRadius:8,background:"var(--bg-3)",border:"1px solid var(--border)"}}>
-                <Ic.Search s={14}/>
-                <input value={search} onChange={e=>setSearch(e.target.value)} placeholder="바이어, 기업명, 품목, 국가 검색..." style={{flex:1,background:"transparent",border:"none",outline:"none",color:"var(--t1)",fontSize:12}} />
-                {search && <div onClick={()=>setSearch("")} style={{cursor:"pointer",color:"var(--t4)"}}><Ic.X s={12}/></div>}
-              </div>
-            </div>
-            <div className="nx-header-actions" style={{marginLeft:"auto",display:"flex",alignItems:"center",gap:2,background:"var(--bg-3)",borderRadius:8,padding:2,overflowX:"auto",flexShrink:0,maxWidth:"100%"}}>
-              {[
-                {key:"buyers",label:"바이어",icon:<Ic.Users s={12}/>},
-                {key:"dashboard",label:"대시보드",icon:<Ic.Bar s={12}/>},
-                {key:"emailfinder",label:"이메일",icon:<Ic.Mail s={12}/>},
-                {key:"aiMatch",label:"AI 매칭",icon:<Ic.Sparkle s={12}/>},
-                {key:"playbook",label:"플레이북",icon:<Ic.BookOpen s={12}/>},
-              ].map(tab=>{
-                const active = view===tab.key;
-                return <div key={tab.key} onClick={()=>navigateTo(tab.key)} style={{padding:"6px 14px",borderRadius:6,cursor:"pointer",display:"flex",alignItems:"center",gap:5,fontSize:11,fontWeight:active?700:500,transition:"all .2s",background:active?"var(--bg-1)":"transparent",color:active?"var(--t1)":"var(--t3)",boxShadow:active?"0 1px 3px rgba(0,0,0,.2)":"none",whiteSpace:"nowrap",flexShrink:0}}>{tab.icon}{tab.label}</div>;
-              })}
-            </div>
-            {/* Theme Toggle */}
-            <button onClick={()=>setIsDark(d=>!d)} title={isDark?"☀️ 라이트 모드로 전환":"🌙 다크 모드로 전환"}
-              style={{width:32,height:32,borderRadius:8,display:"flex",alignItems:"center",justifyContent:"center",cursor:"pointer",flexShrink:0,outline:"none",background:"var(--bg-hover)",border:"1px solid var(--border)",color:"var(--t2)",transition:"all 0.25s cubic-bezier(0.2,0,0,1)"}}
-              onMouseEnter={e=>{e.currentTarget.style.color="var(--t1)";e.currentTarget.style.borderColor="var(--border-h)"}}
-              onMouseLeave={e=>{e.currentTarget.style.color="var(--t2)";e.currentTarget.style.borderColor="var(--border)"}}
-            >{isDark?<Ic.Sun s={15}/>:<Ic.Moon s={15}/>}</button>
-            {/* Bell / Notification */}
-            <div style={{position:"relative",flexShrink:0}} onClick={()=>setShowNotifications(p=>!p)}>
-              <div style={{width:32,height:32,borderRadius:8,display:"flex",alignItems:"center",justifyContent:"center",cursor:"pointer",background:"var(--bg-hover)",border:"1px solid var(--border)",color:"var(--t2)",transition:"all .2s cubic-bezier(0.2,0,0,1)"}}
-                onMouseEnter={e=>{e.currentTarget.style.borderColor="var(--border-h)";e.currentTarget.style.color="var(--t1)"}}
-                onMouseLeave={e=>{e.currentTarget.style.borderColor="var(--border)";e.currentTarget.style.color="var(--t2)"}}
-              ><Ic.Bell s={15}/></div>
-              {notifUnread > 0 && (
-                <div style={{position:"absolute",top:-4,right:-4,minWidth:16,height:16,borderRadius:8,background:"var(--red)",color:"#fff",fontSize:9,fontWeight:700,display:"flex",alignItems:"center",justifyContent:"center",padding:"0 4px",animation:"pulse 2s infinite",pointerEvents:"none"}}>{notifUnread}</div>
-              )}
+            <div style={{marginLeft:"auto",display:"flex",alignItems:"center",gap:6}}>
+              {view==="buyers" && <>
+                <div style={{display:"flex",alignItems:"center",gap:5,padding:"5px 12px",borderRadius:6,border:"1px solid var(--border)",background:"var(--bg-0)",fontSize:11,fontWeight:500,color:"var(--t2)",cursor:"pointer"}}>
+                  <Ic.Download s={11}/> CSV 내보내기
+                </div>
+                <div onClick={()=>setShowAssistant(true)} style={{display:"flex",alignItems:"center",gap:5,padding:"5px 12px",borderRadius:6,background:"var(--blue)",color:"#fff",fontSize:11,fontWeight:600,cursor:"pointer"}}>
+                  <Ic.Sparkle s={11}/> AI 리서치
+                </div>
+              </>}
             </div>
           </div>
           {showNotifications && (
@@ -4387,7 +4437,10 @@ export default function App() {
             />
           )}
 
-          {view==="aiMatch" ? <AIMatchView buyers={ALL_BUYERS} /> : view==="dashboard" ? <DashboardView buyers={ALL_BUYERS} savedSet={savedSet} starred={starred} buyerNotes={buyerNotes} /> : view==="emailfinder" ? <EmailFinderView /> : view==="playbook" ? <PlaybookView buyers={ALL_BUYERS} savedSet={savedSet} onRunPlaybook={(ids,title,cnt)=>{setSelected(ids);navigateTo('buyers');setToast(`✅ "${title}" 실행 — ${cnt}명 바이어가 선택되었습니다`);}} /> : <>
+          {view==="aiMatch" ? <AIMatchView buyers={ALL_BUYERS} /> : view==="dashboard" ? <DashboardView buyers={ALL_BUYERS} savedSet={savedSet} starred={starred} buyerNotes={buyerNotes} /> : view==="emailfinder" ? <EmailFinderView /> : view==="playbook" ? <PlaybookView buyers={ALL_BUYERS} savedSet={savedSet} onRunPlaybook={(ids,title,cnt)=>{setSelected(ids);navigateTo('buyers');setToast(`✅ "${title}" 실행 — ${cnt}명 바이어가 선택되었습니다`);}} /> : <div style={{flex:1,display:"flex",overflow:"hidden"}}>
+          {/* Apollo 2컬럼: Filter Panel + Table */}
+          <FilterSidebar filters={filters} setFilters={setFilters} collapsed={sideCollapsed} setCollapsed={setSideCollapsed} />
+          <div style={{flex:1,display:"flex",flexDirection:"column",overflow:"hidden"}}><>
           {/* Tabs + Meta */}
           <div style={{padding:"8px 16px",borderBottom:"1px solid var(--border)",background:"var(--bg-0)",display:"flex",alignItems:"center",gap:16,flexShrink:0}}>
             <div style={{display:"flex",gap:2,padding:2,background:"var(--bg-3)",borderRadius:7}}>
@@ -4696,7 +4749,7 @@ fi fi${Math.min(i+1,5)}`}
               <div onClick={()=>setSelected(new Set())} style={{cursor:"pointer",color:"var(--t4)",padding:4}}><Ic.X s={14}/></div>
             </div>
           )}
-        </>}
+        </></div></div>}
         </div>
 
         {/* Detail Panel */}
