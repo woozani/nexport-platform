@@ -2811,7 +2811,7 @@ function FilterSidebar({ filters, setFilters, collapsed, setCollapsed }) {
         <span style={{flex:1}}>{title}</span>
         <span style={{transform:`rotate(${openSections[title]?180:0}deg)`,transition:"transform .2s"}}><Ic.ChevDown s={10} /></span>
       </div>
-      {openSections[title] && <div style={{padding:"0 4px 4px",animation:"fadeIn .2s ease"}}>{children}</div>}
+      {openSections[title] && <div style={{padding:"0 0 4px",animation:"fadeIn .2s ease"}}>{children}</div>}
     </div>
   );
 
