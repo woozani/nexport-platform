@@ -2811,7 +2811,7 @@ function FilterSidebar({ filters, setFilters, collapsed, setCollapsed }) {
         <span style={{flex:1}}>{title}</span>
         <span style={{transform:`rotate(${openSections[title]?180:0}deg)`,transition:"transform .2s"}}><Ic.ChevDown s={12} /></span>
       </div>
-      {openSections[title] && <div style={{padding:"0 14px 12px",animation:"fadeIn .2s ease"}}>{children}</div>}
+      {openSections[title] && <div style={{padding:"0 6px 6px",animation:"fadeIn .2s ease"}}>{children}</div>}
     </div>
   );
 
@@ -2844,12 +2844,6 @@ function FilterSidebar({ filters, setFilters, collapsed, setCollapsed }) {
         </div>
       </div>
       <div style={{flex:1,overflowY:"auto"}}>
-        {/* AI Search */}
-        <div style={{padding:"12px 14px",borderBottom:"1px solid var(--border)"}}>
-          <div style={{display:"flex",alignItems:"center",gap:6,padding:"8px 10px",borderRadius:8,background:"var(--bg-3)",border:"1px solid var(--border)",color:"var(--t3)",fontSize:12}}>
-            <Ic.Sparkle s={12} /><span>AI로 검색하기...</span>
-          </div>
-        </div>
         <FilterSection title="산업" icon={Ic.Layers}>
           {INDUSTRIES.map(ind => (
             <CheckItem key={ind} label={ind} count={ALL_BUYERS.filter(b=>b.industry===ind).length}
