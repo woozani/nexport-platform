@@ -2806,17 +2806,17 @@ function FilterSidebar({ filters, setFilters, collapsed, setCollapsed }) {
 
   const FilterSection = ({title, icon:Icon, children}) => (
     <div style={{borderBottom:"1px solid var(--border)"}}>
-      <div onClick={()=>toggle(title)} style={{display:"flex",alignItems:"center",gap:8,padding:"10px 14px",cursor:"pointer",color:openSections[title]?"var(--t1)":"var(--t3)",transition:"color .15s",fontSize:12,fontWeight:600}}>
-        <Icon s={14} />
+      <div onClick={()=>toggle(title)} style={{display:"flex",alignItems:"center",gap:6,padding:"6px 10px",cursor:"pointer",color:openSections[title]?"var(--t1)":"var(--t3)",transition:"color .15s",fontSize:11,fontWeight:600}}>
+        <Icon s={12} />
         <span style={{flex:1}}>{title}</span>
-        <span style={{transform:`rotate(${openSections[title]?180:0}deg)`,transition:"transform .2s"}}><Ic.ChevDown s={12} /></span>
+        <span style={{transform:`rotate(${openSections[title]?180:0}deg)`,transition:"transform .2s"}}><Ic.ChevDown s={10} /></span>
       </div>
-      {openSections[title] && <div style={{padding:"0 6px 6px",animation:"fadeIn .2s ease"}}>{children}</div>}
+      {openSections[title] && <div style={{padding:"0 10px 4px",animation:"fadeIn .2s ease"}}>{children}</div>}
     </div>
   );
 
   const CheckItem = ({label, checked, onChange, count}) => (
-    <div onClick={onChange} style={{display:"flex",alignItems:"center",gap:8,padding:"2px 0",cursor:"pointer",fontSize:12,color:checked?"var(--t1)":"var(--t2)"}}>
+    <div onClick={onChange} style={{display:"flex",alignItems:"center",gap:6,padding:"1px 0",cursor:"pointer",fontSize:11,color:checked?"var(--t1)":"var(--t2)"}}>
       <Checkbox checked={checked} onChange={onChange} />
       <span style={{marginRight:4}}>{label}</span>
       {count !== undefined && <span style={{fontFamily:"var(--mono)",fontSize:10,color:"var(--t4)"}}>{count}</span>}
