@@ -750,6 +750,8 @@ function NotificationCenter({ notifications, unread, onMarkRead, onMarkAllRead, 
 function BuyerDetailPanel({ buyer, onClose, onSave, isSaved, onEmailBuyer, onShowNotes, onDetailBuyer }) {
   if (!buyer) return null;
   const [showLookalikes, setShowLookalikes] = useState(false);
+  const scrollRef = useRef(null);
+  useEffect(() => { if (scrollRef.current) scrollRef.current.scrollTop = 0; }, [buyer?.id]);
   const cColor = (s) => s>=80?"var(--green)":s>=65?"var(--cyan)":s>=50?"var(--amber)":"var(--red)";
   const sections = [
     {label:"산업",value:buyer.industry,icon:<Ic.Grid s={13}/>},
@@ -769,7 +771,7 @@ function BuyerDetailPanel({ buyer, onClose, onSave, isSaved, onEmailBuyer, onSho
             <Ic.Bookmark s={12}/>{isSaved?"저장됨":"저장"}
           </div>
         </div>
-        <div style={{flex:1,overflow:"auto",padding:20}}>
+        <div ref={scrollRef} style={{flex:1,overflow:"auto",padding:20}}>
           <div style={{display:"flex",alignItems:"center",gap:14,marginBottom:20}}>
             <div style={{width:52,height:52,borderRadius:13,background:"linear-gradient(135deg,var(--blue-dim),var(--violet-dim))",display:"flex",alignItems:"center",justifyContent:"center",fontSize:20,fontWeight:800,color:"var(--blue)",flexShrink:0}}>{buyer.name.charAt(0)}</div>
             <div>
@@ -1350,7 +1352,7 @@ function LandingHero({ onEnter, isMobile }) {
               <span style={{display:"inline-block",width:2,height:"1em",background:"var(--blue)",marginLeft:1,verticalAlign:"text-bottom",animation:"typingCursor 1s step-end infinite"}}/>
             </div>
             <div onClick={onEnter} style={{padding:"10px 20px",margin:6,borderRadius:9,background:"var(--blue)",color:"#fff",fontSize:13,fontWeight:700,cursor:"pointer",whiteSpace:"nowrap",transition:"all .18s",flexShrink:0,width:isMobile?"calc(100% - 12px)":undefined,textAlign:isMobile?"center":undefined}}
-              onMouseEnter={e=>e.currentTarget.style.opacity=".88"} onMouseLeave={e=>e.currentTarget.style.opacity="1"}>바이어 찾기 →</div>
+              onMouseEnter={e=>e.currentTarget.style.opacity=".88"} onMouseLeave={e=>e.currentTarget.style.opacity="1"}>바이어 검색</div>
           </div>
 
           <div style={{display:"flex",gap:12,justifyContent:"center",flexWrap:"wrap"}}>
@@ -3138,6 +3140,22 @@ function PlaybookView({ buyers, savedSet, onRunPlaybook }) {
         <p style={{fontSize:13,color:"var(--t3)",maxWidth:560,lineHeight:1.6}}>
           단계별 바이어 접근 전략 — 플레이북을 실행하면 해당 바이어가 자동 선택됩니다. 이메일 발송, 비교 분석을 즉시 시작하세요.
         </p>
+        <div style={{display:"flex",alignItems:"center",gap:8,marginTop:12,flexWrap:"wrap"}}>
+          <span style={{fontSize:10,color:"var(--t4)",fontWeight:600,letterSpacing:".06em",textTransform:"uppercase"}}>색상 의미</span>
+          {[
+            {color:"--green",  label:"AI 추천"},
+            {color:"--amber",  label:"긴급"},
+            {color:"--blue",   label:"고전환"},
+            {color:"--violet", label:"관계 강화"},
+            {color:"--cyan",   label:"성장 전략"},
+            {color:"--red",    label:"관리"},
+          ].map(({color,label})=>(
+            <span key={color} style={{display:"flex",alignItems:"center",gap:4,fontSize:10,color:"var(--t3)"}}>
+              <span style={{width:8,height:8,borderRadius:"50%",background:`var(${color})`,flexShrink:0,display:"inline-block"}}/>
+              {label}
+            </span>
+          ))}
+        </div>
       </div>
 
       {/* 플레이북 그리드 */}
@@ -3631,8 +3649,9 @@ function DashboardView({ buyers, savedSet, starred, buyerNotes }) {
           🤖 AI 매칭 엔진 가동 중 • 
           {matchingActive ? " 새로운 바이어 57명 매칭됨" : " 실시간 글로벌 데이터 스캔 중..."}
         </span>
-        <div style={{marginLeft:"auto",fontSize:11,color:"var(--green)",fontWeight:600}}>
-          LIVE ● {new Date().toLocaleTimeString('ko-KR', {hour12:false})}
+        <div style={{marginLeft:"auto",display:"flex",alignItems:"center",gap:6}}>
+          <span style={{fontSize:11,color:"var(--green)",fontWeight:600}}>LIVE ● {new Date().toLocaleTimeString('ko-KR', {hour12:false})}</span>
+          <span style={{fontSize:9,fontWeight:700,padding:"2px 6px",borderRadius:4,background:"rgba(245,158,11,.15)",color:"var(--amber)",border:"1px solid rgba(245,158,11,.3)",letterSpacing:".04em"}}>DEMO</span>
         </div>
       </div>
       {/* World Map */}
@@ -3957,6 +3976,31 @@ function EmailFinderView() {
 
       {/* Error */}
       {error && <ErrorBanner message={error} onDismiss={()=>setError(null)} onRetry={doSearch} />}
+
+      {/* Empty State */}
+      {!results && !loading && !error && (
+        <div style={{textAlign:"center",padding:"48px 20px",color:"var(--t3)"}}>
+          <div style={{fontSize:44,marginBottom:16}}>✉️</div>
+          <div style={{fontSize:15,fontWeight:700,color:"var(--t2)",marginBottom:8}}>이메일 주소를 찾아드릴게요</div>
+          <div style={{fontSize:12,color:"var(--t3)",marginBottom:28,lineHeight:1.8}}>
+            도메인·회사명으로 담당자 이메일 전체를 찾거나,<br/>
+            이름 + 도메인으로 특정 인물의 이메일을 확인하세요.
+          </div>
+          <div style={{display:"flex",justifyContent:"center",gap:12,flexWrap:"wrap"}}>
+            {[
+              {icon:"🌐", label:"도메인 예시", hint:"techparts.de"},
+              {icon:"🏢", label:"회사명 예시", hint:"Pacific Trade Corp"},
+              {icon:"👤", label:"개인 찾기 예시", hint:"John · Smith · company.com"},
+            ].map((ex,i)=>(
+              <div key={i} style={{padding:"12px 18px",borderRadius:10,background:"var(--bg-2)",border:"1px solid var(--border)",fontSize:11,textAlign:"left",minWidth:140}}>
+                <div style={{fontSize:18,marginBottom:6}}>{ex.icon}</div>
+                <div style={{fontWeight:600,color:"var(--t2)",marginBottom:3}}>{ex.label}</div>
+                <div style={{color:"var(--t4)",fontFamily:"var(--mono)",fontSize:10}}>{ex.hint}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Domain/Company Results */}
       {results && (searchType==="domain"||searchType==="company") && <div className="fi fi3">
@@ -4311,7 +4355,7 @@ export default function App() {
                 {search && <div onClick={()=>setSearch("")} style={{cursor:"pointer",color:"var(--t4)"}}><Ic.X s={12}/></div>}
               </div>
             </div>
-            <div className="nx-header-actions" style={{marginLeft:"auto",display:"flex",alignItems:"center",gap:2,background:"var(--bg-3)",borderRadius:8,padding:2}}>
+            <div className="nx-header-actions" style={{marginLeft:"auto",display:"flex",alignItems:"center",gap:2,background:"var(--bg-3)",borderRadius:8,padding:2,overflowX:"auto",flexShrink:0,maxWidth:"100%"}}>
               {[
                 {key:"buyers",label:"바이어",icon:<Ic.Users s={12}/>},
                 {key:"dashboard",label:"대시보드",icon:<Ic.Bar s={12}/>},
@@ -4320,7 +4364,7 @@ export default function App() {
                 {key:"playbook",label:"플레이북",icon:<Ic.BookOpen s={12}/>},
               ].map(tab=>{
                 const active = view===tab.key;
-                return <div key={tab.key} onClick={()=>navigateTo(tab.key)} style={{padding:"6px 14px",borderRadius:6,cursor:"pointer",display:"flex",alignItems:"center",gap:5,fontSize:11,fontWeight:active?700:500,transition:"all .2s",background:active?"var(--bg-1)":"transparent",color:active?"var(--t1)":"var(--t3)",boxShadow:active?"0 1px 3px rgba(0,0,0,.2)":"none"}}>{tab.icon}{tab.label}</div>;
+                return <div key={tab.key} onClick={()=>navigateTo(tab.key)} style={{padding:"6px 14px",borderRadius:6,cursor:"pointer",display:"flex",alignItems:"center",gap:5,fontSize:11,fontWeight:active?700:500,transition:"all .2s",background:active?"var(--bg-1)":"transparent",color:active?"var(--t1)":"var(--t3)",boxShadow:active?"0 1px 3px rgba(0,0,0,.2)":"none",whiteSpace:"nowrap",flexShrink:0}}>{tab.icon}{tab.label}</div>;
               })}
             </div>
             {/* Theme Toggle */}
