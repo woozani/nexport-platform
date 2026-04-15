@@ -27,21 +27,21 @@ const CSS = `
   --serif:'Instrument Serif',Georgia,serif;
 }
 [data-theme="light"] {
-  /* ── Apple Light ── */
-  --bg-0:#FFFFFF; --bg-1:#F2F2F7; --bg-2:#EFEFF4; --bg-3:#E5E5EA; --bg-4:#D1D1D6;
-  --bg-hover:rgba(120,120,128,0.12); --bg-active:rgba(120,120,128,0.2);
-  --blue:#007AFF; --blue-light:#0A84FF; --blue-dim:rgba(0,122,255,0.12);
-  --cyan:#32ADE6; --cyan-dim:rgba(50,173,230,0.12);
-  --green:#34C759; --green-dim:rgba(52,199,89,0.12);
-  --amber:#FF9500; --amber-dim:rgba(255,149,0,0.12);
-  --red:#FF3B30; --red-dim:rgba(255,59,48,0.12);
-  --violet:#AF52DE; --violet-dim:rgba(175,82,222,0.12);
-  --t1:#000000; --t2:rgba(60,60,67,0.6); --t3:rgba(60,60,67,0.3); --t4:rgba(60,60,67,0.18);
-  --border:rgba(60,60,67,0.2); --border-h:rgba(60,60,67,0.4);
-  --glass-bg:rgba(255,255,255,0.85); --glass-bg-strong:rgba(255,255,255,0.95);
-  --glass-shadow:0 4px 20px rgba(0,0,0,0.08),0 1px 4px rgba(0,0,0,0.04);
-  --modal-shadow:0 8px 40px rgba(0,0,0,0.15),0 2px 8px rgba(0,0,0,0.08);
-  --card-shadow:0 2px 8px rgba(0,0,0,0.07),0 1px 2px rgba(0,0,0,0.04);
+  /* ── Apollo Light ── */
+  --bg-0:#FFFFFF; --bg-1:#F9FAFB; --bg-2:#F3F4F6; --bg-3:#E9ECEF; --bg-4:#DEE2E6;
+  --bg-hover:rgba(0,0,0,0.04); --bg-active:rgba(0,0,0,0.08);
+  --blue:#4B6EFB; --blue-light:#6B8AFC; --blue-dim:rgba(75,110,251,0.1);
+  --cyan:#0EA5E9; --cyan-dim:rgba(14,165,233,0.1);
+  --green:#22C55E; --green-dim:rgba(34,197,94,0.1);
+  --amber:#F59E0B; --amber-dim:rgba(245,158,11,0.1);
+  --red:#EF4444; --red-dim:rgba(239,68,68,0.1);
+  --violet:#8B5CF6; --violet-dim:rgba(139,92,246,0.1);
+  --t1:#111827; --t2:#6B7280; --t3:#9CA3AF; --t4:#D1D5DB;
+  --border:#E5E7EB; --border-h:#D1D5DB;
+  --glass-bg:#FFFFFF; --glass-bg-strong:#FFFFFF;
+  --glass-shadow:0 1px 3px rgba(0,0,0,0.08),0 1px 2px rgba(0,0,0,0.04);
+  --modal-shadow:0 4px 24px rgba(0,0,0,0.12),0 2px 8px rgba(0,0,0,0.06);
+  --card-shadow:0 1px 3px rgba(0,0,0,0.08),0 1px 2px rgba(0,0,0,0.04);
 }
 *{margin:0;padding:0;box-sizing:border-box}
 html{transition:background .3s,color .3s}
@@ -2833,7 +2833,7 @@ function FilterSidebar({ filters, setFilters, collapsed, setCollapsed }) {
   );
 
   return (
-    <div style={{width:260,background:"var(--glass-bg)",backdropFilter:"blur(20px) saturate(160%)",WebkitBackdropFilter:"blur(20px) saturate(160%)",borderRight:"1px solid var(--border)",display:"flex",flexDirection:"column",flexShrink:0,overflow:"hidden"}}>
+    <div style={{width:240,background:"var(--bg-1)",borderRight:"1px solid var(--border)",display:"flex",flexDirection:"column",flexShrink:0,overflow:"hidden"}}>
       <div style={{padding:"12px 14px",borderBottom:"1px solid var(--border)",display:"flex",alignItems:"center",justifyContent:"space-between"}}>
         <div style={{display:"flex",alignItems:"center",gap:6,fontSize:13,fontWeight:700}}><Ic.Filter s={14}/>필터</div>
         <div style={{display:"flex",gap:4}}>
@@ -4122,7 +4122,7 @@ export default function App() {
       const saved = localStorage.getItem('nexport-theme');
       if (saved) return saved === 'dark';
     } catch(e) {}
-    return window.matchMedia?.('(prefers-color-scheme: dark)').matches ?? true;
+    return false;
   });
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', isDark ? 'dark' : 'light');
@@ -4331,7 +4331,7 @@ export default function App() {
         {/* Main Content */}
         <div style={{flex:1,display:"flex",flexDirection:"column",overflow:"hidden"}}>
           {/* Top Header */}
-          <div className="nx-header" style={{padding:"12px 20px",borderBottom:"1px solid var(--border)",background:"var(--glass-bg)",backdropFilter:"blur(40px) saturate(180%)",WebkitBackdropFilter:"blur(40px) saturate(180%)",display:"flex",alignItems:"center",gap:16,flexShrink:0,position:"sticky",top:0,zIndex:100}}>
+          <div className="nx-header" style={{padding:"10px 20px",borderBottom:"1px solid var(--border)",background:"var(--bg-0)",display:"flex",alignItems:"center",gap:16,flexShrink:0,position:"sticky",top:0,zIndex:100}}>
             <div style={{display:"flex",alignItems:"center",gap:10}}>
               <div style={{width:28,height:28,borderRadius:7,background:"linear-gradient(135deg,var(--blue),var(--violet))",display:"flex",alignItems:"center",justifyContent:"center"}}><Ic.Users s={14}/></div>
               <div>
@@ -4389,7 +4389,7 @@ export default function App() {
 
           {view==="aiMatch" ? <AIMatchView buyers={ALL_BUYERS} /> : view==="dashboard" ? <DashboardView buyers={ALL_BUYERS} savedSet={savedSet} starred={starred} buyerNotes={buyerNotes} /> : view==="emailfinder" ? <EmailFinderView /> : view==="playbook" ? <PlaybookView buyers={ALL_BUYERS} savedSet={savedSet} onRunPlaybook={(ids,title,cnt)=>{setSelected(ids);navigateTo('buyers');setToast(`✅ "${title}" 실행 — ${cnt}명 바이어가 선택되었습니다`);}} /> : <>
           {/* Tabs + Meta */}
-          <div style={{padding:"8px 20px",borderBottom:"1px solid var(--border)",background:"var(--bg-1)",display:"flex",alignItems:"center",gap:16,flexShrink:0}}>
+          <div style={{padding:"8px 16px",borderBottom:"1px solid var(--border)",background:"var(--bg-0)",display:"flex",alignItems:"center",gap:16,flexShrink:0}}>
             <div style={{display:"flex",gap:2,padding:2,background:"var(--bg-3)",borderRadius:7}}>
               {[["전체",filtered.length],["신규",netNew],["저장됨",savedCount]].map(([t,c])=>(
                 <div key={t} onClick={()=>setTab(t)} style={{
@@ -4421,7 +4421,7 @@ export default function App() {
           </div>
 
           {/* ── Quick Filter Chips (Apollo-style) ── */}
-          <div style={{display:"flex",alignItems:"center",gap:6,padding:"8px 20px",overflowX:"auto",borderBottom:"1px solid var(--border)",background:"var(--bg-1)",flexShrink:0}}>
+          <div style={{display:"flex",alignItems:"center",gap:6,padding:"6px 16px",overflowX:"auto",borderBottom:"1px solid var(--border)",background:"var(--bg-0)",flexShrink:0}}>
             <span style={{fontSize:10,color:"var(--t4)",fontWeight:600,textTransform:"uppercase",letterSpacing:".06em",whiteSpace:"nowrap",flexShrink:0}}>빠른 필터</span>
             {QUICK_FILTERS.map(q=>{
               const active = quickFilter===q.id;
@@ -4457,7 +4457,7 @@ export default function App() {
           <div style={{flex:1,overflow:"auto",position:"relative"}}>
             <div className="nx-table-wrap"><table className="nx-main-table" style={{width:"100%",borderCollapse:"collapse",minWidth:1100}}>
               <thead>
-                <tr style={{position:"sticky",top:0,zIndex:10,background:"var(--bg-2)"}}>
+                <tr style={{position:"sticky",top:0,zIndex:10,background:"var(--bg-1)",borderBottom:"2px solid var(--border)"}}>
                   <th style={{width:40,padding:"8px 12px"}}><Checkbox checked={allOnPageSelected} indeterminate={selected.size>0&&!allOnPageSelected} onChange={toggleAll}/></th>
                   <th style={{width:30}}/>
                   {[
