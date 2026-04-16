@@ -4907,7 +4907,7 @@ fi fi${Math.min(i+1,5)}`}
                         </div>
                       </td>
                       <td style={{padding:"8px 10px",fontSize:12,whiteSpace:"nowrap"}}><span>{b.flag}</span> <span style={{color:"var(--t2)"}}>{b.country}</span></td>
-                      <td style={{padding:"8px 10px",fontSize:12,color:"var(--t2)"}}>{b.industry}</td>
+                      <td style={{padding:"8px 10px",fontSize:12,color:"var(--t2)",whiteSpace:"nowrap"}}>{b.industry}</td>
                       <td style={{padding:"8px 10px"}}><ScoreBar score={b.score}/></td>
                       <td style={{padding:"8px 10px"}}>
                         {b.creditInfo && (
@@ -4920,7 +4920,7 @@ fi fi${Math.min(i+1,5)}`}
                           />
                         )}
                       </td>
-                      <td style={{padding:"8px 10px",fontSize:12,color:"var(--t2)"}}>{b.demand}</td>
+                      <td style={{padding:"8px 10px",fontSize:12,color:"var(--t2)",whiteSpace:"nowrap"}}>{b.demand}</td>
                       <td style={{padding:"8px 10px"}}><span style={{fontFamily:"var(--mono)",fontSize:12,fontWeight:600,color:"var(--green)"}}>{b.volume}</span></td>
                       <td style={{padding:"8px 10px",whiteSpace:"nowrap"}}>
                         <div><span style={{width:6,height:6,borderRadius:"50%",background:intentColor(b.buyingIntent),display:"inline-block",marginRight:4}}/><span style={{fontSize:11,color:intentColor(b.buyingIntent)}}>{b.buyingIntent}</span></div>
