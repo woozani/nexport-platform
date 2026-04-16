@@ -4880,7 +4880,7 @@ fi fi${Math.min(i+1,5)}`}
                         <span style={{cursor:"pointer",color:starred.has(b.id)?"var(--amber)":"var(--t4)"}}>{starred.has(b.id)?<Ic.StarFill s={13}/>:<Ic.Star s={13}/>}</span>
                       </td>
                       <td style={{padding:"8px 10px"}}>
-                        <div style={{fontWeight:600,fontSize:13,display:"flex",alignItems:"center",gap:5}}>
+                        <div style={{fontWeight:600,fontSize:13,display:"flex",alignItems:"center",gap:5,whiteSpace:"nowrap"}}>
                           {b.name}
                           {b.trustLevel&&<span style={{fontSize:9,fontWeight:700,padding:"1px 6px",borderRadius:3,background:b.trustLevel.bg,color:b.trustLevel.color,border:`1px solid ${b.trustLevel.border}`,whiteSpace:"nowrap"}}>{b.trustLevel.grade==="Gold"?"🏆":"🔹"} {b.trustLevel.label}</span>}
                           {b.hotSignal&&<span style={{fontSize:9,fontWeight:700,padding:"1px 6px",borderRadius:3,background:"rgba(245,158,11,.15)",color:"var(--amber)",border:"1px solid rgba(245,158,11,.25)",whiteSpace:"nowrap",animation:"pulse 2s infinite"}}>⚡ {b.hotSignal}</span>}
