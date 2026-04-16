@@ -4877,7 +4877,7 @@ fi fi${Math.min(i+1,5)}`}
                       onMouseLeave={e=>{if(!isSel){e.currentTarget.style.background="var(--bg-0)";[...e.currentTarget.querySelectorAll('td')].slice(0,3).forEach(td=>td.style.background="var(--bg-0)");}}}
                     >
                       <td style={{padding:"8px 12px",position:"sticky",left:0,zIndex:2,background:isSel?"var(--blue-dim)":"var(--bg-0)"}} onClick={e=>e.stopPropagation()}><Checkbox checked={isSel} onChange={()=>toggleSelect(b.id)}/></td>
-                      <td style={{padding:"4px 0",position:"sticky",left:40,zIndex:2,background:isSel?"var(--blue-dim)":"var(--bg-0)"}} onClick={e=>{e.stopPropagation();setStarred(p=>{const n=new Set(p);n.has(b.id)?n.delete(b.id):n.add(b.id);return n})}}>
+                      <td style={{padding:"4px 0",minWidth:30,position:"sticky",left:40,zIndex:2,background:isSel?"var(--blue-dim)":"var(--bg-0)"}} onClick={e=>{e.stopPropagation();setStarred(p=>{const n=new Set(p);n.has(b.id)?n.delete(b.id):n.add(b.id);return n})}}>
                         <span style={{cursor:"pointer",color:starred.has(b.id)?"var(--amber)":"var(--t4)"}}>{starred.has(b.id)?<Ic.StarFill s={13}/>:<Ic.Star s={13}/>}</span>
                       </td>
                       <td style={{padding:"8px 10px",position:"sticky",left:70,zIndex:2,background:isSel?"var(--blue-dim)":"var(--bg-0)",boxShadow:"2px 0 6px rgba(0,0,0,.08)",borderRight:"1px solid var(--border)"}}>
