@@ -3124,10 +3124,10 @@ function FilterSidebar({ filters, setFilters, collapsed, setCollapsed }) {
   );
 
   const CheckItem = ({label, checked, onChange, count}) => (
-    <div onClick={onChange} style={{display:"flex",alignItems:"center",gap:6,padding:"1px 0",cursor:"pointer",fontSize:11,color:checked?"var(--t1)":"var(--t2)"}}>
+    <div onClick={onChange} style={{display:"flex",alignItems:"center",gap:6,padding:"1px 10px 1px 0",cursor:"pointer",fontSize:11,color:checked?"var(--t1)":"var(--t2)"}}>
       <Checkbox checked={checked} onChange={onChange} />
-      <span style={{marginRight:4}}>{label}</span>
-      {count !== undefined && <span style={{fontFamily:"var(--mono)",fontSize:10,color:"var(--t4)"}}>{count}</span>}
+      <span style={{flex:1}}>{label}</span>
+      {count !== undefined && <span style={{fontFamily:"var(--mono)",fontSize:10,color:"var(--t4)",flexShrink:0}}>{count}</span>}
     </div>
   );
 
