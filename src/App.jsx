@@ -4872,9 +4872,9 @@ export default function App() {
 
 fi fi${Math.min(i+1,5)}`}
                       onClick={()=>setDetailBuyer(b)}
-                      style={{cursor:"pointer",borderBottom:"1px solid var(--border)",background:isSel?"var(--blue-dim)":"transparent",transition:"background .12s"}}
-                      onMouseEnter={e=>{if(!isSel)e.currentTarget.style.background="var(--bg-hover)"}}
-                      onMouseLeave={e=>{if(!isSel)e.currentTarget.style.background=isSel?"var(--blue-dim)":"transparent"}}
+                      style={{cursor:"pointer",borderBottom:"1px solid var(--border)",background:isSel?"var(--blue-dim)":"var(--bg-0)",transition:"background .12s"}}
+                      onMouseEnter={e=>{if(!isSel){e.currentTarget.style.background="var(--bg-hover)";[...e.currentTarget.querySelectorAll('td')].slice(0,3).forEach(td=>td.style.background="var(--bg-hover)");}}}
+                      onMouseLeave={e=>{if(!isSel){e.currentTarget.style.background="var(--bg-0)";[...e.currentTarget.querySelectorAll('td')].slice(0,3).forEach(td=>td.style.background="var(--bg-0)");}}}
                     >
                       <td style={{padding:"8px 12px",position:"sticky",left:0,zIndex:2,background:isSel?"var(--blue-dim)":"var(--bg-0)"}} onClick={e=>e.stopPropagation()}><Checkbox checked={isSel} onChange={()=>toggleSelect(b.id)}/></td>
                       <td style={{padding:"4px 0",position:"sticky",left:40,zIndex:2,background:isSel?"var(--blue-dim)":"var(--bg-0)"}} onClick={e=>{e.stopPropagation();setStarred(p=>{const n=new Set(p);n.has(b.id)?n.delete(b.id):n.add(b.id);return n})}}>
