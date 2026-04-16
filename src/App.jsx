@@ -3127,7 +3127,7 @@ function FilterSidebar({ filters, setFilters, collapsed, setCollapsed }) {
     <div onClick={onChange} style={{display:"flex",alignItems:"center",gap:6,padding:"1px 10px",cursor:"pointer",fontSize:11,color:checked?"var(--t1)":"var(--t2)"}}>
       <Checkbox checked={checked} onChange={onChange} />
       <span>{label}</span>
-      {count !== undefined && <span style={{fontFamily:"var(--mono)",fontSize:10,color:"var(--t4)",background:"var(--bg-3)",borderRadius:4,padding:"0 4px",lineHeight:"16px",flexShrink:0}}>{count}</span>}
+      {count !== undefined && <span style={{fontFamily:"var(--mono)",fontSize:10,color:"var(--blue)",background:"var(--blue-dim)",borderRadius:4,padding:"0 4px",lineHeight:"16px",flexShrink:0,fontWeight:600}}>{count}</span>}
     </div>
   );
 
