@@ -4895,9 +4895,8 @@ fi fi${Math.min(i+1,5)}`}
                           ))}
                         </div>
                       </td>
-                      <td style={{padding:"8px 10px"}}>
+                      <td style={{padding:"8px 10px",whiteSpace:"nowrap"}}>
                         <div style={{fontSize:12,fontWeight:500}}>{b.company}</div>
-                        <div style={{fontSize:10,color:"var(--t4)",marginTop:1}}>{b.employeeLabel} · {b.revenue}</div>
                       </td>
                       <td style={{padding:"8px 10px",fontSize:12,whiteSpace:"nowrap"}}><span>{b.flag}</span> <span style={{color:"var(--t2)"}}>{b.country}</span></td>
                       <td style={{padding:"8px 10px",fontSize:12,color:"var(--t2)"}}>{b.industry}</td>
