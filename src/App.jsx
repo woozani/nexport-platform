@@ -4880,13 +4880,14 @@ fi fi${Math.min(i+1,5)}`}
                         <span style={{cursor:"pointer",color:starred.has(b.id)?"var(--amber)":"var(--t4)"}}>{starred.has(b.id)?<Ic.StarFill s={13}/>:<Ic.Star s={13}/>}</span>
                       </td>
                       <td style={{padding:"8px 10px"}}>
-                        <div style={{fontWeight:600,fontSize:13,display:"flex",alignItems:"center",gap:5,whiteSpace:"nowrap"}}>
-                          {b.name}
+                        {/* row 1: name */}
+                        <div style={{fontWeight:600,fontSize:13,whiteSpace:"nowrap",color:"var(--t1)"}}>{b.name}</div>
+                        {/* row 2: position */}
+                        <div style={{fontSize:11,color:"var(--t3)",marginTop:1,whiteSpace:"nowrap"}}>{b.title}</div>
+                        {/* row 3: all badges */}
+                        <div style={{display:"flex",alignItems:"center",gap:3,marginTop:4,flexWrap:"wrap"}}>
                           {b.trustLevel&&<span style={{fontSize:9,fontWeight:700,padding:"1px 6px",borderRadius:3,background:b.trustLevel.bg,color:b.trustLevel.color,border:`1px solid ${b.trustLevel.border}`,whiteSpace:"nowrap"}}>{b.trustLevel.grade==="Gold"?"🏆":"🔹"} {b.trustLevel.label}</span>}
                           {b.hotSignal&&<span style={{fontSize:9,fontWeight:700,padding:"1px 6px",borderRadius:3,background:"rgba(245,158,11,.15)",color:"var(--amber)",border:"1px solid rgba(245,158,11,.25)",whiteSpace:"nowrap",animation:"pulse 2s infinite"}}>⚡ {b.hotSignal}</span>}
-                        </div>
-                        <div style={{fontSize:11,color:"var(--t3)",marginTop:1,display:"flex",alignItems:"center",gap:4,flexWrap:"wrap"}}>
-                          <span>{b.title}</span>
                           {b.regulatoryShield&&b.regulatoryShield.length>0&&<span style={{fontSize:9,fontWeight:700,padding:"1px 5px",borderRadius:3,background:"rgba(139,92,246,.15)",color:"var(--violet)",whiteSpace:"nowrap"}}>🛡 규제보호</span>}
                           {b.intentSignals&&b.intentSignals.length>0&&b.intentSignals.slice(0,2).map((sig,si)=>(
                             <span key={si} style={{fontSize:9,fontWeight:600,padding:"1px 5px",borderRadius:3,background:"rgba(10,132,255,.08)",color:"var(--blue)",whiteSpace:"nowrap"}}>{sig.icon} {sig.label}</span>
