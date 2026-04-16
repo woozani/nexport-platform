@@ -4768,16 +4768,16 @@ export default function App() {
                   <th style={{width:40,padding:"8px 12px",position:"sticky",left:0,zIndex:11,background:"var(--bg-1)"}}><Checkbox checked={allOnPageSelected} indeterminate={selected.size>0&&!allOnPageSelected} onChange={toggleAll}/></th>
                   <th style={{width:30,position:"sticky",left:40,zIndex:11,background:"var(--bg-1)"}}/>
                   {[
-                    ["name","바이어",180],["company","기업명",150],["country","국가",105],["industry","산업",110],
+                    ["name","바이어",180],["company","기업명",170],["country","국가",105],["industry","산업",110],
                     ["score","매칭점수",120]
                   ].map(([field,label,w],idx)=>(
                     <th key={field} onClick={()=>toggleSort(field)} style={{
                       padding:"8px 10px",fontSize:10,fontWeight:700,color:"var(--t3)",textTransform:"uppercase",
-                      letterSpacing:".08em",textAlign:"left",cursor:"pointer",whiteSpace:"nowrap",
+                      letterSpacing:".08em",textAlign:field==="company"?"center":"left",cursor:"pointer",whiteSpace:"nowrap",
                       width:w,borderBottom:"1px solid var(--border)",userSelect:"none",
                       ...(field==="name"?{position:"sticky",left:70,zIndex:11,background:"var(--bg-1)",boxShadow:"2px 0 6px rgba(0,0,0,.08)",borderRight:"1px solid var(--border)"}:{})
                     }}>
-                      <div style={{display:"flex",alignItems:"center",gap:4}}>
+                      <div style={{display:"flex",alignItems:"center",justifyContent:field==="company"?"center":"flex-start",gap:4}}>
                         {label}<span style={{color:sort.field===field?"var(--blue)":"var(--t4)"}}><SortIcon field={field}/></span>
                       </div>
                     </th>
@@ -4896,7 +4896,15 @@ fi fi${Math.min(i+1,5)}`}
                         </div>
                       </td>
                       <td style={{padding:"8px 10px",whiteSpace:"nowrap"}}>
-                        <div style={{fontSize:12,fontWeight:500}}>{b.company}</div>
+                        <div style={{display:"flex",alignItems:"center",gap:8}}>
+                          {(()=>{
+                            const colors=[["#E8F0FE","#1A73E8"],["#FEF3E2","#E37400"],["#E6F4EA","#1E8E3E"],["#FCE8E6","#D93025"],["#F3E8FD","#8430CE"],["#E4F7FB","#129EAF"],["#FFF0E6","#D56309"]];
+                            const ci=b.company.charCodeAt(0)%colors.length;
+                            const [bg,fg]=colors[ci];
+                            return <div style={{width:28,height:28,borderRadius:6,background:bg,color:fg,display:"flex",alignItems:"center",justifyContent:"center",fontSize:11,fontWeight:700,flexShrink:0,letterSpacing:0}}>{b.company.charAt(0).toUpperCase()}</div>;
+                          })()}
+                          <span style={{fontSize:12,fontWeight:500}}>{b.company}</span>
+                        </div>
                       </td>
                       <td style={{padding:"8px 10px",fontSize:12,whiteSpace:"nowrap"}}><span>{b.flag}</span> <span style={{color:"var(--t2)"}}>{b.country}</span></td>
                       <td style={{padding:"8px 10px",fontSize:12,color:"var(--t2)"}}>{b.industry}</td>
