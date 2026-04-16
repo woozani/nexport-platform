@@ -4765,16 +4765,17 @@ export default function App() {
             <div className="nx-table-wrap"><table className="nx-main-table" style={{width:"100%",borderCollapse:"collapse",minWidth:1100}}>
               <thead>
                 <tr style={{position:"sticky",top:0,zIndex:10,background:"var(--bg-1)",borderBottom:"2px solid var(--border)"}}>
-                  <th style={{width:40,padding:"8px 12px"}}><Checkbox checked={allOnPageSelected} indeterminate={selected.size>0&&!allOnPageSelected} onChange={toggleAll}/></th>
-                  <th style={{width:30}}/>
+                  <th style={{width:40,padding:"8px 12px",position:"sticky",left:0,zIndex:11,background:"var(--bg-1)"}}><Checkbox checked={allOnPageSelected} indeterminate={selected.size>0&&!allOnPageSelected} onChange={toggleAll}/></th>
+                  <th style={{width:30,position:"sticky",left:40,zIndex:11,background:"var(--bg-1)"}}/>
                   {[
                     ["name","바이어",180],["company","기업명",150],["country","국가",105],["industry","산업",110],
                     ["score","매칭점수",120]
-                  ].map(([field,label,w])=>(
+                  ].map(([field,label,w],idx)=>(
                     <th key={field} onClick={()=>toggleSort(field)} style={{
                       padding:"8px 10px",fontSize:10,fontWeight:700,color:"var(--t3)",textTransform:"uppercase",
                       letterSpacing:".08em",textAlign:"left",cursor:"pointer",whiteSpace:"nowrap",
-                      width:w,borderBottom:"1px solid var(--border)",userSelect:"none"
+                      width:w,borderBottom:"1px solid var(--border)",userSelect:"none",
+                      ...(field==="name"?{position:"sticky",left:70,zIndex:11,background:"var(--bg-1)",boxShadow:"2px 0 6px rgba(0,0,0,.08)",borderRight:"1px solid var(--border)"}:{})
                     }}>
                       <div style={{display:"flex",alignItems:"center",gap:4}}>
                         {label}<span style={{color:sort.field===field?"var(--blue)":"var(--t4)"}}><SortIcon field={field}/></span>
@@ -4875,11 +4876,11 @@ fi fi${Math.min(i+1,5)}`}
                       onMouseEnter={e=>{if(!isSel)e.currentTarget.style.background="var(--bg-hover)"}}
                       onMouseLeave={e=>{if(!isSel)e.currentTarget.style.background=isSel?"var(--blue-dim)":"transparent"}}
                     >
-                      <td style={{padding:"8px 12px"}} onClick={e=>e.stopPropagation()}><Checkbox checked={isSel} onChange={()=>toggleSelect(b.id)}/></td>
-                      <td style={{padding:"4px 0"}} onClick={e=>{e.stopPropagation();setStarred(p=>{const n=new Set(p);n.has(b.id)?n.delete(b.id):n.add(b.id);return n})}}>
+                      <td style={{padding:"8px 12px",position:"sticky",left:0,zIndex:2,background:isSel?"var(--blue-dim)":"var(--bg-0)"}} onClick={e=>e.stopPropagation()}><Checkbox checked={isSel} onChange={()=>toggleSelect(b.id)}/></td>
+                      <td style={{padding:"4px 0",position:"sticky",left:40,zIndex:2,background:isSel?"var(--blue-dim)":"var(--bg-0)"}} onClick={e=>{e.stopPropagation();setStarred(p=>{const n=new Set(p);n.has(b.id)?n.delete(b.id):n.add(b.id);return n})}}>
                         <span style={{cursor:"pointer",color:starred.has(b.id)?"var(--amber)":"var(--t4)"}}>{starred.has(b.id)?<Ic.StarFill s={13}/>:<Ic.Star s={13}/>}</span>
                       </td>
-                      <td style={{padding:"8px 10px"}}>
+                      <td style={{padding:"8px 10px",position:"sticky",left:70,zIndex:2,background:isSel?"var(--blue-dim)":"var(--bg-0)",boxShadow:"2px 0 6px rgba(0,0,0,.08)",borderRight:"1px solid var(--border)"}}>
                         {/* row 1: name */}
                         <div style={{fontWeight:600,fontSize:13,whiteSpace:"nowrap",color:"var(--t1)"}}>{b.name}</div>
                         {/* row 2: position */}
