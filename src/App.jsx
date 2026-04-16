@@ -7,7 +7,7 @@ const CSS = `
 :root {
   /* ── Apple Dark (기본) ── */
   --bg-0:#000000; --bg-1:#1C1C1E; --bg-2:#2C2C2E; --bg-3:#3A3A3C; --bg-4:#48484A;
-  --bg-hover:rgba(120,120,128,0.18); --bg-active:rgba(120,120,128,0.28); --bg-row-hover:#161618;
+  --bg-hover:rgba(120,120,128,0.18); --bg-active:rgba(120,120,128,0.28); --bg-row-hover:#161618; --bg-row-sel:#02182E;
   --blue:#0A84FF; --blue-light:#409CFF; --blue-dim:rgba(10,132,255,0.18);
   --cyan:#32ADE6; --cyan-dim:rgba(50,173,230,0.18);
   --green:#30D158; --green-dim:rgba(48,209,88,0.18);
@@ -29,7 +29,7 @@ const CSS = `
 [data-theme="light"] {
   /* ── Apollo Light ── */
   --bg-0:#FFFFFF; --bg-1:#F9FAFB; --bg-2:#F3F4F6; --bg-3:#E9ECEF; --bg-4:#DEE2E6;
-  --bg-hover:rgba(0,0,0,0.04); --bg-active:rgba(0,0,0,0.08); --bg-row-hover:#F5F5F5;
+  --bg-hover:rgba(0,0,0,0.04); --bg-active:rgba(0,0,0,0.08); --bg-row-hover:#F5F5F5; --bg-row-sel:#EDF1FF;
   --blue:#4B6EFB; --blue-light:#6B8AFC; --blue-dim:rgba(75,110,251,0.1);
   --cyan:#0EA5E9; --cyan-dim:rgba(14,165,233,0.1);
   --green:#22C55E; --green-dim:rgba(34,197,94,0.1);
@@ -4876,11 +4876,11 @@ fi fi${Math.min(i+1,5)}`}
                       onMouseEnter={e=>{if(!isSel){e.currentTarget.style.background="var(--bg-hover)";[...e.currentTarget.querySelectorAll('td')].slice(0,3).forEach(td=>td.style.background="var(--bg-row-hover)");}}}
                       onMouseLeave={e=>{if(!isSel){e.currentTarget.style.background="var(--bg-0)";[...e.currentTarget.querySelectorAll('td')].slice(0,3).forEach(td=>td.style.background="var(--bg-0)");}}}
                     >
-                      <td style={{padding:"8px 12px",position:"sticky",left:0,zIndex:2,background:isSel?"var(--blue-dim)":"var(--bg-0)"}} onClick={e=>e.stopPropagation()}><Checkbox checked={isSel} onChange={()=>toggleSelect(b.id)}/></td>
-                      <td style={{padding:"4px 0",minWidth:30,position:"sticky",left:40,zIndex:2,background:isSel?"var(--blue-dim)":"var(--bg-0)"}} onClick={e=>{e.stopPropagation();setStarred(p=>{const n=new Set(p);n.has(b.id)?n.delete(b.id):n.add(b.id);return n})}}>
+                      <td style={{padding:"8px 12px",position:"sticky",left:0,zIndex:2,background:isSel?"var(--bg-row-sel)":"var(--bg-0)"}} onClick={e=>e.stopPropagation()}><Checkbox checked={isSel} onChange={()=>toggleSelect(b.id)}/></td>
+                      <td style={{padding:"4px 0",minWidth:30,position:"sticky",left:40,zIndex:2,background:isSel?"var(--bg-row-sel)":"var(--bg-0)"}} onClick={e=>{e.stopPropagation();setStarred(p=>{const n=new Set(p);n.has(b.id)?n.delete(b.id):n.add(b.id);return n})}}>
                         <span style={{cursor:"pointer",color:starred.has(b.id)?"var(--amber)":"var(--t4)"}}>{starred.has(b.id)?<Ic.StarFill s={13}/>:<Ic.Star s={13}/>}</span>
                       </td>
-                      <td style={{padding:"8px 10px",position:"sticky",left:70,zIndex:2,background:isSel?"var(--blue-dim)":"var(--bg-0)",boxShadow:"2px 0 6px rgba(0,0,0,.08)",borderRight:"1px solid var(--border)"}}>
+                      <td style={{padding:"8px 10px",position:"sticky",left:70,zIndex:2,background:isSel?"var(--bg-row-sel)":"var(--bg-0)",boxShadow:"2px 0 6px rgba(0,0,0,.08)",borderRight:"1px solid var(--border)"}}>
                         {/* row 1: name */}
                         <div style={{fontWeight:600,fontSize:13,whiteSpace:"nowrap",color:"var(--t1)"}}>{b.name}</div>
                         {/* row 2: position */}
