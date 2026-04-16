@@ -207,7 +207,7 @@ function UpgradeModal({ currentPlan, onClose, onUpgrade }) {
 }
 
 // ─────────── ACCOUNT MENU ───────────
-function AccountMenu({ user, plan, onClose, onUpgrade }) {
+function AccountMenu({ user, plan, onClose, onUpgrade, onProfile, onNotifSettings }) {
   const planMeta = PLANS.find(p=>p.id===plan);
   return (
     <div style={{position:"absolute",bottom:"100%",left:0,right:0,marginBottom:6,background:"var(--bg-0)",border:"1px solid var(--border)",borderRadius:10,boxShadow:"var(--modal-shadow)",overflow:"hidden",zIndex:500,animation:"fadeIn .15s ease"}}>
@@ -229,11 +229,11 @@ function AccountMenu({ user, plan, onClose, onUpgrade }) {
       </div>
       {/* Menu items */}
       {[
-        {icon:<Ic.Users s={12}/>,label:"프로필 설정"},
-        {icon:<Ic.Bell s={12}/>,label:"알림 설정"},
-        {icon:<Ic.Globe s={12}/>,label:"언어 / 지역"},
-      ].map(({icon,label})=>(
-        <div key={label} onClick={onClose} style={{display:"flex",alignItems:"center",gap:8,padding:"8px 14px",cursor:"pointer",fontSize:12,color:"var(--t2)"}}
+        {icon:<Ic.Users s={12}/>,label:"프로필 설정",action:()=>{onClose();onProfile();}},
+        {icon:<Ic.Bell s={12}/>,label:"알림 설정",action:()=>{onClose();onNotifSettings();}},
+        {icon:<Ic.Globe s={12}/>,label:"언어 / 지역",action:onClose},
+      ].map(({icon,label,action})=>(
+        <div key={label} onClick={action} style={{display:"flex",alignItems:"center",gap:8,padding:"8px 14px",cursor:"pointer",fontSize:12,color:"var(--t2)"}}
           onMouseEnter={e=>e.currentTarget.style.background="var(--bg-hover)"}
           onMouseLeave={e=>e.currentTarget.style.background="transparent"}>
           {icon}{label}
@@ -257,8 +257,86 @@ function AccountMenu({ user, plan, onClose, onUpgrade }) {
   );
 }
 
+// ─────────── PROFILE SETTINGS MODAL ───────────
+function ProfileSettingsModal({ user, onClose }) {
+  const [form, setForm] = useState({ name: user.name, email: user.email, company: user.company||"", phone: "" });
+  const update = (k,v) => setForm(p=>({...p,[k]:v}));
+  return (
+    <div style={{position:"fixed",inset:0,zIndex:2000,background:"rgba(0,0,0,.45)",display:"flex",alignItems:"center",justifyContent:"center",padding:16}} onClick={onClose}>
+      <div style={{background:"var(--bg-0)",border:"1px solid var(--border)",borderRadius:14,padding:24,width:"100%",maxWidth:400,boxShadow:"var(--modal-shadow)",animation:"fadeIn .18s ease"}} onClick={e=>e.stopPropagation()}>
+        <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:20}}>
+          <div style={{fontSize:15,fontWeight:800,color:"var(--t1)"}}>프로필 설정</div>
+          <div onClick={onClose} style={{cursor:"pointer",color:"var(--t3)",padding:4}}><Ic.X s={14}/></div>
+        </div>
+        <div style={{display:"flex",flexDirection:"column",gap:14}}>
+          {[
+            {label:"이름",key:"name",placeholder:"홍길동"},
+            {label:"이메일",key:"email",placeholder:"you@company.com"},
+            {label:"회사명",key:"company",placeholder:"(주)넥스포트"},
+            {label:"연락처",key:"phone",placeholder:"+82 10-0000-0000"},
+          ].map(({label,key,placeholder})=>(
+            <div key={key}>
+              <div style={{fontSize:11,fontWeight:600,color:"var(--t3)",marginBottom:5,letterSpacing:".03em"}}>{label}</div>
+              <input value={form[key]} onChange={e=>update(key,e.target.value)} placeholder={placeholder}
+                style={{width:"100%",padding:"8px 10px",borderRadius:7,border:"1px solid var(--border)",background:"var(--bg-1)",color:"var(--t1)",fontSize:12,outline:"none",boxSizing:"border-box"}}
+                onFocus={e=>e.target.style.borderColor="var(--blue)"} onBlur={e=>e.target.style.borderColor="var(--border)"}/>
+            </div>
+          ))}
+        </div>
+        <div style={{display:"flex",gap:8,marginTop:20}}>
+          <div onClick={onClose} style={{flex:1,padding:"9px 0",borderRadius:8,border:"1px solid var(--border)",textAlign:"center",fontSize:12,fontWeight:600,color:"var(--t2)",cursor:"pointer"}}>취소</div>
+          <div onClick={onClose} style={{flex:1,padding:"9px 0",borderRadius:8,background:"var(--blue)",textAlign:"center",fontSize:12,fontWeight:700,color:"#fff",cursor:"pointer"}}>저장</div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─────────── NOTIFICATION SETTINGS MODAL ───────────
+function NotificationSettingsModal({ onClose }) {
+  const [settings, setSettings] = useState({
+    newBuyer: true, emailOpen: true, emailClick: false,
+    weeklyReport: true, systemAlert: true, marketing: false,
+  });
+  const toggle = k => setSettings(p=>({...p,[k]:!p[k]}));
+  const rows = [
+    {key:"newBuyer",label:"신규 바이어 추천",desc:"AI가 새 바이어를 발굴하면 알림"},
+    {key:"emailOpen",label:"이메일 열람 알림",desc:"발송한 이메일이 열렸을 때"},
+    {key:"emailClick",label:"링크 클릭 알림",desc:"이메일 내 링크 클릭 시"},
+    {key:"weeklyReport",label:"주간 성과 리포트",desc:"매주 월요일 오전 9시"},
+    {key:"systemAlert",label:"시스템 알림",desc:"점검, 업데이트 등 중요 공지"},
+    {key:"marketing",label:"마케팅 정보",desc:"신기능 소개 및 프로모션"},
+  ];
+  return (
+    <div style={{position:"fixed",inset:0,zIndex:2000,background:"rgba(0,0,0,.45)",display:"flex",alignItems:"center",justifyContent:"center",padding:16}} onClick={onClose}>
+      <div style={{background:"var(--bg-0)",border:"1px solid var(--border)",borderRadius:14,padding:24,width:"100%",maxWidth:400,boxShadow:"var(--modal-shadow)",animation:"fadeIn .18s ease"}} onClick={e=>e.stopPropagation()}>
+        <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:20}}>
+          <div style={{fontSize:15,fontWeight:800,color:"var(--t1)"}}>알림 설정</div>
+          <div onClick={onClose} style={{cursor:"pointer",color:"var(--t3)",padding:4}}><Ic.X s={14}/></div>
+        </div>
+        <div style={{display:"flex",flexDirection:"column",gap:4}}>
+          {rows.map(({key,label,desc})=>(
+            <div key={key} onClick={()=>toggle(key)} style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"10px 12px",borderRadius:8,cursor:"pointer",transition:"background .12s"}}
+              onMouseEnter={e=>e.currentTarget.style.background="var(--bg-hover)"}
+              onMouseLeave={e=>e.currentTarget.style.background="transparent"}>
+              <div>
+                <div style={{fontSize:12,fontWeight:600,color:"var(--t1)"}}>{label}</div>
+                <div style={{fontSize:10,color:"var(--t3)",marginTop:2}}>{desc}</div>
+              </div>
+              <div style={{width:36,height:20,borderRadius:10,background:settings[key]?"var(--blue)":"var(--bg-3)",position:"relative",transition:"background .2s",flexShrink:0}}>
+                <div style={{position:"absolute",top:3,left:settings[key]?18:3,width:14,height:14,borderRadius:"50%",background:"#fff",transition:"left .2s",boxShadow:"0 1px 3px rgba(0,0,0,.2)"}}/>
+              </div>
+            </div>
+          ))}
+        </div>
+        <div onClick={onClose} style={{marginTop:16,padding:"9px 0",borderRadius:8,background:"var(--blue)",textAlign:"center",fontSize:12,fontWeight:700,color:"#fff",cursor:"pointer"}}>저장</div>
+      </div>
+    </div>
+  );
+}
+
 // ─────────── APOLLO-STYLE LEFT NAV ───────────
-function LeftNav({ view, navigateTo, search, setSearch, canBack, canForward, goBack, goForward, isDark, setIsDark, notifUnread, setShowNotifications, plan, user, onUpgrade }) {
+function LeftNav({ view, navigateTo, search, setSearch, canBack, canForward, goBack, goForward, notifUnread, setShowNotifications, plan, user, onUpgrade, onProfile, onNotifSettings }) {
   const [showAccount, setShowAccount] = useState(false);
   const NavItem = ({ icon, label, viewKey, badge, onClick }) => {
     const active = viewKey ? view === viewKey : false;
@@ -303,16 +381,13 @@ function LeftNav({ view, navigateTo, search, setSearch, canBack, canForward, goB
       {/* Bottom */}
       <div style={{borderTop:"1px solid var(--border)",padding:"8px 10px",flexShrink:0,display:"flex",flexDirection:"column",gap:6,position:"relative"}}>
         {/* Account menu popup */}
-        {showAccount && <AccountMenu user={user} plan={plan} onClose={()=>setShowAccount(false)} onUpgrade={onUpgrade}/>}
+        {showAccount && <AccountMenu user={user} plan={plan} onClose={()=>setShowAccount(false)} onUpgrade={onUpgrade} onProfile={onProfile} onNotifSettings={onNotifSettings}/>}
         {/* Icon row */}
         <div style={{display:"flex",alignItems:"center",gap:4}}>
           <div onClick={()=>setShowNotifications(p=>!p)} style={{position:"relative",cursor:"pointer",width:26,height:26,borderRadius:6,display:"flex",alignItems:"center",justifyContent:"center",background:"var(--bg-hover)",color:"var(--t2)"}}>
             <Ic.Bell s={12}/>
             {notifUnread>0 && <div style={{position:"absolute",top:-3,right:-3,minWidth:13,height:13,borderRadius:7,background:"var(--red)",color:"#fff",fontSize:8,fontWeight:700,display:"flex",alignItems:"center",justifyContent:"center",padding:"0 3px"}}>{notifUnread}</div>}
           </div>
-          <button onClick={()=>setIsDark(d=>!d)} style={{width:26,height:26,borderRadius:6,display:"flex",alignItems:"center",justifyContent:"center",cursor:"pointer",background:"var(--bg-hover)",border:"none",color:"var(--t2)",outline:"none"}}>
-            {isDark?<Ic.Sun s={12}/>:<Ic.Moon s={12}/>}
-          </button>
           <div style={{display:"flex",gap:3,marginLeft:"auto"}}>
             <div onClick={canBack?goBack:undefined} style={{width:22,height:22,borderRadius:4,display:"flex",alignItems:"center",justifyContent:"center",cursor:canBack?"pointer":"not-allowed",color:canBack?"var(--t2)":"var(--t4)",background:"var(--bg-hover)"}}><Ic.ChevLeft s={10}/></div>
             <div onClick={canForward?goForward:undefined} style={{width:22,height:22,borderRadius:4,display:"flex",alignItems:"center",justifyContent:"center",cursor:canForward?"pointer":"not-allowed",color:canForward?"var(--t2)":"var(--t4)",background:"var(--bg-hover)"}}><Ic.ChevRight s={10}/></div>
@@ -4356,6 +4431,8 @@ export default function App() {
   // ── Membership ──
   const [userPlan, setUserPlan] = useState(()=>{ try{return localStorage.getItem('nx-plan')||'free'}catch(e){return 'free'} });
   const [showUpgrade, setShowUpgrade] = useState(false);
+  const [showProfileSettings, setShowProfileSettings] = useState(false);
+  const [showNotifSettings, setShowNotifSettings] = useState(false);
   const [userAccount] = useState({name:"Jay Jang", email:"jay.jyjang@gmail.com"});
   const handleUpgrade = (plan) => { setUserPlan(plan); try{localStorage.setItem('nx-plan',plan)}catch(e){} setToast(`✅ ${PLANS.find(p=>p.id===plan)?.name} 플랜으로 업그레이드됐습니다!`); };
   // ── Apple Theme ──
@@ -4567,14 +4644,17 @@ export default function App() {
       {detailBuyer && <BuyerDetailPanel buyer={detailBuyer} onClose={()=>setDetailBuyer(null)} onSave={(b)=>{savedSet.has(b.id)?setSavedSet(p=>{const n=new Set(p);n.delete(b.id);return n}):setSavedSet(p=>new Set([...p,b.id]))}} isSaved={savedSet.has(detailBuyer.id)} onEmailBuyer={b=>setEmailBuyer(b)} onShowNotes={b=>setNotesBuyer(b)} onDetailBuyer={b=>setDetailBuyer(b)} />}
 
       {showUpgrade && <UpgradeModal currentPlan={userPlan} onClose={()=>setShowUpgrade(false)} onUpgrade={handleUpgrade}/>}
+      {showProfileSettings && <ProfileSettingsModal user={userAccount} onClose={()=>setShowProfileSettings(false)}/>}
+      {showNotifSettings && <NotificationSettingsModal onClose={()=>setShowNotifSettings(false)}/>}
 
       <div style={{display:"flex",height:"100vh",overflow:"hidden",background:"var(--bg-0)"}}>
         {/* Apollo-style Left Nav */}
         <LeftNav view={view} navigateTo={navigateTo} search={search} setSearch={setSearch}
           canBack={canBack} canForward={canForward} goBack={goBack} goForward={goForward}
-          isDark={isDark} setIsDark={setIsDark} notifUnread={notifUnread}
+          notifUnread={notifUnread}
           setShowNotifications={setShowNotifications}
-          plan={userPlan} user={userAccount} onUpgrade={()=>setShowUpgrade(true)}/>
+          plan={userPlan} user={userAccount} onUpgrade={()=>setShowUpgrade(true)}
+          onProfile={()=>setShowProfileSettings(true)} onNotifSettings={()=>setShowNotifSettings(true)}/>
 
         {/* Main Content */}
         <div style={{flex:1,display:"flex",flexDirection:"column",overflow:"hidden"}}>
@@ -4597,6 +4677,9 @@ export default function App() {
                   <Ic.Sparkle s={11}/> AI 리서치
                 </div>
               </>}
+              <button onClick={()=>setIsDark(d=>!d)} title={isDark?"라이트 모드":"다크 모드"} style={{width:30,height:30,borderRadius:7,display:"flex",alignItems:"center",justifyContent:"center",cursor:"pointer",background:"var(--bg-hover)",border:"1px solid var(--border)",color:"var(--t2)",outline:"none",flexShrink:0}}>
+                {isDark?<Ic.Sun s={13}/>:<Ic.Moon s={13}/>}
+              </button>
             </div>
           </div>
           {showNotifications && (
