@@ -3124,10 +3124,10 @@ function FilterSidebar({ filters, setFilters, collapsed, setCollapsed }) {
   );
 
   const CheckItem = ({label, checked, onChange, count}) => (
-    <div onClick={onChange} style={{display:"flex",alignItems:"center",gap:6,padding:"1px 10px 1px 0",cursor:"pointer",fontSize:11,color:checked?"var(--t1)":"var(--t2)"}}>
+    <div onClick={onChange} style={{display:"flex",alignItems:"center",gap:6,padding:"1px 10px",cursor:"pointer",fontSize:11,color:checked?"var(--t1)":"var(--t2)"}}>
       <Checkbox checked={checked} onChange={onChange} />
-      <span style={{flex:1}}>{label}</span>
-      {count !== undefined && <span style={{fontFamily:"var(--mono)",fontSize:10,color:"var(--t4)",flexShrink:0}}>{count}</span>}
+      <span>{label}</span>
+      {count !== undefined && <span style={{fontFamily:"var(--mono)",fontSize:10,color:"var(--t4)",background:"var(--bg-3)",borderRadius:4,padding:"0 4px",lineHeight:"16px",flexShrink:0}}>{count}</span>}
     </div>
   );
 
@@ -3141,7 +3141,7 @@ function FilterSidebar({ filters, setFilters, collapsed, setCollapsed }) {
   );
 
   return (
-    <div style={{width:240,background:"var(--bg-1)",borderRight:"1px solid var(--border)",display:"flex",flexDirection:"column",flexShrink:0,overflow:"hidden"}}>
+    <div style={{width:140,background:"var(--bg-1)",borderRight:"1px solid var(--border)",display:"flex",flexDirection:"column",flexShrink:0,overflow:"hidden"}}>
       <div style={{padding:"12px 14px",borderBottom:"1px solid var(--border)",display:"flex",alignItems:"center",justifyContent:"space-between"}}>
         <div style={{display:"flex",alignItems:"center",gap:6,fontSize:13,fontWeight:700}}><Ic.Filter s={14}/>필터</div>
         <div style={{display:"flex",gap:4}}>
