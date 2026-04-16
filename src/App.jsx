@@ -384,10 +384,6 @@ function LeftNav({ view, navigateTo, search, setSearch, canBack, canForward, goB
         {showAccount && <AccountMenu user={user} plan={plan} onClose={()=>setShowAccount(false)} onUpgrade={onUpgrade} onProfile={onProfile} onNotifSettings={onNotifSettings}/>}
         {/* Icon row */}
         <div style={{display:"flex",alignItems:"center",gap:4}}>
-          <div onClick={()=>setShowNotifications(p=>!p)} style={{position:"relative",cursor:"pointer",width:26,height:26,borderRadius:6,display:"flex",alignItems:"center",justifyContent:"center",background:"var(--bg-hover)",color:"var(--t2)"}}>
-            <Ic.Bell s={12}/>
-            {notifUnread>0 && <div style={{position:"absolute",top:-3,right:-3,minWidth:13,height:13,borderRadius:7,background:"var(--red)",color:"#fff",fontSize:8,fontWeight:700,display:"flex",alignItems:"center",justifyContent:"center",padding:"0 3px"}}>{notifUnread}</div>}
-          </div>
           <div style={{display:"flex",gap:3,marginLeft:"auto"}}>
             <div onClick={canBack?goBack:undefined} style={{width:22,height:22,borderRadius:4,display:"flex",alignItems:"center",justifyContent:"center",cursor:canBack?"pointer":"not-allowed",color:canBack?"var(--t2)":"var(--t4)",background:"var(--bg-hover)"}}><Ic.ChevLeft s={10}/></div>
             <div onClick={canForward?goForward:undefined} style={{width:22,height:22,borderRadius:4,display:"flex",alignItems:"center",justifyContent:"center",cursor:canForward?"pointer":"not-allowed",color:canForward?"var(--t2)":"var(--t4)",background:"var(--bg-hover)"}}><Ic.ChevRight s={10}/></div>
@@ -4677,6 +4673,10 @@ export default function App() {
                   <Ic.Sparkle s={11}/> AI 리서치
                 </div>
               </>}
+              <div onClick={()=>setShowNotifications(p=>!p)} title="알림" style={{position:"relative",width:30,height:30,borderRadius:7,display:"flex",alignItems:"center",justifyContent:"center",cursor:"pointer",background:"var(--bg-hover)",border:"1px solid var(--border)",color:"var(--t2)",flexShrink:0}}>
+                <Ic.Bell s={13}/>
+                {notifUnread>0 && <div style={{position:"absolute",top:-4,right:-4,minWidth:15,height:15,borderRadius:8,background:"var(--red)",color:"#fff",fontSize:9,fontWeight:700,display:"flex",alignItems:"center",justifyContent:"center",padding:"0 3px"}}>{notifUnread}</div>}
+              </div>
               <button onClick={()=>setIsDark(d=>!d)} title={isDark?"라이트 모드":"다크 모드"} style={{width:30,height:30,borderRadius:7,display:"flex",alignItems:"center",justifyContent:"center",cursor:"pointer",background:"var(--bg-hover)",border:"1px solid var(--border)",color:"var(--t2)",outline:"none",flexShrink:0}}>
                 {isDark?<Ic.Sun s={13}/>:<Ic.Moon s={13}/>}
               </button>
