@@ -421,6 +421,9 @@ function LeftNav({ view, navigateTo, search, setSearch, canBack, canForward, goB
         <NavItem viewKey="emailfinder" icon={<Ic.Mail s={13}/>} label="이메일 발굴"/>
         <NavSection label="Analyze"/>
         <NavItem viewKey="dashboard" icon={<Ic.Bar s={13}/>} label="대시보드"/>
+        <NavItem viewKey="news" icon={<Ic.Globe s={13}/>} label="무역 뉴스"/>
+        <NavItem viewKey="credit" icon={<Ic.Shield s={13}/>} label="신용 리포트"/>
+        <NavItem viewKey="market" icon={<Ic.Sparkle s={13}/>} label="시장 동향"/>
       </div>
       {/* Bottom */}
       <div style={{borderTop:"1px solid var(--border)",padding:"8px 10px",flexShrink:0,display:"flex",flexDirection:"column",gap:6,position:"relative"}}>
@@ -4447,6 +4450,373 @@ function DashboardView({ buyers, savedSet, starred, buyerNotes }) {
   );
 }
 
+// ─────────── TRADE NEWS VIEW ───────────
+const MOCK_NEWS = [
+  { id:1, category:"무역정책", region:"미국", title:"미국, 한국산 전자부품 관세 15% 추가 부과 검토", summary:"미국 무역대표부(USTR)가 한국산 반도체·PCB 등 전자부품에 대한 섹션 301 관세 15% 추가 부과를 검토 중인 것으로 알려졌다.", source:"Reuters", date:"2026-04-20", impact:"high", flag:"🇺🇸" },
+  { id:2, category:"시장동향", region:"유럽", title:"EU, 탄소국경조정제도(CBAM) 적용 범위 철강·알루미늄으로 확대", summary:"EU 집행위원회는 CBAM 적용 품목을 기존 시멘트·비료에서 철강·알루미늄·화학제품까지 확대 적용하기로 결정했다고 발표했다.", source:"Financial Times", date:"2026-04-19", impact:"high", flag:"🇪🇺" },
+  { id:3, category:"무역협정", region:"동남아", title:"한-인도네시아 CEPA 개정협상 타결, 부품·소재 관세 즉시 철폐", summary:"한국과 인도네시아 정부가 포괄적경제동반자협정(CEPA) 개정을 타결, 자동차 부품 및 전자 소재 관세가 즉시 철폐된다.", source:"KOTRA", date:"2026-04-19", impact:"medium", flag:"🇮🇩" },
+  { id:4, category:"물류·공급망", region:"글로벌", title:"홍해 분쟁 장기화로 컨테이너 운임 다시 40% 급등", summary:"홍해 분쟁 재확산으로 수에즈 운하 우회 항로 이용이 증가하며 아시아-유럽 컨테이너 운임이 전월 대비 40% 급등했다.", source:"Bloomberg", date:"2026-04-18", impact:"high", flag:"🌐" },
+  { id:5, category:"시장동향", region:"중동", title:"사우디 비전 2030 제조업 투자 확대, 한국 산업재 수요 급증 전망", summary:"사우디아라비아 정부가 비전 2030 이행 가속화를 위해 제조업·인프라에 총 1,200억 달러 투자를 발표, 한국 산업재 수요가 크게 늘 전망이다.", source:"Arab News", date:"2026-04-18", impact:"medium", flag:"🇸🇦" },
+  { id:6, category:"규제·인증", region:"유럽", title:"EU, 리튬배터리 탄소발자국 공개 의무화 2026년 7월 시행", summary:"EU는 전기차 및 산업용 리튬배터리에 대해 탄소발자국 공개 및 디지털배터리여권(DBP) 첨부를 의무화하는 규정을 7월부터 시행한다.", source:"EU Commission", date:"2026-04-17", impact:"medium", flag:"🇪🇺" },
+  { id:7, category:"무역정책", region:"중국", title:"중국, 희토류 수출 허가 강화 — 반도체·모터 소재 공급망 긴장", summary:"중국 상무부가 네오디뮴·디스프로슘 등 희토류 수출 허가 심사를 강화, 글로벌 반도체 및 전기모터 공급망에 비상이 걸렸다.", source:"Nikkei Asia", date:"2026-04-17", impact:"high", flag:"🇨🇳" },
+  { id:8, category:"시장동향", region:"북미", title:"멕시코 니어쇼어링 열풍 — 한국 자동차 부품사 현지 공장 투자 급증", summary:"미-멕시코-캐나다 협정(USMCA) 원산지 규정 강화로 멕시코 현지 생산 수요가 폭증, 한국 자동차 부품 업체들의 멕시코 투자가 올해만 전년비 3배 증가했다.", source:"WSJ", date:"2026-04-16", impact:"medium", flag:"🇲🇽" },
+  { id:9, category:"물류·공급망", region:"글로벌", title:"파나마 운하 가뭄 재발 우려 — 선박 통항 제한 경보 발령", summary:"파나마 운하청이 건기 예상보다 강수량 부족으로 일일 통항 선박 수를 기존 36척에서 28척으로 제한한다고 발표, 태평양-대서양 운임 불안이 재현될 조짐이다.", source:"Reuters", date:"2026-04-16", impact:"medium", flag:"🌊" },
+  { id:10, category:"무역협정", region:"인도", title:"한-인도 FTA 협상 재개, 의료기기·화장품 시장접근 개선 기대", summary:"8년간 중단됐던 한-인도 자유무역협정 협상이 재개됐다. 의료기기, 화장품, 자동차 부품 등에서 관세 인하 기대가 높다.", source:"KOTRA", date:"2026-04-15", impact:"medium", flag:"🇮🇳" },
+];
+const NEWS_CATEGORIES = ["전체","무역정책","시장동향","무역협정","물류·공급망","규제·인증"];
+const NEWS_REGIONS = ["전체","글로벌","미국","유럽","중국","동남아","중동","북미","인도"];
+
+function TradeNewsView() {
+  const [cat, setCat] = useState("전체");
+  const [region, setRegion] = useState("전체");
+  const [selected, setSelected] = useState(MOCK_NEWS[0]);
+  const filtered = MOCK_NEWS.filter(n =>
+    (cat === "전체" || n.category === cat) &&
+    (region === "전체" || n.region === region)
+  );
+  const impactColor = { high: "var(--red)", medium: "var(--amber)", low: "var(--green)" };
+  const impactLabel = { high: "주의", medium: "보통", low: "낮음" };
+  return (
+    <div style={{flex:1,display:"flex",flexDirection:"column",overflow:"hidden"}}>
+      {/* Filters */}
+      <div style={{padding:"10px 20px",borderBottom:"1px solid var(--border)",background:"var(--bg-0)",flexShrink:0}}>
+        <div style={{display:"flex",gap:6,flexWrap:"wrap",marginBottom:8}}>
+          {NEWS_CATEGORIES.map(c=>(
+            <div key={c} onClick={()=>setCat(c)} style={{padding:"4px 12px",borderRadius:20,fontSize:11,fontWeight:cat===c?600:400,background:cat===c?"var(--blue)":"var(--bg-3)",color:cat===c?"#fff":"var(--t2)",cursor:"pointer",transition:"all .15s"}}>
+              {c}
+            </div>
+          ))}
+        </div>
+        <div style={{display:"flex",gap:6,flexWrap:"wrap"}}>
+          {NEWS_REGIONS.map(r=>(
+            <div key={r} onClick={()=>setRegion(r)} style={{padding:"3px 10px",borderRadius:20,fontSize:11,fontWeight:region===r?600:400,background:region===r?"var(--violet-dim)":"transparent",color:region===r?"var(--violet)":"var(--t3)",cursor:"pointer",border:"1px solid",borderColor:region===r?"var(--violet)":"var(--border)",transition:"all .15s"}}>
+              {r}
+            </div>
+          ))}
+        </div>
+      </div>
+      {/* Content: list + detail */}
+      <div style={{flex:1,display:"flex",overflow:"hidden"}}>
+        {/* News List */}
+        <div style={{width:340,borderRight:"1px solid var(--border)",overflowY:"auto",flexShrink:0,background:"var(--bg-0)"}}>
+          {filtered.length === 0 && (
+            <div style={{padding:40,textAlign:"center",color:"var(--t4)",fontSize:13}}>해당 조건의 뉴스가 없습니다</div>
+          )}
+          {filtered.map(n=>(
+            <div key={n.id} onClick={()=>setSelected(n)} style={{padding:"14px 16px",borderBottom:"1px solid var(--border)",cursor:"pointer",background:selected?.id===n.id?"var(--blue-dim)":"transparent",transition:"background .15s"}}>
+              <div style={{display:"flex",alignItems:"center",gap:6,marginBottom:6}}>
+                <span style={{fontSize:14}}>{n.flag}</span>
+                <span style={{fontSize:10,padding:"2px 7px",borderRadius:10,background:"var(--bg-3)",color:"var(--t3)"}}>{n.category}</span>
+                <span style={{fontSize:10,padding:"2px 7px",borderRadius:10,background:impactColor[n.impact]+"22",color:impactColor[n.impact],marginLeft:"auto"}}>{impactLabel[n.impact]}</span>
+              </div>
+              <div style={{fontSize:12,fontWeight:600,color:selected?.id===n.id?"var(--blue)":"var(--t1)",lineHeight:1.4,marginBottom:4}}>{n.title}</div>
+              <div style={{fontSize:10,color:"var(--t4)"}}>{n.source} · {n.date}</div>
+            </div>
+          ))}
+        </div>
+        {/* Detail */}
+        <div style={{flex:1,overflowY:"auto",padding:28,background:"var(--bg-1)"}}>
+          {selected ? (
+            <div style={{maxWidth:640}}>
+              <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:16}}>
+                <span style={{fontSize:22}}>{selected.flag}</span>
+                <span style={{fontSize:11,padding:"3px 10px",borderRadius:10,background:"var(--bg-3)",color:"var(--t3)"}}>{selected.category}</span>
+                <span style={{fontSize:11,padding:"3px 10px",borderRadius:10,background:impactColor[selected.impact]+"22",color:impactColor[selected.impact],fontWeight:600}}>영향도: {impactLabel[selected.impact]}</span>
+                <span style={{fontSize:11,color:"var(--t4)",marginLeft:"auto"}}>{selected.source} · {selected.date}</span>
+              </div>
+              <h2 style={{fontSize:18,fontWeight:700,color:"var(--t1)",lineHeight:1.4,marginBottom:16}}>{selected.title}</h2>
+              <div style={{padding:16,borderRadius:10,background:"var(--bg-0)",border:"1px solid var(--border)",marginBottom:20}}>
+                <div style={{fontSize:11,fontWeight:600,color:"var(--t3)",marginBottom:8,textTransform:"uppercase",letterSpacing:.5}}>요약</div>
+                <p style={{fontSize:14,color:"var(--t2)",lineHeight:1.7}}>{selected.summary}</p>
+              </div>
+              <div style={{padding:16,borderRadius:10,background:"var(--blue-dim)",border:"1px solid var(--blue)",marginBottom:20}}>
+                <div style={{fontSize:11,fontWeight:600,color:"var(--blue)",marginBottom:8}}>✦ AI 수출 인사이트</div>
+                <p style={{fontSize:13,color:"var(--t2)",lineHeight:1.7}}>
+                  {selected.impact === "high"
+                    ? "⚠️ 이 뉴스는 귀사의 수출 전략에 직접적인 영향을 미칠 수 있습니다. 해당 지역 바이어와의 계약 조건 재검토 및 대체 시장 탐색을 권장합니다."
+                    : "📌 중기적으로 모니터링이 필요한 이슈입니다. 관련 지역 바이어 동향을 지속적으로 추적하고 계약서에 관련 조항을 검토하세요."}
+                </p>
+              </div>
+              <div style={{display:"flex",gap:8}}>
+                <div style={{flex:1,padding:14,borderRadius:10,background:"var(--bg-0)",border:"1px solid var(--border)",textAlign:"center"}}>
+                  <div style={{fontSize:11,color:"var(--t4)",marginBottom:4}}>관련 지역</div>
+                  <div style={{fontSize:13,fontWeight:600,color:"var(--t1)"}}>{selected.flag} {selected.region}</div>
+                </div>
+                <div style={{flex:1,padding:14,borderRadius:10,background:"var(--bg-0)",border:"1px solid var(--border)",textAlign:"center"}}>
+                  <div style={{fontSize:11,color:"var(--t4)",marginBottom:4}}>카테고리</div>
+                  <div style={{fontSize:13,fontWeight:600,color:"var(--t1)"}}>{selected.category}</div>
+                </div>
+                <div style={{flex:1,padding:14,borderRadius:10,background:"var(--bg-0)",border:"1px solid var(--border)",textAlign:"center"}}>
+                  <div style={{fontSize:11,color:"var(--t4)",marginBottom:4}}>영향도</div>
+                  <div style={{fontSize:13,fontWeight:600,color:impactColor[selected.impact]}}>{impactLabel[selected.impact]}</div>
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div style={{display:"flex",alignItems:"center",justifyContent:"center",height:"100%",color:"var(--t4)",fontSize:13}}>
+              뉴스를 선택하세요
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─────────── CREDIT REPORT VIEW ───────────
+const CREDIT_BUYERS = [
+  { id:"cr1", name:"Siemens AG", country:"🇩🇪 독일", industry:"산업기계", employees:311000, revenue:"€62B", riskLevel:"low", score:91, paymentHistory:97, financialStability:94, years:177, listed:true, currency:"EUR", trend:"stable", incidents:0, certifications:["ISO 9001","ISO 14001","CE"] },
+  { id:"cr2", name:"Bosch GmbH", country:"🇩🇪 독일", industry:"자동차부품", employees:422000, revenue:"€91B", riskLevel:"low", score:94, paymentHistory:98, financialStability:96, years:138, listed:false, currency:"EUR", trend:"up", incidents:0, certifications:["IATF 16949","ISO 9001"] },
+  { id:"cr3", name:"Mitsubishi Electric", country:"🇯🇵 일본", industry:"전기전자", employees:146000, revenue:"¥4.5T", riskLevel:"low", score:88, paymentHistory:93, financialStability:89, years:102, listed:true, currency:"JPY", trend:"stable", incidents:1, certifications:["ISO 9001","JIS"] },
+  { id:"cr4", name:"SECO Tools AB", country:"🇸🇪 스웨덴", industry:"절삭공구", employees:20000, revenue:"SEK 17B", riskLevel:"medium", score:73, paymentHistory:81, financialStability:76, years:80, listed:true, currency:"SEK", trend:"down", incidents:2, certifications:["ISO 9001"] },
+  { id:"cr5", name:"Flex Ltd.", country:"🇸🇬 싱가포르", industry:"전자제조", employees:170000, revenue:"$26B", riskLevel:"medium", score:69, paymentHistory:74, financialStability:71, years:52, listed:true, currency:"USD", trend:"stable", incidents:3, certifications:["ISO 9001","ISO 14001"] },
+  { id:"cr6", name:"Zhejiang Parts Co.", country:"🇨🇳 중국", industry:"자동차부품", employees:3200, revenue:"¥1.2B", riskLevel:"high", score:48, paymentHistory:52, financialStability:44, years:12, listed:false, currency:"CNY", trend:"down", incidents:7, certifications:[] },
+  { id:"cr7", name:"PT Indo Machinery", country:"🇮🇩 인도네시아", industry:"산업기계", employees:850, revenue:"$45M", riskLevel:"high", score:41, paymentHistory:47, financialStability:38, years:8, listed:false, currency:"USD", trend:"down", incidents:5, certifications:[] },
+  { id:"cr8", name:"Honeywell Int'l", country:"🇺🇸 미국", industry:"항공우주", employees:98000, revenue:"$36B", riskLevel:"low", score:89, paymentHistory:95, financialStability:91, years:119, listed:true, currency:"USD", trend:"up", incidents:0, certifications:["AS9100","ISO 9001","ITAR"] },
+];
+
+function CreditReportView() {
+  const [selected, setSelected] = useState(CREDIT_BUYERS[0]);
+  const [search, setSearch] = useState("");
+  const filtered = CREDIT_BUYERS.filter(b => b.name.toLowerCase().includes(search.toLowerCase()) || b.country.includes(search));
+  const riskColor = { low:"var(--green)", medium:"var(--amber)", high:"var(--red)" };
+  const riskLabel = { low:"저위험", medium:"중위험", high:"고위험" };
+  const riskBg = { low:"var(--green-dim,#d1fae5)", medium:"var(--amber-dim,#fef3c7)", high:"#fee2e2" };
+  const trendIcon = { up:"↑", stable:"→", down:"↓" };
+  const trendColor = { up:"var(--green)", stable:"var(--t3)", down:"var(--red)" };
+
+  const ScoreBar = ({ label, value, color }) => (
+    <div style={{marginBottom:12}}>
+      <div style={{display:"flex",justifyContent:"space-between",marginBottom:4}}>
+        <span style={{fontSize:12,color:"var(--t3)"}}>{label}</span>
+        <span style={{fontSize:12,fontWeight:600,color:color||"var(--t1)"}}>{value}</span>
+      </div>
+      <div style={{height:6,borderRadius:3,background:"var(--bg-3)"}}>
+        <div style={{height:6,borderRadius:3,width:`${value}%`,background:color||"var(--blue)",transition:"width .6s ease"}}/>
+      </div>
+    </div>
+  );
+
+  return (
+    <div style={{flex:1,display:"flex",overflow:"hidden"}}>
+      {/* List */}
+      <div style={{width:300,borderRight:"1px solid var(--border)",display:"flex",flexDirection:"column",background:"var(--bg-0)"}}>
+        <div style={{padding:"12px 14px",borderBottom:"1px solid var(--border)",flexShrink:0}}>
+          <input value={search} onChange={e=>setSearch(e.target.value)} placeholder="기업명 / 국가 검색…" style={{width:"100%",padding:"7px 10px",borderRadius:7,border:"1px solid var(--border)",background:"var(--bg-2)",fontSize:12,color:"var(--t1)",outline:"none",boxSizing:"border-box"}}/>
+        </div>
+        <div style={{overflowY:"auto",flex:1}}>
+          {filtered.map(b=>(
+            <div key={b.id} onClick={()=>setSelected(b)} style={{padding:"12px 14px",borderBottom:"1px solid var(--border)",cursor:"pointer",background:selected?.id===b.id?"var(--blue-dim)":"transparent",transition:"background .15s"}}>
+              <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:4}}>
+                <div style={{fontSize:12,fontWeight:600,color:selected?.id===b.id?"var(--blue)":"var(--t1)"}}>{b.name}</div>
+                <div style={{fontSize:11,fontWeight:700,color:riskColor[b.riskLevel]}}>{b.score}점</div>
+              </div>
+              <div style={{display:"flex",alignItems:"center",gap:6}}>
+                <span style={{fontSize:10,color:"var(--t4)"}}>{b.country} · {b.industry}</span>
+                <span style={{fontSize:10,padding:"1px 6px",borderRadius:8,background:riskBg[b.riskLevel],color:riskColor[b.riskLevel],marginLeft:"auto"}}>{riskLabel[b.riskLevel]}</span>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+      {/* Detail */}
+      <div style={{flex:1,overflowY:"auto",padding:28,background:"var(--bg-1)"}}>
+        {selected && (
+          <div style={{maxWidth:680}}>
+            {/* Header */}
+            <div style={{display:"flex",alignItems:"flex-start",justifyContent:"space-between",marginBottom:24}}>
+              <div>
+                <h2 style={{fontSize:20,fontWeight:800,color:"var(--t1)",marginBottom:4}}>{selected.name}</h2>
+                <div style={{fontSize:13,color:"var(--t3)"}}>{selected.country} · {selected.industry} · 설립 {new Date().getFullYear() - selected.years}년 ({selected.years}년 업력)</div>
+              </div>
+              <div style={{textAlign:"center",padding:"10px 18px",borderRadius:12,background:riskBg[selected.riskLevel],border:`1px solid ${riskColor[selected.riskLevel]}`}}>
+                <div style={{fontSize:28,fontWeight:900,color:riskColor[selected.riskLevel]}}>{selected.score}</div>
+                <div style={{fontSize:10,fontWeight:600,color:riskColor[selected.riskLevel]}}>{riskLabel[selected.riskLevel]}</div>
+              </div>
+            </div>
+
+            {/* KPI Row */}
+            <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:10,marginBottom:20}}>
+              {[
+                {label:"직원 수", value: selected.employees >= 10000 ? (selected.employees/10000).toFixed(0)+"만명" : selected.employees.toLocaleString()+"명"},
+                {label:"연매출", value: selected.revenue},
+                {label:"결제 이력", value: selected.paymentHistory+"점"},
+                {label:"재무 안정성", value: selected.financialStability+"점"},
+              ].map((k,i)=>(
+                <div key={i} style={{padding:14,borderRadius:10,background:"var(--bg-0)",border:"1px solid var(--border)",textAlign:"center"}}>
+                  <div style={{fontSize:10,color:"var(--t4)",marginBottom:4}}>{k.label}</div>
+                  <div style={{fontSize:14,fontWeight:700,color:"var(--t1)"}}>{k.value}</div>
+                </div>
+              ))}
+            </div>
+
+            {/* Score Bars */}
+            <div style={{padding:20,borderRadius:12,background:"var(--bg-0)",border:"1px solid var(--border)",marginBottom:16}}>
+              <div style={{fontSize:12,fontWeight:700,color:"var(--t2)",marginBottom:16,textTransform:"uppercase",letterSpacing:.5}}>신용 평가 세부 항목</div>
+              <ScoreBar label="종합 신용 점수" value={selected.score} color={riskColor[selected.riskLevel]}/>
+              <ScoreBar label="결제 이력 점수" value={selected.paymentHistory} color="var(--blue)"/>
+              <ScoreBar label="재무 안정성" value={selected.financialStability} color="var(--cyan)"/>
+              <div style={{display:"flex",alignItems:"center",gap:10,marginTop:12,padding:"10px 14px",borderRadius:8,background:"var(--bg-2)"}}>
+                <span style={{fontSize:12,color:"var(--t3)"}}>최근 분쟁/클레임 건수</span>
+                <span style={{fontSize:13,fontWeight:700,color:selected.incidents>3?"var(--red)":selected.incidents>0?"var(--amber)":"var(--green)",marginLeft:"auto"}}>{selected.incidents}건 {selected.incidents===0?"✓ 클린":selected.incidents>3?"⚠️ 주의":"📌 모니터링"}</span>
+              </div>
+            </div>
+
+            {/* Status badges */}
+            <div style={{display:"flex",gap:10,marginBottom:16,flexWrap:"wrap"}}>
+              <div style={{padding:"6px 14px",borderRadius:8,background:"var(--bg-0)",border:"1px solid var(--border)",fontSize:12}}>
+                <span style={{color:"var(--t3)"}}>상장 여부: </span>
+                <span style={{fontWeight:600,color:selected.listed?"var(--green)":"var(--t2)"}}>{selected.listed?"상장기업 ✓":"비상장"}</span>
+              </div>
+              <div style={{padding:"6px 14px",borderRadius:8,background:"var(--bg-0)",border:"1px solid var(--border)",fontSize:12}}>
+                <span style={{color:"var(--t3)"}}>결제 통화: </span>
+                <span style={{fontWeight:600,color:"var(--t1)"}}>{selected.currency}</span>
+              </div>
+              <div style={{padding:"6px 14px",borderRadius:8,background:"var(--bg-0)",border:"1px solid var(--border)",fontSize:12}}>
+                <span style={{color:"var(--t3)"}}>재무 추세: </span>
+                <span style={{fontWeight:700,color:trendColor[selected.trend]}}>{trendIcon[selected.trend]} {selected.trend==="up"?"개선":"stable"===selected.trend?"안정":"하락"}</span>
+              </div>
+            </div>
+
+            {/* Certifications */}
+            {selected.certifications.length > 0 && (
+              <div style={{padding:16,borderRadius:10,background:"var(--bg-0)",border:"1px solid var(--border)",marginBottom:16}}>
+                <div style={{fontSize:11,fontWeight:600,color:"var(--t3)",marginBottom:10}}>보유 인증</div>
+                <div style={{display:"flex",gap:6,flexWrap:"wrap"}}>
+                  {selected.certifications.map(c=>(
+                    <span key={c} style={{padding:"4px 10px",borderRadius:6,background:"var(--green-dim,#d1fae5)",color:"var(--green)",fontSize:11,fontWeight:600}}>✓ {c}</span>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* AI Recommendation */}
+            <div style={{padding:16,borderRadius:10,background:selected.riskLevel==="low"?"var(--green-dim,#d1fae5)":selected.riskLevel==="medium"?"var(--amber-dim,#fef3c7)":"#fee2e2",border:`1px solid ${riskColor[selected.riskLevel]}`}}>
+              <div style={{fontSize:11,fontWeight:700,color:riskColor[selected.riskLevel],marginBottom:8}}>✦ AI 거래 권장 의견</div>
+              <p style={{fontSize:13,color:"var(--t2)",lineHeight:1.6}}>
+                {selected.riskLevel==="low" && "✅ 우수한 신용 등급 기업입니다. 적극적인 거래를 권장하며, 조기 결제 인센티브 제공 시 관계 강화에 효과적입니다."}
+                {selected.riskLevel==="medium" && "📌 중간 수준의 리스크가 있습니다. T/T 선금 30% 이상 요구 또는 신용장(L/C) 방식 결제를 권장하며, 거래 초기에는 소량 테스트 오더를 추천합니다."}
+                {selected.riskLevel==="high" && "⚠️ 고위험 기업입니다. 거래 시 100% 선불 결제 또는 에스크로 방식을 강력히 권장합니다. 법적 계약서 체결 필수."}
+              </p>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// ─────────── MARKET VIEW ───────────
+const FX_DATA = [
+  { pair:"USD/KRW", rate:1378.50, change:+0.32, flag:"🇺🇸", full:"미국 달러" },
+  { pair:"EUR/KRW", rate:1521.80, change:-0.18, flag:"🇪🇺", full:"유로" },
+  { pair:"JPY/KRW", rate:9.42, change:+0.51, flag:"🇯🇵", full:"일본 엔 (100엔)" },
+  { pair:"CNY/KRW", rate:190.35, change:-0.07, flag:"🇨🇳", full:"중국 위안" },
+  { pair:"GBP/KRW", rate:1764.20, change:+0.14, flag:"🇬🇧", full:"영국 파운드" },
+  { pair:"SGD/KRW", rate:1022.60, change:+0.09, flag:"🇸🇬", full:"싱가포르 달러" },
+  { pair:"AUD/KRW", rate:873.40, change:-0.23, flag:"🇦🇺", full:"호주 달러" },
+  { pair:"AED/KRW", rate:375.20, change:+0.01, flag:"🇦🇪", full:"UAE 디르함" },
+];
+const COMMODITY_DATA = [
+  { name:"구리 (Copper)", unit:"$/톤", price:9842, change:+1.24, icon:"🔶", relevance:"전자·전기 부품" },
+  { name:"알루미늄", unit:"$/톤", price:2456, change:-0.87, icon:"⬜", relevance:"자동차·항공 소재" },
+  { name:"철강 (HRC)", unit:"$/톤", price:712, change:+0.43, icon:"🔩", relevance:"기계·건설 부품" },
+  { name:"천연고무", unit:"$/kg", price:2.18, change:+2.11, icon:"⚫", relevance:"자동차·방진 부품" },
+  { name:"리튬", unit:"$/톤", price:14200, change:-3.22, icon:"🔋", relevance:"배터리·전자" },
+  { name:"니켈", unit:"$/톤", price:17580, change:+0.65, icon:"🪙", relevance:"스테인리스·배터리" },
+];
+const TRADE_INDICES = [
+  { name:"Baltic Dry Index", value:1842, change:+2.3, desc:"글로벌 건화물 운임 지수", icon:"🚢" },
+  { name:"WCI 상하이-유럽", value:3240, change:-1.8, desc:"컨테이너 운임 ($/FEU)", icon:"📦" },
+  { name:"한국 수출입 물가", value:112.4, change:+0.9, desc:"수출입 물가 지수 (2020=100)", icon:"📊" },
+  { name:"글로벌 PMI 제조업", value:51.2, change:+0.3, desc:"50 이상 = 확장 국면", icon:"🏭" },
+];
+
+function MarketView() {
+  const [lastUpdate] = useState("2026-04-20 09:30 KST");
+  const ChangeTag = ({ value }) => (
+    <span style={{fontSize:11,fontWeight:600,color:value>=0?"var(--green)":"var(--red)",background:value>=0?"var(--green-dim,#d1fae5)":"#fee2e2",padding:"2px 7px",borderRadius:6}}>
+      {value>=0?"+":""}{value.toFixed(2)}%
+    </span>
+  );
+  return (
+    <div style={{flex:1,overflowY:"auto",padding:24,background:"var(--bg-1)"}}>
+      <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:20}}>
+        <div>
+          <h2 style={{fontSize:16,fontWeight:800,color:"var(--t1)",marginBottom:2}}>시장 동향</h2>
+          <div style={{fontSize:11,color:"var(--t4)"}}>최종 업데이트: {lastUpdate} (Mock 데이터)</div>
+        </div>
+        <div style={{padding:"6px 14px",borderRadius:8,background:"var(--blue-dim)",color:"var(--blue)",fontSize:11,fontWeight:600}}>📡 실시간 연동 예정</div>
+      </div>
+
+      {/* FX Section */}
+      <div style={{marginBottom:24}}>
+        <div style={{fontSize:12,fontWeight:700,color:"var(--t3)",textTransform:"uppercase",letterSpacing:.5,marginBottom:12}}>주요 환율 (원화 기준)</div>
+        <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(200px,1fr))",gap:10}}>
+          {FX_DATA.map(f=>(
+            <div key={f.pair} style={{padding:"14px 16px",borderRadius:10,background:"var(--bg-0)",border:"1px solid var(--border)",display:"flex",alignItems:"center",gap:12}}>
+              <span style={{fontSize:20}}>{f.flag}</span>
+              <div style={{flex:1}}>
+                <div style={{fontSize:10,color:"var(--t4)",marginBottom:2}}>{f.full}</div>
+                <div style={{fontSize:15,fontWeight:700,color:"var(--t1)",fontFamily:"var(--mono)"}}>{f.rate.toLocaleString()}</div>
+              </div>
+              <ChangeTag value={f.change}/>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Commodities */}
+      <div style={{marginBottom:24}}>
+        <div style={{fontSize:12,fontWeight:700,color:"var(--t3)",textTransform:"uppercase",letterSpacing:.5,marginBottom:12}}>원자재 시세</div>
+        <div style={{borderRadius:10,border:"1px solid var(--border)",overflow:"hidden",background:"var(--bg-0)"}}>
+          <table style={{width:"100%",borderCollapse:"collapse"}}>
+            <thead>
+              <tr style={{background:"var(--bg-2)"}}>
+                {["","품목","단위","현재가","등락률","관련 품목"].map((h,i)=>(
+                  <th key={i} style={{padding:"8px 14px",textAlign:i>1?"right":"left",fontSize:10,fontWeight:600,color:"var(--t3)",textTransform:"uppercase"}}>{h}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {COMMODITY_DATA.map((c,i)=>(
+                <tr key={c.name} style={{borderTop:"1px solid var(--border)",background:i%2===0?"var(--bg-0)":"var(--bg-1)"}}>
+                  <td style={{padding:"10px 14px",fontSize:18}}>{c.icon}</td>
+                  <td style={{padding:"10px 14px",fontSize:13,fontWeight:600,color:"var(--t1)"}}>{c.name}</td>
+                  <td style={{padding:"10px 14px",fontSize:11,color:"var(--t4)",textAlign:"right"}}>{c.unit}</td>
+                  <td style={{padding:"10px 14px",fontSize:13,fontWeight:700,color:"var(--t1)",fontFamily:"var(--mono)",textAlign:"right"}}>{c.price.toLocaleString()}</td>
+                  <td style={{padding:"10px 14px",textAlign:"right"}}><ChangeTag value={c.change}/></td>
+                  <td style={{padding:"10px 14px",fontSize:11,color:"var(--t3)",textAlign:"right"}}>{c.relevance}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      {/* Trade Indices */}
+      <div>
+        <div style={{fontSize:12,fontWeight:700,color:"var(--t3)",textTransform:"uppercase",letterSpacing:.5,marginBottom:12}}>무역 지수</div>
+        <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(220px,1fr))",gap:10}}>
+          {TRADE_INDICES.map(t=>(
+            <div key={t.name} style={{padding:"16px",borderRadius:10,background:"var(--bg-0)",border:"1px solid var(--border)"}}>
+              <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:8}}>
+                <span style={{fontSize:20}}>{t.icon}</span>
+                <div style={{fontSize:11,fontWeight:600,color:"var(--t2)"}}>{t.name}</div>
+              </div>
+              <div style={{display:"flex",alignItems:"flex-end",justifyContent:"space-between"}}>
+                <div style={{fontSize:22,fontWeight:800,color:"var(--t1)",fontFamily:"var(--mono)"}}>{t.value.toLocaleString()}</div>
+                <ChangeTag value={t.change}/>
+              </div>
+              <div style={{fontSize:10,color:"var(--t4)",marginTop:6}}>{t.desc}</div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function EmailFinderView() {
   const [searchType, setSearchType] = useState("domain");
   const [domain, setDomain] = useState("");
@@ -4936,10 +5306,10 @@ export default function App() {
           <div style={{padding:"10px 20px",borderBottom:"1px solid var(--border)",background:"var(--bg-0)",display:"flex",alignItems:"center",gap:12,flexShrink:0}}>
             <div>
               <h1 style={{fontSize:15,fontWeight:800,color:"var(--t1)"}}>
-                {view==="buyers"?"바이어 탐색":view==="dashboard"?"대시보드":view==="emailfinder"?"이메일 발굴":view==="aiMatch"?"AI 매칭":"플레이북"}
+                {view==="buyers"?"바이어 탐색":view==="dashboard"?"대시보드":view==="emailfinder"?"이메일 발굴":view==="aiMatch"?"AI 매칭":view==="news"?"무역 뉴스":view==="credit"?"신용 리포트":view==="market"?"시장 동향":"플레이북"}
               </h1>
               <p style={{fontSize:11,color:"var(--t3)",marginTop:1}}>
-                {view==="buyers"?`${filtered.length.toLocaleString()}명의 검증된 글로벌 바이어`:view==="dashboard"?"성과 분석 및 인사이트":view==="emailfinder"?"이메일 주소 발굴 및 검증":view==="aiMatch"?"AI 기반 바이어 추천":"아웃리치 전략 실행"}
+                {view==="buyers"?`${filtered.length.toLocaleString()}명의 검증된 글로벌 바이어`:view==="dashboard"?"성과 분석 및 인사이트":view==="emailfinder"?"이메일 주소 발굴 및 검증":view==="aiMatch"?"AI 기반 바이어 추천":view==="news"?"글로벌 무역·경제 최신 뉴스":view==="credit"?"바이어 신용평가 및 리스크 분석":view==="market"?"환율·원자재·무역 지수 현황":"아웃리치 전략 실행"}
               </p>
             </div>
             <div style={{marginLeft:"auto",display:"flex",alignItems:"center",gap:6}}>
@@ -4969,7 +5339,7 @@ export default function App() {
             />
           )}
 
-          {view==="aiMatch" ? <AIMatchView buyers={ALL_BUYERS} /> : view==="dashboard" ? <DashboardView buyers={ALL_BUYERS} savedSet={savedSet} starred={starred} buyerNotes={buyerNotes} /> : view==="emailfinder" ? <EmailFinderView /> : view==="playbook" ? <PlaybookView buyers={ALL_BUYERS} savedSet={savedSet} onRunPlaybook={(ids,title,cnt)=>{setSelected(ids);navigateTo('buyers');setToast(`✅ "${title}" 실행 — ${cnt}명 바이어가 선택되었습니다`);}} /> : <div style={{flex:1,display:"flex",overflow:"hidden"}}>
+          {view==="aiMatch" ? <AIMatchView buyers={ALL_BUYERS} /> : view==="dashboard" ? <DashboardView buyers={ALL_BUYERS} savedSet={savedSet} starred={starred} buyerNotes={buyerNotes} /> : view==="emailfinder" ? <EmailFinderView /> : view==="playbook" ? <PlaybookView buyers={ALL_BUYERS} savedSet={savedSet} onRunPlaybook={(ids,title,cnt)=>{setSelected(ids);navigateTo('buyers');setToast(`✅ "${title}" 실행 — ${cnt}명 바이어가 선택되었습니다`);}} /> : view==="news" ? <TradeNewsView /> : view==="credit" ? <CreditReportView /> : view==="market" ? <MarketView /> : <div style={{flex:1,display:"flex",overflow:"hidden"}}>
           {/* Apollo 2컬럼: Filter Panel + Table */}
           <FilterSidebar filters={filters} setFilters={setFilters} collapsed={sideCollapsed} setCollapsed={setSideCollapsed} />
           <div style={{flex:1,display:"flex",flexDirection:"column",overflow:"hidden"}}><>
