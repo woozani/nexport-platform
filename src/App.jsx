@@ -207,7 +207,7 @@ function UpgradeModal({ currentPlan, onClose, onUpgrade }) {
 }
 
 // ─────────── ACCOUNT MENU ───────────
-function AccountMenu({ user, plan, onClose, onUpgrade, onProfile, onNotifSettings }) {
+function AccountMenu({ user, plan, onClose, onUpgrade, onProfile, onNotifSettings, onLangRegion }) {
   const planMeta = PLANS.find(p=>p.id===plan);
   return (
     <div style={{position:"absolute",bottom:"100%",left:0,right:0,marginBottom:6,background:"var(--bg-0)",border:"1px solid var(--border)",borderRadius:10,boxShadow:"var(--modal-shadow)",overflow:"hidden",zIndex:500,animation:"fadeIn .15s ease"}}>
@@ -231,7 +231,7 @@ function AccountMenu({ user, plan, onClose, onUpgrade, onProfile, onNotifSetting
       {[
         {icon:<Ic.Users s={12}/>,label:"프로필 설정",action:()=>{onClose();onProfile();}},
         {icon:<Ic.Bell s={12}/>,label:"알림 설정",action:()=>{onClose();onNotifSettings();}},
-        {icon:<Ic.Globe s={12}/>,label:"언어 / 지역",action:onClose},
+        {icon:<Ic.Globe s={12}/>,label:"언어 / 지역",action:()=>{onClose();onLangRegion();}},
       ].map(({icon,label,action})=>(
         <div key={label} onClick={action} style={{display:"flex",alignItems:"center",gap:8,padding:"8px 14px",cursor:"pointer",fontSize:12,color:"var(--t2)"}}
           onMouseEnter={e=>e.currentTarget.style.background="var(--bg-hover)"}
@@ -335,8 +335,52 @@ function NotificationSettingsModal({ onClose }) {
   );
 }
 
+// ─────────── LANG / REGION MODAL ───────────
+function LangRegionModal({ lang, region, onSave, onClose }) {
+  const [selLang, setSelLang] = useState(lang);
+  const [selRegion, setSelRegion] = useState(region);
+  const Option = ({ active, onClick, children }) => (
+    <div onClick={onClick} style={{display:"flex",alignItems:"center",gap:10,padding:"10px 14px",borderRadius:9,border:`1px solid ${active?"var(--blue)":"var(--border)"}`,background:active?"var(--blue-dim)":"transparent",cursor:"pointer",transition:"all .15s"}}
+      onMouseEnter={e=>{if(!active)e.currentTarget.style.borderColor="var(--border-h)"}}
+      onMouseLeave={e=>{if(!active)e.currentTarget.style.borderColor="var(--border)"}}>
+      <div style={{width:16,height:16,borderRadius:"50%",border:`2px solid ${active?"var(--blue)":"var(--t4)"}`,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
+        {active && <div style={{width:8,height:8,borderRadius:"50%",background:"var(--blue)"}}/>}
+      </div>
+      <span style={{fontSize:13,fontWeight:active?700:400,color:active?"var(--blue)":"var(--t1)"}}>{children}</span>
+    </div>
+  );
+  return (
+    <div style={{position:"fixed",inset:0,zIndex:2000,background:"rgba(0,0,0,.45)",display:"flex",alignItems:"center",justifyContent:"center",padding:16}} onClick={onClose}>
+      <div style={{background:"var(--bg-0)",border:"1px solid var(--border)",borderRadius:14,padding:24,width:"100%",maxWidth:380,boxShadow:"var(--modal-shadow)",animation:"fadeIn .18s ease"}} onClick={e=>e.stopPropagation()}>
+        <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:20}}>
+          <div style={{fontSize:15,fontWeight:800,color:"var(--t1)"}}>언어 / 지역</div>
+          <div onClick={onClose} style={{cursor:"pointer",color:"var(--t3)",padding:4}}><Ic.X s={14}/></div>
+        </div>
+        <div style={{marginBottom:20}}>
+          <div style={{fontSize:11,fontWeight:700,color:"var(--t3)",textTransform:"uppercase",letterSpacing:".08em",marginBottom:10}}>언어</div>
+          <div style={{display:"flex",flexDirection:"column",gap:8}}>
+            <Option active={selLang==="ko"} onClick={()=>setSelLang("ko")}>한국어</Option>
+            <Option active={selLang==="en"} onClick={()=>setSelLang("en")}>English</Option>
+          </div>
+        </div>
+        <div style={{marginBottom:24}}>
+          <div style={{fontSize:11,fontWeight:700,color:"var(--t3)",textTransform:"uppercase",letterSpacing:".08em",marginBottom:10}}>지역</div>
+          <div style={{display:"flex",flexDirection:"column",gap:8}}>
+            <Option active={selRegion==="KR"} onClick={()=>setSelRegion("KR")}>🇰🇷 한국</Option>
+            <Option active={selRegion==="US"} onClick={()=>setSelRegion("US")}>🇺🇸 미국</Option>
+          </div>
+        </div>
+        <div style={{display:"flex",gap:8}}>
+          <div onClick={onClose} style={{flex:1,padding:"9px 0",borderRadius:8,border:"1px solid var(--border)",textAlign:"center",fontSize:12,fontWeight:600,color:"var(--t2)",cursor:"pointer"}}>취소</div>
+          <div onClick={()=>{onSave(selLang,selRegion);onClose();}} style={{flex:2,padding:"9px 0",borderRadius:8,background:"var(--blue)",textAlign:"center",fontSize:12,fontWeight:700,color:"#fff",cursor:"pointer"}}>저장</div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ─────────── APOLLO-STYLE LEFT NAV ───────────
-function LeftNav({ view, navigateTo, search, setSearch, canBack, canForward, goBack, goForward, notifUnread, setShowNotifications, plan, user, onUpgrade, onProfile, onNotifSettings }) {
+function LeftNav({ view, navigateTo, search, setSearch, canBack, canForward, goBack, goForward, notifUnread, setShowNotifications, plan, user, onUpgrade, onProfile, onNotifSettings, onLangRegion }) {
   const [showAccount, setShowAccount] = useState(false);
   const NavItem = ({ icon, label, viewKey, badge, onClick }) => {
     const active = viewKey ? view === viewKey : false;
@@ -381,7 +425,7 @@ function LeftNav({ view, navigateTo, search, setSearch, canBack, canForward, goB
       {/* Bottom */}
       <div style={{borderTop:"1px solid var(--border)",padding:"8px 10px",flexShrink:0,display:"flex",flexDirection:"column",gap:6,position:"relative"}}>
         {/* Account menu popup */}
-        {showAccount && <AccountMenu user={user} plan={plan} onClose={()=>setShowAccount(false)} onUpgrade={onUpgrade} onProfile={onProfile} onNotifSettings={onNotifSettings}/>}
+        {showAccount && <AccountMenu user={user} plan={plan} onClose={()=>setShowAccount(false)} onUpgrade={onUpgrade} onProfile={onProfile} onNotifSettings={onNotifSettings} onLangRegion={onLangRegion}/>}
         {/* Icon row */}
         <div style={{display:"flex",alignItems:"center",gap:4}}>
           <div style={{display:"flex",gap:3,marginLeft:"auto"}}>
@@ -4656,6 +4700,9 @@ export default function App() {
   const [showUpgrade, setShowUpgrade] = useState(false);
   const [showProfileSettings, setShowProfileSettings] = useState(false);
   const [showNotifSettings, setShowNotifSettings] = useState(false);
+  const [showLangRegion, setShowLangRegion] = useState(false);
+  const [appLang, setAppLang] = useState("ko");
+  const [appRegion, setAppRegion] = useState("KR");
   const [userAccount] = useState({name:"Jay Jang", email:"jay.jyjang@gmail.com"});
   const handleUpgrade = (plan) => { setUserPlan(plan); try{localStorage.setItem('nx-plan',plan)}catch(e){} setToast(`✅ ${PLANS.find(p=>p.id===plan)?.name} 플랜으로 업그레이드됐습니다!`); };
   // ── Apple Theme ──
@@ -4870,6 +4917,7 @@ export default function App() {
       {showUpgrade && <UpgradeModal currentPlan={userPlan} onClose={()=>setShowUpgrade(false)} onUpgrade={handleUpgrade}/>}
       {showProfileSettings && <ProfileSettingsModal user={userAccount} onClose={()=>setShowProfileSettings(false)}/>}
       {showNotifSettings && <NotificationSettingsModal onClose={()=>setShowNotifSettings(false)}/>}
+      {showLangRegion && <LangRegionModal lang={appLang} region={appRegion} onSave={(l,r)=>{setAppLang(l);setAppRegion(r);}} onClose={()=>setShowLangRegion(false)}/>}
 
       <div style={{display:"flex",height:"100vh",overflow:"hidden",background:"var(--bg-0)"}}>
         {/* Apollo-style Left Nav */}
@@ -4878,7 +4926,8 @@ export default function App() {
           notifUnread={notifUnread}
           setShowNotifications={setShowNotifications}
           plan={userPlan} user={userAccount} onUpgrade={()=>setShowUpgrade(true)}
-          onProfile={()=>setShowProfileSettings(true)} onNotifSettings={()=>setShowNotifSettings(true)}/>
+          onProfile={()=>setShowProfileSettings(true)} onNotifSettings={()=>setShowNotifSettings(true)}
+          onLangRegion={()=>setShowLangRegion(true)}/>
 
         {/* Main Content */}
         <div style={{flex:1,display:"flex",flexDirection:"column",overflow:"hidden"}}>
