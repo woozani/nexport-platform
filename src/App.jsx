@@ -1601,6 +1601,29 @@ function LandingHero({ onEnter, onLogin, isMobile }) {
   const [regRef, regInView] = useInView(0.15);
   // ── 경쟁 비교 inView ──
   const [compRef, compInView] = useInView(0.15);
+  // ── 검색 미리보기 ──
+  const [searchQuery, setSearchQuery] = useState("");
+  const [searchFocused, setSearchFocused] = useState(false);
+  const PREVIEW_BUYERS = [
+    {name:"Pacific Trade Corp",country:"🇺🇸 미국",industry:"자동차 부품",score:98},
+    {name:"TechParts GmbH",country:"🇩🇪 독일",industry:"자동차 부품",score:97},
+    {name:"Lyon Aerospace",country:"🇫🇷 프랑스",industry:"항공·기계",score:96},
+    {name:"Seoul Auto Parts",country:"🇯🇵 일본",industry:"자동차 부품",score:94},
+    {name:"MedDevice Canada",country:"🇨🇦 캐나다",industry:"의료기기",score:95},
+    {name:"Elektronik AG",country:"🇩🇪 독일",industry:"전자·반도체",score:93},
+    {name:"Midwest Industrial",country:"🇺🇸 미국",industry:"기계·장비",score:91},
+    {name:"SingTech Pte",country:"🇸🇬 싱가포르",industry:"전자·반도체",score:90},
+    {name:"Viet Mfg Corp",country:"🇻🇳 베트남",industry:"플라스틱·고무",score:89},
+    {name:"Nordic Medical",country:"🇸🇪 스웨덴",industry:"의료기기",score:92},
+  ];
+  const filteredBuyers = searchQuery.trim().length > 0
+    ? PREVIEW_BUYERS.filter(b =>
+        b.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        b.industry.includes(searchQuery) ||
+        b.country.includes(searchQuery)
+      ).slice(0, 4)
+    : PREVIEW_BUYERS.slice(0, 4);
+  const showSearchDrop = searchFocused && searchQuery.trim().length > 0;
   // ── 데모 모달 ──
   const [showDemo, setShowDemo] = useState(false);
   // ── 연간/월간 요금 토글 ──
@@ -1722,15 +1745,46 @@ function LandingHero({ onEnter, onLogin, isMobile }) {
             바이어 발굴부터 이메일 확보, AI 매칭까지.<br/>수출의 모든 과정을 하나의 플랫폼에서.
           </p>
 
-          {/* 타이핑 검색창 */}
-          <div style={{maxWidth:580,margin:"0 auto 32px",display:"flex",alignItems:"center",flexDirection:isMobile?"column":"row",gap:0,borderRadius:14,border:"1px solid var(--border-h)",background:"var(--bg-2)",overflow:"hidden",boxShadow:"var(--card-shadow)"}}>
-            <div style={{padding:"0 16px",color:"var(--t3)",display:"flex",alignItems:"center"}}><Ic.Search s={16}/></div>
-            <div style={{flex:1,padding:"14px 0",fontSize:15,color:"var(--t1)",textAlign:"left",fontFamily:"var(--font)",minHeight:22}}>
-              {typed}
-              <span style={{display:"inline-block",width:2,height:"1em",background:"var(--blue)",marginLeft:1,verticalAlign:"text-bottom",animation:"typingCursor 1s step-end infinite"}}/>
+          {/* 검색창 + 드롭다운 */}
+          <div style={{maxWidth:580,margin:"0 auto 32px",position:"relative"}}>
+            <div style={{display:"flex",alignItems:"center",flexDirection:isMobile?"column":"row",gap:0,borderRadius:14,border:`1px solid ${searchFocused?"var(--blue)":"var(--border-h)"}`,background:"var(--bg-2)",overflow:"hidden",boxShadow:searchFocused?"0 0 0 3px rgba(10,132,255,.12)":"var(--card-shadow)",transition:"all .2s"}}>
+              <div style={{padding:"0 16px",color:"var(--t3)",display:"flex",alignItems:"center"}}><Ic.Search s={16}/></div>
+              <div style={{flex:1,position:"relative",minHeight:22}}>
+                <input
+                  value={searchQuery}
+                  onChange={e=>setSearchQuery(e.target.value)}
+                  onFocus={()=>setSearchFocused(true)}
+                  onBlur={()=>setTimeout(()=>setSearchFocused(false),150)}
+                  placeholder={typed || "바이어 검색..."}
+                  style={{width:"100%",padding:"14px 0",fontSize:15,color:"var(--t1)",background:"transparent",border:"none",outline:"none",fontFamily:"var(--font)"}}
+                />
+              </div>
+              <div onClick={onEnter} style={{padding:"10px 20px",margin:6,borderRadius:9,background:"var(--blue)",color:"#fff",fontSize:13,fontWeight:700,cursor:"pointer",whiteSpace:"nowrap",transition:"all .18s",flexShrink:0,width:isMobile?"calc(100% - 12px)":undefined,textAlign:isMobile?"center":undefined}}
+                onMouseEnter={e=>e.currentTarget.style.opacity=".88"} onMouseLeave={e=>e.currentTarget.style.opacity="1"}>바이어 검색</div>
             </div>
-            <div onClick={onEnter} style={{padding:"10px 20px",margin:6,borderRadius:9,background:"var(--blue)",color:"#fff",fontSize:13,fontWeight:700,cursor:"pointer",whiteSpace:"nowrap",transition:"all .18s",flexShrink:0,width:isMobile?"calc(100% - 12px)":undefined,textAlign:isMobile?"center":undefined}}
-              onMouseEnter={e=>e.currentTarget.style.opacity=".88"} onMouseLeave={e=>e.currentTarget.style.opacity="1"}>바이어 검색</div>
+            {/* 드롭다운 미리보기 */}
+            {showSearchDrop && (
+              <div style={{position:"absolute",top:"calc(100% + 8px)",left:0,right:0,borderRadius:12,background:"var(--bg-1)",border:"1px solid var(--border)",boxShadow:"var(--modal-shadow)",zIndex:50,overflow:"hidden"}}>
+                {filteredBuyers.length > 0 ? filteredBuyers.map((b,i)=>(
+                  <div key={i} onClick={onEnter} style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"10px 16px",cursor:"pointer",transition:"background .15s",borderBottom:i<filteredBuyers.length-1?"1px solid var(--border)":"none"}}
+                    onMouseEnter={e=>e.currentTarget.style.background="var(--bg-2)"} onMouseLeave={e=>e.currentTarget.style.background="transparent"}>
+                    <div style={{display:"flex",alignItems:"center",gap:10}}>
+                      <div style={{width:32,height:32,borderRadius:8,background:"var(--blue-dim)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:12,fontWeight:800,color:"var(--blue)"}}>{b.name[0]}</div>
+                      <div>
+                        <div style={{fontSize:13,fontWeight:600,color:"var(--t1)"}}>{b.name}</div>
+                        <div style={{fontSize:11,color:"var(--t3)"}}>{b.country} · {b.industry}</div>
+                      </div>
+                    </div>
+                    <div style={{padding:"3px 10px",borderRadius:20,background:"rgba(16,185,129,.1)",color:"var(--green)",fontSize:11,fontWeight:700}}>점수 {b.score}</div>
+                  </div>
+                )) : (
+                  <div style={{padding:"16px",textAlign:"center",fontSize:13,color:"var(--t3)"}}>검색 결과가 없습니다</div>
+                )}
+                <div onClick={onEnter} style={{padding:"10px 16px",textAlign:"center",fontSize:12,fontWeight:700,color:"var(--blue)",cursor:"pointer",background:"var(--bg-2)",borderTop:"1px solid var(--border)"}}>
+                  전체 결과 보기 →
+                </div>
+              </div>
+            )}
           </div>
 
           <div style={{display:"flex",gap:12,justifyContent:"center",flexWrap:"wrap"}}>
@@ -2384,6 +2438,70 @@ function LandingHero({ onEnter, onLogin, isMobile }) {
                 ))}
               </tbody>
             </table>
+          </div>
+        </div>
+
+        {/* ⑥-E-0 이용 사례 */}
+        <div id="cases" style={{padding:isMobile?"0 0 48px":"0 0 80px"}}>
+          <div style={{textAlign:"center",marginBottom:isMobile?28:44}}>
+            <div style={{fontSize:11,fontWeight:700,color:"var(--cyan)",textTransform:"uppercase",letterSpacing:".12em",marginBottom:10}}>Success Stories</div>
+            <h2 style={{fontSize:isMobile?22:32,fontWeight:800,letterSpacing:"-.03em",color:"var(--t1)"}}>실제 수출 성공 사례</h2>
+            <p style={{fontSize:isMobile?13:15,color:"var(--t3)",marginTop:10}}>NEXPORT를 통해 해외 바이어를 발굴한 한국 중소 제조업체 사례입니다</p>
+          </div>
+          <div style={{display:"grid",gridTemplateColumns:isMobile?"1fr":"repeat(3,1fr)",gap:isMobile?16:20}}>
+            {[
+              {
+                tag:"자동차 부품",tagColor:"var(--blue)",
+                company:"경기도 A사",desc:"10년 경력 PCB 커넥터 제조업체. 기존 전시회 중심 영업으로 연 3~4개 바이어 발굴에 한계.",
+                result:"6개월 내 미국·독일 바이어 11곳 계약",
+                metrics:[{label:"신규 계약",val:"11건"},{label:"수출 매출",val:"$180K"},{label:"소요 기간",val:"6개월"}],
+                quote:"전시회 한 번 비용으로 1년치 바이어를 확보했어요.",
+                author:"대표이사 김OO",
+                color:"var(--blue)",dim:"var(--blue-dim)"
+              },
+              {
+                tag:"의료기기",tagColor:"var(--green)",
+                company:"부산 B사",desc:"FDA 인증 보유 의료 소모품 제조사. 북미 진출 희망이었으나 현지 바이어 정보 부재로 3년째 국내 매출에 의존.",
+                result:"FDA 인증 매칭으로 미국 병원 유통사 5곳 확보",
+                metrics:[{label:"바이어 확보",val:"5곳"},{label:"첫 계약",val:"3주"},{label:"연간 매출 증가",val:"+240%"}],
+                quote:"인증 필터 덕분에 FDA 요구 바이어만 골라낼 수 있었습니다.",
+                author:"수출담당 이OO",
+                color:"var(--green)",dim:"rgba(16,185,129,.1)"
+              },
+              {
+                tag:"전자·반도체",tagColor:"var(--violet)",
+                company:"인천 C사",desc:"MLCC 전문 제조업체. 콜드이메일을 직접 작성하다 응답률 0.8%에 불과해 사실상 해외 영업 포기 상태.",
+                result:"AI 개인화 이메일로 응답률 12배 향상",
+                metrics:[{label:"이메일 응답률",val:"9.6%"},{label:"파이프라인",val:"23건"},{label:"계약 전환",val:"4건"}],
+                quote:"같은 시간에 12배 많은 바이어가 답장을 보내왔어요.",
+                author:"영업팀장 박OO",
+                color:"var(--violet)",dim:"rgba(139,92,246,.1)"
+              },
+            ].map((c,i)=>(
+              <div key={i} style={{padding:isMobile?"24px 20px":"28px 24px",borderRadius:16,background:"var(--bg-2)",border:"1px solid var(--border)",boxShadow:"var(--card-shadow)",display:"flex",flexDirection:"column",gap:16}}>
+                <div>
+                  <div style={{display:"inline-flex",alignItems:"center",padding:"4px 10px",borderRadius:20,background:c.dim,border:`1px solid ${c.color}30`,fontSize:10,fontWeight:700,color:c.color,marginBottom:12,letterSpacing:".04em"}}>{c.tag}</div>
+                  <div style={{fontSize:14,fontWeight:700,color:"var(--t1)",marginBottom:6}}>{c.company}</div>
+                  <div style={{fontSize:12,color:"var(--t3)",lineHeight:1.65}}>{c.desc}</div>
+                </div>
+                <div style={{padding:"12px 14px",borderRadius:10,background:c.dim,border:`1px solid ${c.color}25`}}>
+                  <div style={{fontSize:11,fontWeight:700,color:c.color,marginBottom:2}}>결과</div>
+                  <div style={{fontSize:13,fontWeight:600,color:"var(--t1)"}}>{c.result}</div>
+                </div>
+                <div style={{display:"flex",gap:8}}>
+                  {c.metrics.map((m,j)=>(
+                    <div key={j} style={{flex:1,textAlign:"center",padding:"10px 4px",borderRadius:8,background:"var(--bg-3)",border:"1px solid var(--border)"}}>
+                      <div style={{fontSize:isMobile?14:16,fontWeight:900,color:c.color}}>{m.val}</div>
+                      <div style={{fontSize:9,color:"var(--t4)",marginTop:2,lineHeight:1.3}}>{m.label}</div>
+                    </div>
+                  ))}
+                </div>
+                <div style={{paddingTop:14,borderTop:"1px solid var(--border)"}}>
+                  <div style={{fontSize:12,color:"var(--t2)",lineHeight:1.6,fontStyle:"italic",marginBottom:6}}>"{c.quote}"</div>
+                  <div style={{fontSize:10,color:"var(--t4)",fontWeight:600}}>— {c.author}</div>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
 
