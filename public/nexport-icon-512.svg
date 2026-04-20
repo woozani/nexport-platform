@@ -1,0 +1,15 @@
+<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="512" height="512" rx="80" fill="white"/>
+  <defs>
+    <linearGradient id="nxLogoGrad" x1="80" y1="256" x2="432" y2="256" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#0A2463"/>
+      <stop offset="100%" stop-color="#3E92CC"/>
+    </linearGradient>
+  </defs>
+  <!-- N 레터 (중앙 배치) -->
+  <path d="M80 430V82L290 390V82" stroke="url(#nxLogoGrad)" stroke-width="42" stroke-linecap="round" stroke-linejoin="round"/>
+  <!-- 첫 번째 > -->
+  <path d="M328 170L420 256L328 342" stroke="#3E92CC" stroke-width="36" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+  <!-- 두 번째 > -->
+  <path d="M404 170L496 256L404 342" stroke="#3E92CC" stroke-width="36" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+</svg>
