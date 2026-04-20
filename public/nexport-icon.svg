@@ -1,4 +1,4 @@
-<svg width="200" height="140" viewBox="0 0 40 28" fill="none" xmlns="http://www.w3.org/2000/svg">
+<svg width="200" height="200" viewBox="0 0 20 28" fill="none" xmlns="http://www.w3.org/2000/svg">
   <defs>
     <linearGradient id="nxLogoGrad" x1="0" y1="0" x2="40" y2="0" gradientUnits="userSpaceOnUse">
       <stop offset="0%" stop-color="#0A2463"/>
@@ -7,8 +7,4 @@
   </defs>
   <!-- N 레터 -->
   <path d="M2 26V2L18 24V2" stroke="url(#nxLogoGrad)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
-  <!-- 첫 번째 > -->
-  <path d="M23 7L31 14L23 21" stroke="#3E92CC" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
-  <!-- 두 번째 > -->
-  <path d="M30 7L38 14L30 21" stroke="#3E92CC" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
 </svg>
