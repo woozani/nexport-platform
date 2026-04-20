@@ -1735,11 +1735,12 @@ function LandingHero({ onEnter, onLogin, isMobile }) {
           onMouseEnter={e=>e.currentTarget.style.borderColor="var(--border-h)"} onMouseLeave={e=>e.currentTarget.style.borderColor="var(--border)"}>
           <span style={{fontSize:14}}>✉</span> 이메일 문의
         </a>
-        <div style={{width:40,height:40,borderRadius:"50%",background:"#FEE500",display:"flex",alignItems:"center",justifyContent:"center",cursor:"pointer",boxShadow:"0 4px 16px rgba(0,0,0,.18)",fontSize:20,transition:"transform .2s"}}
+        <a href="http://pf.kakao.com/_DPyCX/chat" target="_blank" rel="noopener noreferrer"
+          style={{width:40,height:40,borderRadius:"50%",background:"#FEE500",display:"flex",alignItems:"center",justifyContent:"center",cursor:"pointer",boxShadow:"0 4px 16px rgba(0,0,0,.18)",fontSize:20,transition:"transform .2s",textDecoration:"none"}}
           title="카카오톡 문의"
           onMouseEnter={e=>e.currentTarget.style.transform="scale(1.08)"} onMouseLeave={e=>e.currentTarget.style.transform="scale(1)"}>
           💬
-        </div>
+        </a>
       </div>
 
       {/* Ambient glows */}
