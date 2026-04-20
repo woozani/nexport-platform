@@ -1545,9 +1545,17 @@ function MobileDesktopBanner({ onClose }) {
 }
 
 // ─────────── LANDING HERO ───────────
-function LandingHero({ onEnter, isMobile }) {
+function LandingHero({ onEnter, onLogin, isMobile }) {
   const [visible, setVisible] = useState(false);
   useEffect(() => { setTimeout(() => setVisible(true), 80); }, []);
+
+  const landingRef = useRef(null);
+  const scrollToSection = (id) => {
+    const el = document.getElementById(id);
+    if (el && landingRef.current) {
+      landingRef.current.scrollTo({ top: el.offsetTop - 68, behavior: "smooth" });
+    }
+  };
 
   // ── 타이핑 애니메이션 ──
   const QUERIES = ["자동차 부품 독일 바이어", "PCB 제조 미국 바이어", "플라스틱 사출 유럽 바이어", "의료기기 일본 바이어"];
@@ -1616,7 +1624,7 @@ function LandingHero({ onEnter, isMobile }) {
   ];
 
   return (
-    <div style={{position:"fixed",inset:0,zIndex:100,background:"var(--bg-0)",overflowY:"auto",overflowX:"hidden"}}>
+    <div ref={landingRef} style={{position:"fixed",inset:0,zIndex:100,background:"var(--bg-0)",overflowY:"auto",overflowX:"hidden"}}>
       {/* Ambient glows */}
       <div style={{position:"fixed",top:"-15%",left:"5%",width:"55vw",height:"55vw",borderRadius:"50%",background:"radial-gradient(circle,rgba(10,132,255,0.07) 0%,transparent 65%)",pointerEvents:"none",zIndex:0}}/>
       <div style={{position:"fixed",bottom:"-5%",right:"0%",width:"45vw",height:"45vw",borderRadius:"50%",background:"radial-gradient(circle,rgba(191,90,242,0.05) 0%,transparent 65%)",pointerEvents:"none",zIndex:0}}/>
@@ -1628,10 +1636,22 @@ function LandingHero({ onEnter, isMobile }) {
             <NexportLogo iconSize={isMobile?24:28} textSize={isMobile?15:17}/>
           </div>
           <div style={{display:"flex",alignItems:"center",gap:8}}>
-            <div onClick={onEnter} style={{padding:"7px 18px",borderRadius:8,border:"1px solid var(--border)",color:"var(--t2)",fontSize:12,fontWeight:600,cursor:"pointer",transition:"all .18s"}}
+            {!isMobile && (
+              <>
+                {[{label:"이용방법",id:"how-it-works"},{label:"기능",id:"features"},{label:"요금",id:"pricing"}].map(item=>(
+                  <div key={item.id} onClick={()=>scrollToSection(item.id)}
+                    style={{padding:"6px 12px",fontSize:12,fontWeight:500,color:"var(--t2)",cursor:"pointer",borderRadius:6,transition:"color .18s"}}
+                    onMouseEnter={e=>e.currentTarget.style.color="var(--t1)"} onMouseLeave={e=>e.currentTarget.style.color="var(--t2)"}>
+                    {item.label}
+                  </div>
+                ))}
+                <div style={{width:1,height:18,background:"var(--border)",margin:"0 4px"}}/>
+              </>
+            )}
+            <div onClick={onLogin} style={{padding:"7px 18px",borderRadius:8,border:"1px solid var(--border)",color:"var(--t2)",fontSize:12,fontWeight:600,cursor:"pointer",transition:"all .18s"}}
               onMouseEnter={e=>e.currentTarget.style.borderColor="var(--border-h)"} onMouseLeave={e=>e.currentTarget.style.borderColor="var(--border)"}>로그인</div>
             <div onClick={onEnter} style={{padding:"7px 18px",borderRadius:8,background:"var(--blue)",color:"#fff",fontSize:12,fontWeight:600,cursor:"pointer",transition:"all .18s"}}
-              onMouseEnter={e=>e.currentTarget.style.opacity=".88"} onMouseLeave={e=>e.currentTarget.style.opacity="1"}>플랫폼 시작 →</div>
+              onMouseEnter={e=>e.currentTarget.style.opacity=".88"} onMouseLeave={e=>e.currentTarget.style.opacity="1"}>무료 시작 →</div>
           </div>
         </div>
       </div>
@@ -1792,7 +1812,7 @@ function LandingHero({ onEnter, isMobile }) {
         </div>}
 
         {/* ④ HOW IT WORKS */}
-        <div ref={howRef} style={{padding:"0 0 80px"}}>
+        <div id="how-it-works" ref={howRef} style={{padding:"0 0 80px"}}>
           <div style={{textAlign:"center",marginBottom:48,opacity:howInView?1:0,transform:howInView?"none":"translateY(20px)",transition:"all .6s cubic-bezier(0.2,0,0,1)"}}>
             <div style={{fontSize:11,fontWeight:700,color:"var(--blue)",textTransform:"uppercase",letterSpacing:".12em",marginBottom:10}}>How it works</div>
             <h2 style={{fontSize:isMobile?22:32,fontWeight:800,letterSpacing:"-.03em",color:"var(--t1)"}}>NEXPORT로 수출 바이어를 찾는 방법</h2>
@@ -2011,7 +2031,7 @@ function LandingHero({ onEnter, isMobile }) {
         )}
 
         {/* ⑥ FEATURES GRID — 데스크탑 + 모바일 */}
-        <div ref={featRef} style={{padding:isMobile?"0 0 48px":"0 0 80px"}}>
+        <div id="features" ref={featRef} style={{padding:isMobile?"0 0 48px":"0 0 80px"}}>
           <div style={{textAlign:"center",marginBottom:isMobile?24:40,opacity:featInView?1:0,transform:featInView?"none":"translateY(16px)",transition:"all .6s cubic-bezier(0.2,0,0,1)"}}>
             <div style={{fontSize:11,fontWeight:700,color:"var(--blue)",textTransform:"uppercase",letterSpacing:".12em",marginBottom:10}}>Features</div>
             <h2 style={{fontSize:isMobile?22:32,fontWeight:800,letterSpacing:"-.03em",color:"var(--t1)"}}>수출 전 과정을 하나의 플랫폼에서</h2>
@@ -2193,7 +2213,7 @@ function LandingHero({ onEnter, isMobile }) {
         </div>
 
         {/* ⑥-C PRICING */}
-        <div style={{padding:isMobile?"0 0 48px":"0 0 80px"}}>
+        <div id="pricing" style={{padding:isMobile?"0 0 48px":"0 0 80px"}}>
           <div style={{textAlign:"center",marginBottom:isMobile?24:44}}>
             <div style={{fontSize:11,fontWeight:700,color:"var(--violet)",textTransform:"uppercase",letterSpacing:".12em",marginBottom:10}}>Pricing</div>
             <h2 style={{fontSize:isMobile?22:32,fontWeight:800,letterSpacing:"-.03em",color:"var(--t1)"}}>투명한 요금제, 숨겨진 비용 없음</h2>
@@ -4615,6 +4635,7 @@ export default function App() {
       <style>{CSS}</style>
       {showLanding && <LandingHero
         onEnter={() => { if (isMobile) { setShowMobileBanner(true); } else { history.pushState({ page: "platform" }, "", location.href); setShowLanding(false); } }}
+        onLogin={() => { history.pushState({ page: "platform" }, "", location.href); setShowLanding(false); }}
         isMobile={isMobile}
       />}
       {showMobileBanner && <MobileDesktopBanner onClose={() => setShowMobileBanner(false)} />}
