@@ -1601,6 +1601,12 @@ function LandingHero({ onEnter, onLogin, isMobile }) {
   const [regRef, regInView] = useInView(0.15);
   // ── 경쟁 비교 inView ──
   const [compRef, compInView] = useInView(0.15);
+  // ── 데모 모달 ──
+  const [showDemo, setShowDemo] = useState(false);
+  // ── 연간/월간 요금 토글 ──
+  const [billingAnnual, setBillingAnnual] = useState(false);
+  // ── FAQ 열림 상태 ──
+  const [faqOpen, setFaqOpen] = useState(null);
   const [activeRegTab, setActiveRegTab] = useState("cert");
 
   const features = [
@@ -1625,6 +1631,50 @@ function LandingHero({ onEnter, onLogin, isMobile }) {
 
   return (
     <div ref={landingRef} style={{position:"fixed",inset:0,zIndex:100,background:"var(--bg-0)",overflowY:"auto",overflowX:"hidden"}}>
+      {/* 데모 모달 */}
+      {showDemo && (
+        <div onClick={()=>setShowDemo(false)} style={{position:"fixed",inset:0,zIndex:500,background:"rgba(0,0,0,.72)",display:"flex",alignItems:"center",justifyContent:"center",padding:16}}>
+          <div onClick={e=>e.stopPropagation()} style={{width:"100%",maxWidth:760,borderRadius:20,background:"var(--bg-1)",border:"1px solid var(--border)",boxShadow:"var(--modal-shadow)",overflow:"hidden"}}>
+            <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"16px 20px",borderBottom:"1px solid var(--border)"}}>
+              <div>
+                <div style={{fontSize:15,fontWeight:700,color:"var(--t1)"}}>NEXPORT 데모</div>
+                <div style={{fontSize:11,color:"var(--t3)",marginTop:2}}>AI 바이어 매칭 플랫폼 2분 미리보기</div>
+              </div>
+              <div onClick={()=>setShowDemo(false)} style={{width:28,height:28,borderRadius:8,background:"var(--bg-3)",display:"flex",alignItems:"center",justifyContent:"center",cursor:"pointer",fontSize:14,color:"var(--t2)"}}>✕</div>
+            </div>
+            <div style={{aspectRatio:"16/9",background:"var(--bg-2)",position:"relative",display:"flex",alignItems:"center",justifyContent:"center"}}>
+              <iframe
+                src="https://www.youtube.com/embed/dQw4w9WgXcQ?autoplay=1"
+                style={{width:"100%",height:"100%",border:"none",position:"absolute",inset:0}}
+                allow="autoplay; fullscreen"
+                allowFullScreen
+              />
+            </div>
+            <div style={{padding:"16px 20px",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+              <div style={{fontSize:12,color:"var(--t3)"}}>직접 체험하고 싶으신가요?</div>
+              <div onClick={()=>{setShowDemo(false);onEnter();}} style={{padding:"9px 22px",borderRadius:9,background:"var(--blue)",color:"#fff",fontSize:13,fontWeight:700,cursor:"pointer",transition:"opacity .18s"}}
+                onMouseEnter={e=>e.currentTarget.style.opacity=".85"} onMouseLeave={e=>e.currentTarget.style.opacity="1"}>
+                무료로 시작하기 →
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 플로팅 문의 버튼 */}
+      <div style={{position:"fixed",bottom:28,right:24,zIndex:400,display:"flex",flexDirection:"column",alignItems:"flex-end",gap:8}}>
+        <a href="mailto:support@nexport.trade"
+          style={{display:"flex",alignItems:"center",gap:8,padding:"10px 16px",borderRadius:40,background:"var(--bg-2)",border:"1px solid var(--border)",boxShadow:"var(--card-shadow)",color:"var(--t1)",textDecoration:"none",fontSize:12,fontWeight:600,transition:"all .2s",whiteSpace:"nowrap"}}
+          onMouseEnter={e=>e.currentTarget.style.borderColor="var(--border-h)"} onMouseLeave={e=>e.currentTarget.style.borderColor="var(--border)"}>
+          <span style={{fontSize:14}}>✉</span> 이메일 문의
+        </a>
+        <div style={{width:40,height:40,borderRadius:"50%",background:"#FEE500",display:"flex",alignItems:"center",justifyContent:"center",cursor:"pointer",boxShadow:"0 4px 16px rgba(0,0,0,.18)",fontSize:20,transition:"transform .2s"}}
+          title="카카오톡 문의"
+          onMouseEnter={e=>e.currentTarget.style.transform="scale(1.08)"} onMouseLeave={e=>e.currentTarget.style.transform="scale(1)"}>
+          💬
+        </div>
+      </div>
+
       {/* Ambient glows */}
       <div style={{position:"fixed",top:"-15%",left:"5%",width:"55vw",height:"55vw",borderRadius:"50%",background:"radial-gradient(circle,rgba(10,132,255,0.07) 0%,transparent 65%)",pointerEvents:"none",zIndex:0}}/>
       <div style={{position:"fixed",bottom:"-5%",right:"0%",width:"45vw",height:"45vw",borderRadius:"50%",background:"radial-gradient(circle,rgba(191,90,242,0.05) 0%,transparent 65%)",pointerEvents:"none",zIndex:0}}/>
@@ -1688,9 +1738,9 @@ function LandingHero({ onEnter, onLogin, isMobile }) {
               onMouseEnter={e=>e.currentTarget.style.transform="translateY(-2px)"} onMouseLeave={e=>e.currentTarget.style.transform="none"}>
               무료로 시작하기
             </div>
-            <div onClick={onEnter} style={{padding:"13px 34px",borderRadius:10,background:"var(--bg-2)",border:"1px solid var(--border)",color:"var(--t1)",fontSize:14,fontWeight:600,cursor:"pointer",transition:"all .18s"}}
+            <div onClick={()=>setShowDemo(true)} style={{padding:"13px 34px",borderRadius:10,background:"var(--bg-2)",border:"1px solid var(--border)",color:"var(--t1)",fontSize:14,fontWeight:600,cursor:"pointer",transition:"all .18s"}}
               onMouseEnter={e=>e.currentTarget.style.borderColor="var(--border-h)"} onMouseLeave={e=>e.currentTarget.style.borderColor="var(--border)"}>
-              데모 보기
+              ▶ 데모 보기
             </div>
           </div>
         </div>
@@ -2218,6 +2268,14 @@ function LandingHero({ onEnter, onLogin, isMobile }) {
             <div style={{fontSize:11,fontWeight:700,color:"var(--violet)",textTransform:"uppercase",letterSpacing:".12em",marginBottom:10}}>Pricing</div>
             <h2 style={{fontSize:isMobile?22:32,fontWeight:800,letterSpacing:"-.03em",color:"var(--t1)"}}>투명한 요금제, 숨겨진 비용 없음</h2>
             <p style={{fontSize:isMobile?13:15,color:"var(--t3)",marginTop:10}}>14일 무료 체험 · 신용카드 불필요 · 언제든 해지 가능</p>
+            {/* 월간/연간 토글 */}
+            <div style={{display:"inline-flex",alignItems:"center",gap:12,marginTop:20,padding:"6px 8px",borderRadius:40,background:"var(--bg-2)",border:"1px solid var(--border)"}}>
+              <div onClick={()=>setBillingAnnual(false)} style={{padding:"6px 18px",borderRadius:30,fontSize:12,fontWeight:700,cursor:"pointer",transition:"all .2s",background:billingAnnual?"transparent":"var(--blue)",color:billingAnnual?"var(--t3)":"#fff"}}>월간</div>
+              <div onClick={()=>setBillingAnnual(true)} style={{padding:"6px 18px",borderRadius:30,fontSize:12,fontWeight:700,cursor:"pointer",transition:"all .2s",display:"flex",alignItems:"center",gap:6,background:billingAnnual?"var(--blue)":"transparent",color:billingAnnual?"#fff":"var(--t3)"}}>
+                연간
+                <span style={{padding:"2px 8px",borderRadius:10,background:"rgba(16,185,129,.15)",color:"var(--green)",fontSize:10,fontWeight:800}}>20% 할인</span>
+              </div>
+            </div>
           </div>
           <div style={{display:"grid",gridTemplateColumns:isMobile?"1fr":"repeat(3,1fr)",gap:isMobile?16:20,maxWidth:960,margin:"0 auto"}}>
             {/* Free */}
@@ -2246,10 +2304,11 @@ function LandingHero({ onEnter, onLogin, isMobile }) {
               <div style={{position:"absolute",top:-12,left:"50%",transform:"translateX(-50%)",padding:"4px 16px",borderRadius:20,background:"var(--blue)",color:"#fff",fontSize:11,fontWeight:700,whiteSpace:"nowrap"}}>가장 인기</div>
               <div style={{fontSize:12,fontWeight:700,color:"var(--blue)",textTransform:"uppercase",letterSpacing:".08em",marginBottom:8}}>Starter</div>
               <div style={{display:"flex",alignItems:"baseline",gap:4,marginBottom:4}}>
-                <span style={{fontSize:isMobile?32:40,fontWeight:900,color:"var(--t1)"}}>₩99,000</span>
+                <span style={{fontSize:isMobile?32:40,fontWeight:900,color:"var(--t1)"}}>{billingAnnual?"₩79,200":"₩99,000"}</span>
                 <span style={{fontSize:13,color:"var(--t3)"}}>/월</span>
               </div>
-              <div style={{fontSize:12,color:"var(--t4)",marginBottom:20}}>수출 시작 단계</div>
+              {billingAnnual && <div style={{fontSize:11,color:"var(--t4)",textDecoration:"line-through",marginBottom:2}}>₩99,000/월</div>}
+              <div style={{fontSize:12,color:"var(--t4)",marginBottom:20}}>수출 시작 단계{billingAnnual?" · 연 ₩950,400":""}</div>
               <div style={{borderTop:"1px solid var(--border)",paddingTop:16,display:"flex",flexDirection:"column",gap:10}}>
                 {["바이어 검색 무제한","AI 매칭 월 50회","콜드이메일 월 200건","인증·규제 필터","기본 대시보드"].map((t,i)=>(
                   <div key={i} style={{display:"flex",alignItems:"center",gap:8,fontSize:13,color:"var(--t2)"}}>
@@ -2266,10 +2325,11 @@ function LandingHero({ onEnter, onLogin, isMobile }) {
             <div style={{padding:isMobile?"24px 20px":"32px 28px",borderRadius:16,background:"var(--bg-2)",border:"1px solid var(--border)",boxShadow:"var(--card-shadow)"}}>
               <div style={{fontSize:12,fontWeight:700,color:"var(--violet)",textTransform:"uppercase",letterSpacing:".08em",marginBottom:8}}>Pro</div>
               <div style={{display:"flex",alignItems:"baseline",gap:4,marginBottom:4}}>
-                <span style={{fontSize:isMobile?32:40,fontWeight:900,color:"var(--t1)"}}>₩290,000</span>
+                <span style={{fontSize:isMobile?32:40,fontWeight:900,color:"var(--t1)"}}>{billingAnnual?"₩232,000":"₩290,000"}</span>
                 <span style={{fontSize:13,color:"var(--t3)"}}>/월</span>
               </div>
-              <div style={{fontSize:12,color:"var(--t4)",marginBottom:20}}>본격 수출 확장</div>
+              {billingAnnual && <div style={{fontSize:11,color:"var(--t4)",textDecoration:"line-through",marginBottom:2}}>₩290,000/월</div>}
+              <div style={{fontSize:12,color:"var(--t4)",marginBottom:20}}>본격 수출 확장{billingAnnual?" · 연 ₩2,784,000":""}</div>
               <div style={{borderTop:"1px solid var(--border)",paddingTop:16,display:"flex",flexDirection:"column",gap:10}}>
                 {["Starter 전체 기능 포함","AI 매칭 무제한","콜드이메일 무제한","고급 분석 대시보드","우선 기술 지원","API 연동"].map((t,i)=>(
                   <div key={i} style={{display:"flex",alignItems:"center",gap:8,fontSize:13,color:"var(--t2)"}}>
@@ -2340,6 +2400,35 @@ function LandingHero({ onEnter, onLogin, isMobile }) {
               <div key={i} style={{padding:isMobile?"12px 18px":"14px 28px",borderRadius:10,background:"var(--bg-2)",border:"1px solid var(--border)",display:"flex",flexDirection:"column",alignItems:"center",gap:4,minWidth:isMobile?120:140}}>
                 <div style={{fontSize:isMobile?13:14,fontWeight:700,color:"var(--t2)"}}>{org.name}</div>
                 <div style={{fontSize:10,color:"var(--t4)"}}>{org.desc}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* ⑦-A FAQ */}
+        <div id="faq" style={{padding:isMobile?"0 0 48px":"0 0 80px"}}>
+          <div style={{textAlign:"center",marginBottom:isMobile?28:44}}>
+            <div style={{fontSize:11,fontWeight:700,color:"var(--blue)",textTransform:"uppercase",letterSpacing:".12em",marginBottom:10}}>FAQ</div>
+            <h2 style={{fontSize:isMobile?22:32,fontWeight:800,letterSpacing:"-.03em",color:"var(--t1)"}}>자주 묻는 질문</h2>
+          </div>
+          <div style={{maxWidth:720,margin:"0 auto",display:"flex",flexDirection:"column",gap:8}}>
+            {[
+              {q:"바이어 데이터는 얼마나 정확한가요?",a:"Hunter.io API와 자체 크롤링 엔진을 결합해 60개국 10만+ 바이어 DB를 구축합니다. 이메일 검증율 95% 이상, 분기마다 데이터를 갱신합니다."},
+              {q:"무료 체험 후 자동으로 결제되나요?",a:"아닙니다. 14일 무료 체험은 신용카드 없이 시작할 수 있으며, 체험 기간 종료 후 자동 결제는 없습니다. 업그레이드는 직접 선택하실 때만 진행됩니다."},
+              {q:"콜드이메일 발송은 어떻게 작동하나요?",a:"NEXPORT AI가 바이어 프로필을 분석해 개인화 이메일을 자동 생성합니다. 발송 후 오픈율·클릭률을 실시간 추적하며, 스팸 방지 최적화가 기본 적용됩니다."},
+              {q:"어떤 업종·제품을 지원하나요?",a:"자동차 부품, 전자·반도체, 의료기기, 화학/소재, 기계·장비, 식품, 건축자재 등 제조업 전 분야를 지원합니다. 산업별 맞춤 인증·규제 필터도 제공합니다."},
+              {q:"기존 CRM이나 Apollo와 연동 가능한가요?",a:"Pro 플랜에서 API 연동을 지원합니다. HubSpot, Salesforce, Apollo.io와의 연동 가이드를 제공하며, 커스텀 연동은 별도 문의해 주세요."},
+            ].map((item,i)=>(
+              <div key={i} onClick={()=>setFaqOpen(faqOpen===i?null:i)}
+                style={{borderRadius:12,border:"1px solid var(--border)",background:"var(--bg-2)",overflow:"hidden",cursor:"pointer",transition:"border-color .2s"}}
+                onMouseEnter={e=>e.currentTarget.style.borderColor="var(--border-h)"} onMouseLeave={e=>e.currentTarget.style.borderColor="var(--border)"}>
+                <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"16px 20px",gap:12}}>
+                  <span style={{fontSize:14,fontWeight:600,color:"var(--t1)"}}>{item.q}</span>
+                  <span style={{fontSize:18,color:"var(--t3)",flexShrink:0,transition:"transform .25s",transform:faqOpen===i?"rotate(45deg)":"none"}}>+</span>
+                </div>
+                {faqOpen===i && (
+                  <div style={{padding:"0 20px 18px",fontSize:13,color:"var(--t2)",lineHeight:1.75,borderTop:"1px solid var(--border)"}}>{item.a}</div>
+                )}
               </div>
             ))}
           </div>
