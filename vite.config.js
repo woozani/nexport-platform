@@ -93,7 +93,7 @@ export default defineConfig(({ mode }) => {
       rollupOptions: { output: { manualChunks: undefined } },
     },
     server: {
-      port: 3000,
+      port: parseInt(process.env.PORT || '3000'),
       open: true,
     },
   }
