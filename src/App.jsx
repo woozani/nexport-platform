@@ -1605,7 +1605,7 @@ function LandingHero({ onEnter, onLogin, isMobile }) {
   };
 
   // ── 타이핑 애니메이션 ──
-  const QUERIES = ["자동차 부품 독일 바이어", "PCB 제조 미국 바이어", "플라스틱 사출 유럽 바이어", "의료기기 일본 바이어"];
+  const QUERIES = ["IATF 16949 자동차 부품 독일 바이어", "FDA 인증 의료기기 미국 바이어", "CE 인증 전자부품 유럽 바이어", "REACH 화학소재 유럽 바이어"];
   const [qIdx, setQIdx] = useState(0);
   const [typed, setTyped] = useState("");
   const [isTyping, setIsTyping] = useState(true);
@@ -1712,13 +1712,13 @@ function LandingHero({ onEnter, onLogin, isMobile }) {
               </div>
               <div onClick={()=>setShowDemo(false)} style={{width:28,height:28,borderRadius:8,background:"var(--bg-3)",display:"flex",alignItems:"center",justifyContent:"center",cursor:"pointer",fontSize:14,color:"var(--t2)"}}>✕</div>
             </div>
-            <div style={{aspectRatio:"16/9",background:"var(--bg-2)",position:"relative",display:"flex",alignItems:"center",justifyContent:"center"}}>
-              <iframe
-                src="https://www.youtube.com/embed/dQw4w9WgXcQ?autoplay=1"
-                style={{width:"100%",height:"100%",border:"none",position:"absolute",inset:0}}
-                allow="autoplay; fullscreen"
-                allowFullScreen
-              />
+            <div style={{aspectRatio:"16/9",background:"var(--bg-2)",position:"relative",display:"flex",alignItems:"center",justifyContent:"center",flexDirection:"column",gap:12}}>
+              <div style={{fontSize:40,opacity:.5}}>🎬</div>
+              <div style={{fontSize:14,fontWeight:600,color:"var(--t2)"}}>데모 영상 준비 중</div>
+              <div style={{fontSize:12,color:"var(--t3)",textAlign:"center",maxWidth:420,padding:"0 20px"}}>
+                실제 AI Trade Agent 동작 데모는 파일럿 파트너 온보딩 시 1:1로 제공됩니다.<br/>
+                먼저 신청서를 작성해주세요.
+              </div>
             </div>
             <div style={{padding:"16px 20px",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
               <div style={{fontSize:12,color:"var(--t3)"}}>직접 체험하고 싶으신가요?</div>
@@ -1772,7 +1772,7 @@ function LandingHero({ onEnter, onLogin, isMobile }) {
             <div onClick={onLogin} style={{padding:"7px 18px",borderRadius:8,border:"1px solid var(--border)",color:"var(--t2)",fontSize:12,fontWeight:600,cursor:"pointer",transition:"all .18s"}}
               onMouseEnter={e=>e.currentTarget.style.borderColor="var(--border-h)"} onMouseLeave={e=>e.currentTarget.style.borderColor="var(--border)"}>로그인</div>
             <div onClick={onEnter} style={{padding:"7px 18px",borderRadius:8,background:"var(--blue)",color:"#fff",fontSize:12,fontWeight:600,cursor:"pointer",transition:"all .18s"}}
-              onMouseEnter={e=>e.currentTarget.style.opacity=".88"} onMouseLeave={e=>e.currentTarget.style.opacity="1"}>무료 시작 →</div>
+              onMouseEnter={e=>e.currentTarget.style.opacity=".88"} onMouseLeave={e=>e.currentTarget.style.opacity="1"}>파일럿 신청 →</div>
           </div>
         </div>
       </div>
@@ -1783,14 +1783,14 @@ function LandingHero({ onEnter, onLogin, isMobile }) {
         <div style={{textAlign:"center",padding:"80px 0 48px",opacity:visible?1:0,transform:visible?"none":"translateY(24px)",transition:"all .75s cubic-bezier(0.2,0,0,1) .05s"}}>
           <div style={{display:"inline-flex",alignItems:"center",gap:6,padding:"5px 14px",borderRadius:20,background:"var(--blue-dim)",border:"1px solid rgba(10,132,255,.25)",fontSize:11,fontWeight:600,color:"var(--blue)",marginBottom:24,letterSpacing:".04em"}}>
             <span style={{width:6,height:6,borderRadius:"50%",background:"var(--blue)",display:"inline-block",animation:"pulse 1.5s infinite"}}/>
-            AI-Powered Export Platform
+            AI Trade Agent · 파일럿 파트너 모집 중
           </div>
           <h1 style={{fontSize:isMobile?"clamp(30px,8vw,40px)":52,fontWeight:900,lineHeight:1.15,letterSpacing:"-.04em",marginBottom:20}}>
-            <span style={{color:"var(--t1)"}}>수출 바이어 발굴,</span><br/>
-            <span style={{background:"linear-gradient(120deg,var(--blue),var(--cyan) 60%)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent",backgroundClip:"text"}}>AI로 10배 빠르게</span>
+            <span style={{color:"var(--t1)"}}>수출 파이프라인을,</span><br/>
+            <span style={{background:"linear-gradient(120deg,var(--blue),var(--cyan) 60%)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent",backgroundClip:"text"}}>시스템으로.</span>
           </h1>
-          <p style={{fontSize:isMobile?14:17,color:"var(--t2)",maxWidth:560,margin:"0 auto 36px",lineHeight:1.75}}>
-            바이어 발굴부터 이메일 확보, AI 매칭까지.<br/>수출의 모든 과정을 하나의 플랫폼에서.
+          <p style={{fontSize:isMobile?14:17,color:"var(--t2)",maxWidth:620,margin:"0 auto 36px",lineHeight:1.75}}>
+            AI Trade Agent가 매월 인증 매칭된 진성 바이어 리드를<br/>당신의 파이프라인에 공급합니다.
           </p>
 
           {/* 검색창 + 드롭다운 */}
@@ -1838,7 +1838,7 @@ function LandingHero({ onEnter, onLogin, isMobile }) {
           <div style={{display:"flex",gap:12,justifyContent:"center",flexWrap:"wrap"}}>
             <div onClick={onEnter} style={{padding:"13px 34px",borderRadius:10,background:"var(--blue)",color:"#fff",fontSize:14,fontWeight:700,cursor:"pointer",animation:"glowPulse 3s ease-in-out infinite",transition:"transform .2s"}}
               onMouseEnter={e=>e.currentTarget.style.transform="translateY(-2px)"} onMouseLeave={e=>e.currentTarget.style.transform="none"}>
-              무료로 시작하기
+              파일럿 파트너 신청
             </div>
             <div onClick={()=>setShowDemo(true)} style={{padding:"13px 34px",borderRadius:10,background:"var(--bg-2)",border:"1px solid var(--border)",color:"var(--t1)",fontSize:14,fontWeight:600,cursor:"pointer",transition:"all .18s"}}
               onMouseEnter={e=>e.currentTarget.style.borderColor="var(--border-h)"} onMouseLeave={e=>e.currentTarget.style.borderColor="var(--border)"}>
@@ -1854,17 +1854,17 @@ function LandingHero({ onEnter, onLogin, isMobile }) {
               Problem
             </div>
             <h2 style={{fontSize:isMobile?22:32,fontWeight:800,letterSpacing:"-.03em",color:"var(--t1)"}}>
-              한국 중소기업 <span style={{color:"rgba(255,69,58,1)"}}>98.8%</span>가 수출을 못 합니다
+              운과 이벤트에 기댄 수출은, <span style={{color:"rgba(255,69,58,1)"}}>매월 3,000만원</span>의 매몰비용을 낳습니다
             </h2>
-            <p style={{fontSize:isMobile?13:15,color:"var(--t3)",marginTop:10,maxWidth:560,margin:"10px auto 0"}}>바이어를 찾지 못해 내수에 머무는 것이 가장 큰 원인입니다</p>
+            <p style={{fontSize:isMobile?13:15,color:"var(--t3)",marginTop:10,maxWidth:560,margin:"10px auto 0"}}>매출 50~200억 인증 제조기업 대표가 가장 자주 직면하는 3가지 현실</p>
           </div>
 
           {/* 핵심 통계 카드 */}
           <div style={{display:"grid",gridTemplateColumns:isMobile?"1fr":"repeat(3,1fr)",gap:isMobile?12:16,marginBottom:isMobile?24:40}}>
             {[
-              {num:"762만",label:"국내 중소기업",sub:"그 중 수출 기업은 단 1.2% (9.4만 개)",icon:<Ic.Building s={20}/>,color:"rgba(255,69,58,1)",bg:"rgba(255,69,58,.06)",border:"rgba(255,69,58,.18)"},
-              {num:"3~6개월",label:"바이어 발굴 소요 기간",sub:"전시회·무역대행사 경유 시 평균 소요",icon:<Ic.Refresh s={20}/>,color:"var(--amber)",bg:"rgba(245,158,11,.06)",border:"rgba(245,158,11,.18)"},
-              {num:"17.2배",label:"수출 전환 시 매출 증가",sub:"내수 대비 영업이익 1.8배, 고용 5.1배",icon:<Ic.TrendUp s={20}/>,color:"var(--green)",bg:"rgba(16,185,129,.06)",border:"rgba(16,185,129,.18)"},
+              {num:"3,000만원",label:"6개월 영업 매몰비용",sub:"전담 영업 인건비가 허공으로 증발 (월 500만원 × 6개월)",icon:<Ic.TrendUp s={20}/>,color:"rgba(255,69,58,1)",bg:"rgba(255,69,58,.06)",border:"rgba(255,69,58,.18)"},
+              {num:"1% 미만",label:"콜드메일 실제 응답률",sub:"\"3년 보냈는데 실계약 0건\" — Scott, 자동차부품 수출 담당",icon:<Ic.Mail s={20}/>,color:"var(--amber)",bg:"rgba(245,158,11,.06)",border:"rgba(245,158,11,.18)"},
+              {num:"3~6개월",label:"전시회→계약 전환 지연",sub:"5,000만원 부스비 투입, 명함 수백 장 ≠ 수주",icon:<Ic.Refresh s={20}/>,color:"var(--cyan)",bg:"rgba(50,173,230,.06)",border:"rgba(50,173,230,.18)"},
             ].map((s,i)=>(
               <div key={i} style={{padding:isMobile?"20px 18px":"28px 24px",borderRadius:14,background:s.bg,border:`1px solid ${s.border}`,opacity:probInView?1:0,animation:probInView?`staggerUp .55s cubic-bezier(0.2,0,0,1) ${i*120}ms both`:"none"}}>
                 <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:12}}>
