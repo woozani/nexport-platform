@@ -1636,12 +1636,11 @@ function LandingHero({ onEnter, onLogin, onPilotApply, isMobile }) {
   const [howRef, howInView] = useInView(0.2);
   // ── ROI 비교 inView ──
   const [roiRef, roiInView] = useInView(0.15);
-  // ── ROI 계산기 state ──
-  const [tradeShowBudget, setTradeShowBudget] = useState(5000);
-  const nexportMonthly = 30;
-  const tradeShowConvRate = 0.01;
-  const nexportConvRate = 0.08;
-  const avgDealSize = 500;
+  // ── 매몰비용 계산기 state ──
+  const [monthlySalary, setMonthlySalary] = useState(500);
+  const [salesMonths, setSalesMonths] = useState(6);
+  const tradeShowPerYear = 5000;
+  const nexportMonthly = 200;
   // ── Features inView ──
   const [featRef, featInView] = useInView(0.15);
   // ── 인증·규제 섹션 inView ──
@@ -2101,47 +2100,58 @@ function LandingHero({ onEnter, onLogin, onPilotApply, isMobile }) {
           </div>
         </div>
 
-        {/* ⑤-C 인터랙티브 ROI 계산기 */}
+        {/* ⑤-C 매몰비용 계산기 */}
         {!isMobile && (
           <div style={{margin:"0 0 80px",padding:"36px 40px",borderRadius:20,background:"var(--bg-2)",border:"1px solid var(--border)",opacity:roiInView?1:0,transform:roiInView?"none":"translateY(16px)",transition:"all .7s cubic-bezier(0.2,0,0,1) .5s"}}>
             <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:24}}>
-              <div style={{width:32,height:32,borderRadius:8,background:"rgba(245,158,11,.12)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:16}}>🧮</div>
+              <div style={{width:32,height:32,borderRadius:8,background:"rgba(255,69,58,.12)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:16}}>🔥</div>
               <div>
-                <div style={{fontSize:15,fontWeight:800,color:"var(--t1)"}}>나의 ROI 직접 계산해보기</div>
-                <div style={{fontSize:12,color:"var(--t3)",marginTop:2}}>연간 전시회 예산을 입력하면 NEXPORT 대비 절감액을 즉시 계산합니다</div>
+                <div style={{fontSize:15,fontWeight:800,color:"var(--t1)"}}>우리 회사의 수출 매몰비용 계산기</div>
+                <div style={{fontSize:12,color:"var(--t3)",marginTop:2}}>해외영업 인건비와 기간을 입력하면, 파이프라인 없이 증발하는 비용을 보여드립니다</div>
               </div>
             </div>
             <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:32,alignItems:"center"}}>
               {/* 슬라이더 */}
               <div>
                 <div style={{display:"flex",justifyContent:"space-between",alignItems:"baseline",marginBottom:10}}>
-                  <label style={{fontSize:12,fontWeight:700,color:"var(--t2)"}}>연간 전시회 예산</label>
-                  <span style={{fontSize:22,fontWeight:900,color:"rgba(255,69,58,1)",fontFamily:"var(--mono)"}}>{tradeShowBudget.toLocaleString()}만원</span>
+                  <label style={{fontSize:12,fontWeight:700,color:"var(--t2)"}}>월 해외영업 인건비</label>
+                  <span style={{fontSize:22,fontWeight:900,color:"rgba(255,69,58,1)",fontFamily:"var(--mono)"}}>{monthlySalary.toLocaleString()}만원</span>
                 </div>
-                <input type="range" min={500} max={20000} step={500} value={tradeShowBudget}
-                  onChange={e=>setTradeShowBudget(Number(e.target.value))}
+                <input type="range" min={300} max={1500} step={50} value={monthlySalary}
+                  onChange={e=>setMonthlySalary(Number(e.target.value))}
                   style={{width:"100%",accentColor:"var(--blue)",cursor:"pointer"}}/>
                 <div style={{display:"flex",justifyContent:"space-between",fontSize:10,color:"var(--t4)",marginTop:4}}>
-                  <span>500만원</span><span>2억원</span>
+                  <span>300만원</span><span>1,500만원</span>
                 </div>
                 <div style={{marginTop:16,display:"flex",gap:8,flexWrap:"wrap"}}>
-                  {[1000,3000,5000,10000].map(v=>(
-                    <div key={v} onClick={()=>setTradeShowBudget(v)}
+                  {[400,500,700,1000].map(v=>(
+                    <div key={v} onClick={()=>setMonthlySalary(v)}
                       style={{padding:"4px 12px",borderRadius:6,fontSize:11,fontWeight:600,cursor:"pointer",transition:"all .15s",
-                        background:tradeShowBudget===v?"var(--blue)":"var(--bg-3)",
-                        color:tradeShowBudget===v?"#fff":"var(--t3)",
-                        border:`1px solid ${tradeShowBudget===v?"var(--blue)":"var(--border)"}`}}>
-                      {(v/1000).toFixed(0)}천만
+                        background:monthlySalary===v?"var(--blue)":"var(--bg-3)",
+                        color:monthlySalary===v?"#fff":"var(--t3)",
+                        border:`1px solid ${monthlySalary===v?"var(--blue)":"var(--border)"}`}}>
+                      {v}만원
                     </div>
                   ))}
+                </div>
+                <div style={{display:"flex",justifyContent:"space-between",alignItems:"baseline",marginBottom:10,marginTop:20}}>
+                  <label style={{fontSize:12,fontWeight:700,color:"var(--t2)"}}>성과 없는 영업 기간</label>
+                  <span style={{fontSize:22,fontWeight:900,color:"var(--amber)",fontFamily:"var(--mono)"}}>{salesMonths}개월</span>
+                </div>
+                <input type="range" min={3} max={24} step={1} value={salesMonths}
+                  onChange={e=>setSalesMonths(Number(e.target.value))}
+                  style={{width:"100%",accentColor:"var(--amber)",cursor:"pointer"}}/>
+                <div style={{display:"flex",justifyContent:"space-between",fontSize:10,color:"var(--t4)",marginTop:4}}>
+                  <span>3개월</span><span>24개월</span>
                 </div>
               </div>
               {/* 결과 */}
               <div style={{display:"grid",gap:12}}>
                 {[
-                  {label:"전시회 연간 비용",value:`${tradeShowBudget.toLocaleString()}만원`,sub:`${Math.round(tradeShowBudget*tradeShowConvRate)}만원 가치의 계약 (전환율 ${(tradeShowConvRate*100).toFixed(0)}%)`,color:"rgba(255,69,58,1)",bg:"rgba(255,69,58,.06)",border:"rgba(255,69,58,.2)"},
-                  {label:"NEXPORT 연간 비용",value:`${(nexportMonthly*12).toLocaleString()}만원`,sub:`${Math.round(tradeShowBudget*nexportConvRate/tradeShowConvRate*nexportMonthly*12/tradeShowBudget)}배 더 많은 바이어 접근 가능`,color:"var(--green)",bg:"rgba(16,185,129,.06)",border:"rgba(16,185,129,.2)"},
-                  {label:"연간 절감액",value:`${(tradeShowBudget - nexportMonthly*12).toLocaleString()}만원`,sub:`NEXPORT 전환 시 즉시 절약 — ${Math.round((1-nexportMonthly*12/tradeShowBudget)*100)}% 비용 절감`,color:"var(--cyan)",bg:"rgba(34,211,238,.06)",border:"rgba(34,211,238,.2)"},
+                  {label:"인건비 매몰비용",value:`${(monthlySalary * salesMonths).toLocaleString()}만원`,sub:`월 ${monthlySalary}만원 × ${salesMonths}개월, 계약 0건 시 전액 증발`,color:"rgba(255,69,58,1)",bg:"rgba(255,69,58,.06)",border:"rgba(255,69,58,.2)"},
+                  {label:"전시회·출장 추가 비용",value:`${tradeShowPerYear.toLocaleString()}만원`,sub:"연 1~2회 전시회 부스비 + 항공·숙박 (업계 평균)",color:"var(--amber)",bg:"rgba(245,158,11,.06)",border:"rgba(245,158,11,.2)"},
+                  {label:"총 매몰비용 (연간 환산)",value:`${(monthlySalary * 12 + tradeShowPerYear).toLocaleString()}만원`,sub:`이 비용으로 파이프라인이 0건이라면?`,color:"rgba(255,69,58,1)",bg:"rgba(255,69,58,.08)",border:"rgba(255,69,58,.3)"},
+                  {label:"NEXPORT 연간 비용",value:`${(nexportMonthly * 12).toLocaleString()}만원`,sub:`매월 인증 매칭 바이어 공급 · 기존 대비 ${Math.round((1 - nexportMonthly*12/(monthlySalary*12+tradeShowPerYear))*100)}% 절감`,color:"var(--green)",bg:"rgba(16,185,129,.06)",border:"rgba(16,185,129,.2)"},
                 ].map((item,i)=>(
                   <div key={i} style={{padding:"12px 16px",borderRadius:10,background:item.bg,border:`1px solid ${item.border}`,display:"flex",justifyContent:"space-between",alignItems:"center",gap:8}}>
                     <div>
