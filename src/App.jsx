@@ -1679,17 +1679,17 @@ function LandingHero({ onEnter, onLogin, onPilotApply, isMobile }) {
   const [activeRegTab, setActiveRegTab] = useState("cert");
 
   const features = [
-    { icon: <Ic.Search s={20}/>, title: "AI 바이어 매칭", desc: "제조사 프로필(산업·인증·지역) 입력 시 AI가 최적 바이어 TOP 15를 자동 추천 — 매칭 근거까지 설명", color: "var(--blue)", dim: "var(--blue-dim)" },
-    { icon: <Ic.Mail s={20}/>, title: "콜드이메일 자동화", desc: "개인화 이메일 자동 생성·전송, 오픈율/클릭률 실시간 추적으로 세일즈 효율 극대화", color: "var(--cyan)", dim: "var(--cyan-dim)" },
-    { icon: <Ic.Shield s={20}/>, title: "인증·규제 필터", desc: "수출 대상국별 필수 인증(CE, FDA 등) 및 규제 요건을 자동 필터링 — 한국산 유리 시장 즉시 파악", color: "var(--green)", dim: "var(--green-dim)" },
-    { icon: <Ic.Bar s={20}/>, title: "세일즈 대시보드", desc: "바이어 응답률, 파이프라인 현황, 성과 지표를 한눈에 관리하고 모니터링", color: "var(--amber)", dim: "var(--amber-dim)" },
+    { icon: <Ic.Search s={20}/>, title: "인증 기반 바이어 발굴", desc: "IATF·FDA·CE 등 보유 인증을 기준으로 AI Agent가 적격 바이어를 자동 탐색 — 구글링·엑셀 작업 제로", color: "var(--blue)", dim: "var(--blue-dim)" },
+    { icon: <Ic.Mail s={20}/>, title: "맞춤형 아웃리치 대행", desc: "바이어 맥락에 맞춘 개인화 이메일을 Agent가 작성·발송하고, 응답까지 추적합니다", color: "var(--cyan)", dim: "var(--cyan-dim)" },
+    { icon: <Ic.Shield s={20}/>, title: "인증·규제 자동 필터", desc: "수출 대상국별 필수 인증과 규제 요건을 자동 분석 — 한국산 제품이 유리한 시장을 먼저 찾아냅니다", color: "var(--green)", dim: "var(--green-dim)" },
+    { icon: <Ic.Bar s={20}/>, title: "파이프라인 리포트", desc: "매월 공급된 리드·응답률·미팅 전환을 리포트로 제공 — 대표가 한눈에 성과를 확인", color: "var(--amber)", dim: "var(--amber-dim)" },
   ];
 
   const steps = [
-    { num:"①", icon:<Ic.Search s={22}/>, title:"프로필 입력", desc:"제조사 정보·제품·인증·수출 희망 지역을 입력하세요", color:"var(--blue)", dim:"var(--blue-dim)" },
-    { num:"②", icon:<Ic.Sparkle s={22}/>, title:"AI 바이어 매칭", desc:"AI가 산업·지역·규모 기반으로 적격 바이어를 자동 스코어링", color:"var(--violet)", dim:"var(--violet-dim)" },
-    { num:"③", icon:<Ic.Mail s={22}/>, title:"자동 아웃리치", desc:"개인화 콜드이메일 자동 생성·발송, 오픈/클릭 실시간 추적", color:"var(--cyan)", dim:"var(--cyan-dim)" },
-    { num:"④", icon:<Ic.Bar s={22}/>, title:"성과 관리", desc:"바이어 응답률·파이프라인 현황을 대시보드에서 한눈에 관리", color:"var(--green)", dim:"var(--green-dim)" },
+    { num:"①", icon:<Ic.Search s={22}/>, title:"온보딩", desc:"제조사 프로필·인증·제품 스펙을 1회 입력하면 Agent가 학습합니다", color:"var(--blue)", dim:"var(--blue-dim)" },
+    { num:"②", icon:<Ic.Sparkle s={22}/>, title:"Agent가 바이어 탐색", desc:"AI Agent가 인증·산업·지역 기반으로 적격 바이어를 자동 발굴합니다", color:"var(--violet)", dim:"var(--violet-dim)" },
+    { num:"③", icon:<Ic.Mail s={22}/>, title:"Agent가 아웃리치", desc:"바이어별 맞춤 이메일을 Agent가 작성·발송하고 응답을 추적합니다", color:"var(--cyan)", dim:"var(--cyan-dim)" },
+    { num:"④", icon:<Ic.Bar s={22}/>, title:"월간 리포트 수령", desc:"매월 파이프라인 현황·응답률·미팅 전환 리포트를 받아보세요", color:"var(--green)", dim:"var(--green-dim)" },
   ];
 
   const mockBuyers = [
@@ -1966,8 +1966,8 @@ function LandingHero({ onEnter, onLogin, onPilotApply, isMobile }) {
         <div id="how-it-works" ref={howRef} style={{padding:"0 0 80px"}}>
           <div style={{textAlign:"center",marginBottom:48,opacity:howInView?1:0,transform:howInView?"none":"translateY(20px)",transition:"all .6s cubic-bezier(0.2,0,0,1)"}}>
             <div style={{fontSize:11,fontWeight:700,color:"var(--blue)",textTransform:"uppercase",letterSpacing:".12em",marginBottom:10}}>How it works</div>
-            <h2 style={{fontSize:isMobile?22:32,fontWeight:800,letterSpacing:"-.03em",color:"var(--t1)"}}>NEXPORT로 수출 바이어를 찾는 방법</h2>
-            <p style={{fontSize:isMobile?13:15,color:"var(--t3)",marginTop:10}}>4단계로 수출 바이어 발굴부터 성과 관리까지 자동화하세요</p>
+            <h2 style={{fontSize:isMobile?22:32,fontWeight:800,letterSpacing:"-.03em",color:"var(--t1)"}}>AI Trade Agent가 일하는 방식</h2>
+            <p style={{fontSize:isMobile?13:15,color:"var(--t3)",marginTop:10}}>온보딩 1회, 이후 Agent가 매월 바이어를 찾아 파이프라인에 공급합니다</p>
           </div>
           <div className="hiw-grid" style={{display:isMobile?"flex":"grid",flexDirection:isMobile?"column":undefined,gridTemplateColumns:isMobile?undefined:"1fr auto 1fr auto 1fr auto 1fr",gap:isMobile?"16px":0,alignItems:isMobile?"stretch":"start"}}>
             {steps.map((s,i) => (
@@ -1995,10 +1995,10 @@ function LandingHero({ onEnter, onLogin, onPilotApply, isMobile }) {
         <div style={{margin:"0 0 80px",padding:"36px 0",borderRadius:16,background:"var(--bg-2)",border:"1px solid var(--border)"}}>
           <div style={{display:"grid",gridTemplateColumns:isMobile?"repeat(2,1fr)":"repeat(4,1fr)",gap:0}}>
             {[
-              {end:60,suffix:"개국+",label:"글로벌 바이어 DB",color:"var(--blue)"},
-              {end:98,suffix:"%",label:"이메일 정확도",color:"var(--green)"},
-              {end:5,suffix:"분 내",label:"바이어 발굴 시간",color:"var(--amber)"},
-              {end:15,suffix:"개국",label:"국가 커버리지",color:"var(--cyan)"},
+              {end:60,suffix:"개국+",label:"바이어 커버리지",color:"var(--blue)"},
+              {end:15,suffix:"건+",label:"월 평균 리드 공급",color:"var(--green)"},
+              {end:3,suffix:"주 내",label:"첫 리드 도착",color:"var(--amber)"},
+              {end:0,suffix:"건",label:"고객 직접 작업",color:"var(--cyan)"},
             ].map((s,i)=>(
               <div key={i} style={{textAlign:"center",padding:"16px 12px",
                 borderRight:isMobile?(i%2===0?"1px solid var(--border)":"none"):(i<3?"1px solid var(--border)":"none"),
@@ -2196,7 +2196,7 @@ function LandingHero({ onEnter, onLogin, onPilotApply, isMobile }) {
         <div id="features" ref={featRef} style={{padding:isMobile?"0 0 48px":"0 0 80px"}}>
           <div style={{textAlign:"center",marginBottom:isMobile?24:40,opacity:featInView?1:0,transform:featInView?"none":"translateY(16px)",transition:"all .6s cubic-bezier(0.2,0,0,1)"}}>
             <div style={{fontSize:11,fontWeight:700,color:"var(--blue)",textTransform:"uppercase",letterSpacing:".12em",marginBottom:10}}>Features</div>
-            <h2 style={{fontSize:isMobile?22:32,fontWeight:800,letterSpacing:"-.03em",color:"var(--t1)"}}>수출 전 과정을 하나의 플랫폼에서</h2>
+            <h2 style={{fontSize:isMobile?22:32,fontWeight:800,letterSpacing:"-.03em",color:"var(--t1)"}}>AI Agent가 대신 처리하는 영역</h2>
           </div>
           <div style={{display:"grid",gridTemplateColumns:isMobile?"1fr":"repeat(2,1fr)",gap:isMobile?12:16}}>
             {features.map((f,i)=>(
@@ -2503,8 +2503,8 @@ function LandingHero({ onEnter, onLogin, onPilotApply, isMobile }) {
         <div id="cases" style={{padding:isMobile?"0 0 48px":"0 0 80px"}}>
           <div style={{textAlign:"center",marginBottom:isMobile?28:44}}>
             <div style={{fontSize:11,fontWeight:700,color:"var(--cyan)",textTransform:"uppercase",letterSpacing:".12em",marginBottom:10}}>Success Stories</div>
-            <h2 style={{fontSize:isMobile?22:32,fontWeight:800,letterSpacing:"-.03em",color:"var(--t1)"}}>실제 수출 성공 사례</h2>
-            <p style={{fontSize:isMobile?13:15,color:"var(--t3)",marginTop:10}}>NEXPORT를 통해 해외 바이어를 발굴한 한국 중소 제조업체 사례입니다</p>
+            <h2 style={{fontSize:isMobile?22:32,fontWeight:800,letterSpacing:"-.03em",color:"var(--t1)"}}>AI Trade Agent 도입 후 변화</h2>
+            <p style={{fontSize:isMobile?13:15,color:"var(--t3)",marginTop:10}}>구글링·엑셀·번역기 콜드메일에서 벗어난 제조업체 사례입니다</p>
           </div>
           <div style={{display:"grid",gridTemplateColumns:isMobile?"1fr":"repeat(3,1fr)",gap:isMobile?16:20}}>
             {[
@@ -2614,20 +2614,20 @@ function LandingHero({ onEnter, onLogin, onPilotApply, isMobile }) {
         <div style={{margin:"0 0 60px",padding:isMobile?"40px 20px":"56px 40px",borderRadius:20,background:"linear-gradient(135deg,rgba(10,132,255,.09),rgba(191,90,242,.06))",border:"1px solid rgba(10,132,255,.18)",textAlign:"center",position:"relative",overflow:"hidden"}}>
           <div style={{position:"absolute",top:"50%",left:"50%",transform:"translate(-50%,-50%)",width:"60%",height:"60%",borderRadius:"50%",background:"radial-gradient(circle,rgba(10,132,255,.07) 0%,transparent 70%)",pointerEvents:"none"}}/>
           <div style={{position:"relative"}}>
-            <h2 style={{fontSize:isMobile?26:36,fontWeight:900,letterSpacing:"-.03em",color:"var(--t1)",marginBottom:12}}>지금 NEXPORT를 시작하세요</h2>
-            <p style={{fontSize:isMobile?14:16,color:"var(--t2)",marginBottom:32,lineHeight:1.7}}>바이어 발굴에 소비하던 시간을 계약에 투자하세요.<br/>AI가 검증된 글로벌 바이어를 5분 내에 찾아드립니다.</p>
-            <div onClick={onEnter} style={{display:"inline-block",padding:isMobile?"14px 32px":"15px 44px",borderRadius:12,background:"var(--blue)",color:"#fff",fontSize:isMobile?14:16,fontWeight:700,cursor:"pointer",animation:"glowPulse 2.5s ease-in-out infinite",transition:"transform .2s"}}
+            <h2 style={{fontSize:isMobile?26:36,fontWeight:900,letterSpacing:"-.03em",color:"var(--t1)",marginBottom:12}}>매몰비용을 파이프라인으로 바꾸세요</h2>
+            <p style={{fontSize:isMobile?14:16,color:"var(--t2)",marginBottom:32,lineHeight:1.7}}>구글링·엑셀·번역기 콜드메일을 멈추고,<br/>AI Trade Agent에게 바이어 발굴을 맡기세요.</p>
+            <div onClick={onPilotApply} style={{display:"inline-block",padding:isMobile?"14px 32px":"15px 44px",borderRadius:12,background:"var(--blue)",color:"#fff",fontSize:isMobile?14:16,fontWeight:700,cursor:"pointer",animation:"glowPulse 2.5s ease-in-out infinite",transition:"transform .2s"}}
               onMouseEnter={e=>e.currentTarget.style.transform="translateY(-3px)"} onMouseLeave={e=>e.currentTarget.style.transform="none"}>
-              무료로 시작하기 →
+              파일럿 파트너 신청 →
             </div>
-            <div style={{marginTop:14,fontSize:12,color:"var(--t4)"}}>신용카드 불필요 · 즉시 시작 · 60개국 바이어 DB 즉시 접근</div>
+            <div style={{marginTop:14,fontSize:12,color:"var(--t4)"}}>파일럿 기간 중 1:1 온보딩 · 60개국 바이어 커버리지 · 성과 리포트 제공</div>
           </div>
         </div>
 
         {/* Footer */}
         <div style={{padding:"32px 0 40px",borderTop:"1px solid var(--border)"}}>
           <div style={{display:"flex",flexDirection:isMobile?"column":"row",justifyContent:"space-between",alignItems:"center",gap:isMobile?16:0}}>
-            <div style={{fontSize:11,color:"var(--t4)"}}>© 2026 NEXPORT. AI 기반 수출 바이어 매칭 플랫폼</div>
+            <div style={{fontSize:11,color:"var(--t4)"}}>© 2026 NEXPORT. AI Trade Agent for Korean Manufacturers</div>
             <div style={{display:"flex",gap:20,alignItems:"center"}}>
               {[{label:"이용약관",href:"#"},{label:"개인정보처리방침",href:"#"},{label:"고객센터",href:"mailto:support@nexport.trade"}].map((link,i)=>(
                 <a key={i} href={link.href} style={{fontSize:11,color:"var(--t4)",textDecoration:"none",transition:"color .2s"}}
