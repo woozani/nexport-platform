@@ -5261,7 +5261,7 @@ export default function App() {
       {showLanding && <LandingHero
         onEnter={() => { if (isMobile) { setShowMobileBanner(true); } else { history.pushState({ page: "platform" }, "", location.href); setShowLanding(false); } }}
         onLogin={() => { history.pushState({ page: "platform" }, "", location.href); setShowLanding(false); }}
-        onPilotApply={() => window.open("https://tally.so/r/PLACEHOLDER", "_blank")}
+        onPilotApply={() => window.open("https://tally.so/r/xXNGaE", "_blank")}
         isMobile={isMobile}
       />}
       {showMobileBanner && <MobileDesktopBanner onClose={() => setShowMobileBanner(false)} />}
