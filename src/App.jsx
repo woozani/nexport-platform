@@ -1636,12 +1636,11 @@ function LandingHero({ onEnter, onLogin, onPilotApply, isMobile }) {
   const [howRef, howInView] = useInView(0.2);
   // ── ROI 비교 inView ──
   const [roiRef, roiInView] = useInView(0.15);
-  // ── ROI 계산기 state ──
-  const [tradeShowBudget, setTradeShowBudget] = useState(5000);
-  const nexportMonthly = 30;
-  const tradeShowConvRate = 0.01;
-  const nexportConvRate = 0.08;
-  const avgDealSize = 500;
+  // ── 매몰비용 계산기 state ──
+  const [monthlySalary, setMonthlySalary] = useState(500);
+  const [salesMonths, setSalesMonths] = useState(6);
+  const tradeShowPerYear = 5000;
+  const nexportMonthly = 200;
   // ── Features inView ──
   const [featRef, featInView] = useInView(0.15);
   // ── 인증·규제 섹션 inView ──
@@ -1680,17 +1679,17 @@ function LandingHero({ onEnter, onLogin, onPilotApply, isMobile }) {
   const [activeRegTab, setActiveRegTab] = useState("cert");
 
   const features = [
-    { icon: <Ic.Search s={20}/>, title: "AI 바이어 매칭", desc: "제조사 프로필(산업·인증·지역) 입력 시 AI가 최적 바이어 TOP 15를 자동 추천 — 매칭 근거까지 설명", color: "var(--blue)", dim: "var(--blue-dim)" },
-    { icon: <Ic.Mail s={20}/>, title: "콜드이메일 자동화", desc: "개인화 이메일 자동 생성·전송, 오픈율/클릭률 실시간 추적으로 세일즈 효율 극대화", color: "var(--cyan)", dim: "var(--cyan-dim)" },
-    { icon: <Ic.Shield s={20}/>, title: "인증·규제 필터", desc: "수출 대상국별 필수 인증(CE, FDA 등) 및 규제 요건을 자동 필터링 — 한국산 유리 시장 즉시 파악", color: "var(--green)", dim: "var(--green-dim)" },
-    { icon: <Ic.Bar s={20}/>, title: "세일즈 대시보드", desc: "바이어 응답률, 파이프라인 현황, 성과 지표를 한눈에 관리하고 모니터링", color: "var(--amber)", dim: "var(--amber-dim)" },
+    { icon: <Ic.Search s={20}/>, title: "인증 기반 바이어 발굴", desc: "IATF·FDA·CE 등 보유 인증을 기준으로 AI Agent가 적격 바이어를 자동 탐색 — 구글링·엑셀 작업 제로", color: "var(--blue)", dim: "var(--blue-dim)" },
+    { icon: <Ic.Mail s={20}/>, title: "맞춤형 아웃리치 대행", desc: "바이어 맥락에 맞춘 개인화 이메일을 Agent가 작성·발송하고, 응답까지 추적합니다", color: "var(--cyan)", dim: "var(--cyan-dim)" },
+    { icon: <Ic.Shield s={20}/>, title: "인증·규제 자동 필터", desc: "수출 대상국별 필수 인증과 규제 요건을 자동 분석 — 한국산 제품이 유리한 시장을 먼저 찾아냅니다", color: "var(--green)", dim: "var(--green-dim)" },
+    { icon: <Ic.Bar s={20}/>, title: "파이프라인 리포트", desc: "매월 공급된 리드·응답률·미팅 전환을 리포트로 제공 — 대표가 한눈에 성과를 확인", color: "var(--amber)", dim: "var(--amber-dim)" },
   ];
 
   const steps = [
-    { num:"①", icon:<Ic.Search s={22}/>, title:"프로필 입력", desc:"제조사 정보·제품·인증·수출 희망 지역을 입력하세요", color:"var(--blue)", dim:"var(--blue-dim)" },
-    { num:"②", icon:<Ic.Sparkle s={22}/>, title:"AI 바이어 매칭", desc:"AI가 산업·지역·규모 기반으로 적격 바이어를 자동 스코어링", color:"var(--violet)", dim:"var(--violet-dim)" },
-    { num:"③", icon:<Ic.Mail s={22}/>, title:"자동 아웃리치", desc:"개인화 콜드이메일 자동 생성·발송, 오픈/클릭 실시간 추적", color:"var(--cyan)", dim:"var(--cyan-dim)" },
-    { num:"④", icon:<Ic.Bar s={22}/>, title:"성과 관리", desc:"바이어 응답률·파이프라인 현황을 대시보드에서 한눈에 관리", color:"var(--green)", dim:"var(--green-dim)" },
+    { num:"①", icon:<Ic.Search s={22}/>, title:"온보딩", desc:"제조사 프로필·인증·제품 스펙을 1회 입력하면 Agent가 학습합니다", color:"var(--blue)", dim:"var(--blue-dim)" },
+    { num:"②", icon:<Ic.Sparkle s={22}/>, title:"Agent가 바이어 탐색", desc:"AI Agent가 인증·산업·지역 기반으로 적격 바이어를 자동 발굴합니다", color:"var(--violet)", dim:"var(--violet-dim)" },
+    { num:"③", icon:<Ic.Mail s={22}/>, title:"Agent가 아웃리치", desc:"바이어별 맞춤 이메일을 Agent가 작성·발송하고 응답을 추적합니다", color:"var(--cyan)", dim:"var(--cyan-dim)" },
+    { num:"④", icon:<Ic.Bar s={22}/>, title:"월간 리포트 수령", desc:"매월 파이프라인 현황·응답률·미팅 전환 리포트를 받아보세요", color:"var(--green)", dim:"var(--green-dim)" },
   ];
 
   const mockBuyers = [
@@ -1967,8 +1966,8 @@ function LandingHero({ onEnter, onLogin, onPilotApply, isMobile }) {
         <div id="how-it-works" ref={howRef} style={{padding:"0 0 80px"}}>
           <div style={{textAlign:"center",marginBottom:48,opacity:howInView?1:0,transform:howInView?"none":"translateY(20px)",transition:"all .6s cubic-bezier(0.2,0,0,1)"}}>
             <div style={{fontSize:11,fontWeight:700,color:"var(--blue)",textTransform:"uppercase",letterSpacing:".12em",marginBottom:10}}>How it works</div>
-            <h2 style={{fontSize:isMobile?22:32,fontWeight:800,letterSpacing:"-.03em",color:"var(--t1)"}}>NEXPORT로 수출 바이어를 찾는 방법</h2>
-            <p style={{fontSize:isMobile?13:15,color:"var(--t3)",marginTop:10}}>4단계로 수출 바이어 발굴부터 성과 관리까지 자동화하세요</p>
+            <h2 style={{fontSize:isMobile?22:32,fontWeight:800,letterSpacing:"-.03em",color:"var(--t1)"}}>AI Trade Agent가 일하는 방식</h2>
+            <p style={{fontSize:isMobile?13:15,color:"var(--t3)",marginTop:10}}>온보딩 1회, 이후 Agent가 매월 바이어를 찾아 파이프라인에 공급합니다</p>
           </div>
           <div className="hiw-grid" style={{display:isMobile?"flex":"grid",flexDirection:isMobile?"column":undefined,gridTemplateColumns:isMobile?undefined:"1fr auto 1fr auto 1fr auto 1fr",gap:isMobile?"16px":0,alignItems:isMobile?"stretch":"start"}}>
             {steps.map((s,i) => (
@@ -1996,10 +1995,10 @@ function LandingHero({ onEnter, onLogin, onPilotApply, isMobile }) {
         <div style={{margin:"0 0 80px",padding:"36px 0",borderRadius:16,background:"var(--bg-2)",border:"1px solid var(--border)"}}>
           <div style={{display:"grid",gridTemplateColumns:isMobile?"repeat(2,1fr)":"repeat(4,1fr)",gap:0}}>
             {[
-              {end:60,suffix:"개국+",label:"글로벌 바이어 DB",color:"var(--blue)"},
-              {end:98,suffix:"%",label:"이메일 정확도",color:"var(--green)"},
-              {end:5,suffix:"분 내",label:"바이어 발굴 시간",color:"var(--amber)"},
-              {end:15,suffix:"개국",label:"국가 커버리지",color:"var(--cyan)"},
+              {end:60,suffix:"개국+",label:"바이어 커버리지",color:"var(--blue)"},
+              {end:15,suffix:"건+",label:"월 평균 리드 공급",color:"var(--green)"},
+              {end:3,suffix:"주 내",label:"첫 리드 도착",color:"var(--amber)"},
+              {end:0,suffix:"건",label:"고객 직접 작업",color:"var(--cyan)"},
             ].map((s,i)=>(
               <div key={i} style={{textAlign:"center",padding:"16px 12px",
                 borderRight:isMobile?(i%2===0?"1px solid var(--border)":"none"):(i<3?"1px solid var(--border)":"none"),
@@ -2101,47 +2100,58 @@ function LandingHero({ onEnter, onLogin, onPilotApply, isMobile }) {
           </div>
         </div>
 
-        {/* ⑤-C 인터랙티브 ROI 계산기 */}
+        {/* ⑤-C 매몰비용 계산기 */}
         {!isMobile && (
           <div style={{margin:"0 0 80px",padding:"36px 40px",borderRadius:20,background:"var(--bg-2)",border:"1px solid var(--border)",opacity:roiInView?1:0,transform:roiInView?"none":"translateY(16px)",transition:"all .7s cubic-bezier(0.2,0,0,1) .5s"}}>
             <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:24}}>
-              <div style={{width:32,height:32,borderRadius:8,background:"rgba(245,158,11,.12)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:16}}>🧮</div>
+              <div style={{width:32,height:32,borderRadius:8,background:"rgba(255,69,58,.12)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:16}}>🔥</div>
               <div>
-                <div style={{fontSize:15,fontWeight:800,color:"var(--t1)"}}>나의 ROI 직접 계산해보기</div>
-                <div style={{fontSize:12,color:"var(--t3)",marginTop:2}}>연간 전시회 예산을 입력하면 NEXPORT 대비 절감액을 즉시 계산합니다</div>
+                <div style={{fontSize:15,fontWeight:800,color:"var(--t1)"}}>우리 회사의 수출 매몰비용 계산기</div>
+                <div style={{fontSize:12,color:"var(--t3)",marginTop:2}}>해외영업 인건비와 기간을 입력하면, 파이프라인 없이 증발하는 비용을 보여드립니다</div>
               </div>
             </div>
             <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:32,alignItems:"center"}}>
               {/* 슬라이더 */}
               <div>
                 <div style={{display:"flex",justifyContent:"space-between",alignItems:"baseline",marginBottom:10}}>
-                  <label style={{fontSize:12,fontWeight:700,color:"var(--t2)"}}>연간 전시회 예산</label>
-                  <span style={{fontSize:22,fontWeight:900,color:"rgba(255,69,58,1)",fontFamily:"var(--mono)"}}>{tradeShowBudget.toLocaleString()}만원</span>
+                  <label style={{fontSize:12,fontWeight:700,color:"var(--t2)"}}>월 해외영업 인건비</label>
+                  <span style={{fontSize:22,fontWeight:900,color:"rgba(255,69,58,1)",fontFamily:"var(--mono)"}}>{monthlySalary.toLocaleString()}만원</span>
                 </div>
-                <input type="range" min={500} max={20000} step={500} value={tradeShowBudget}
-                  onChange={e=>setTradeShowBudget(Number(e.target.value))}
+                <input type="range" min={300} max={1500} step={50} value={monthlySalary}
+                  onChange={e=>setMonthlySalary(Number(e.target.value))}
                   style={{width:"100%",accentColor:"var(--blue)",cursor:"pointer"}}/>
                 <div style={{display:"flex",justifyContent:"space-between",fontSize:10,color:"var(--t4)",marginTop:4}}>
-                  <span>500만원</span><span>2억원</span>
+                  <span>300만원</span><span>1,500만원</span>
                 </div>
                 <div style={{marginTop:16,display:"flex",gap:8,flexWrap:"wrap"}}>
-                  {[1000,3000,5000,10000].map(v=>(
-                    <div key={v} onClick={()=>setTradeShowBudget(v)}
+                  {[400,500,700,1000].map(v=>(
+                    <div key={v} onClick={()=>setMonthlySalary(v)}
                       style={{padding:"4px 12px",borderRadius:6,fontSize:11,fontWeight:600,cursor:"pointer",transition:"all .15s",
-                        background:tradeShowBudget===v?"var(--blue)":"var(--bg-3)",
-                        color:tradeShowBudget===v?"#fff":"var(--t3)",
-                        border:`1px solid ${tradeShowBudget===v?"var(--blue)":"var(--border)"}`}}>
-                      {(v/1000).toFixed(0)}천만
+                        background:monthlySalary===v?"var(--blue)":"var(--bg-3)",
+                        color:monthlySalary===v?"#fff":"var(--t3)",
+                        border:`1px solid ${monthlySalary===v?"var(--blue)":"var(--border)"}`}}>
+                      {v}만원
                     </div>
                   ))}
+                </div>
+                <div style={{display:"flex",justifyContent:"space-between",alignItems:"baseline",marginBottom:10,marginTop:20}}>
+                  <label style={{fontSize:12,fontWeight:700,color:"var(--t2)"}}>성과 없는 영업 기간</label>
+                  <span style={{fontSize:22,fontWeight:900,color:"var(--amber)",fontFamily:"var(--mono)"}}>{salesMonths}개월</span>
+                </div>
+                <input type="range" min={3} max={24} step={1} value={salesMonths}
+                  onChange={e=>setSalesMonths(Number(e.target.value))}
+                  style={{width:"100%",accentColor:"var(--amber)",cursor:"pointer"}}/>
+                <div style={{display:"flex",justifyContent:"space-between",fontSize:10,color:"var(--t4)",marginTop:4}}>
+                  <span>3개월</span><span>24개월</span>
                 </div>
               </div>
               {/* 결과 */}
               <div style={{display:"grid",gap:12}}>
                 {[
-                  {label:"전시회 연간 비용",value:`${tradeShowBudget.toLocaleString()}만원`,sub:`${Math.round(tradeShowBudget*tradeShowConvRate)}만원 가치의 계약 (전환율 ${(tradeShowConvRate*100).toFixed(0)}%)`,color:"rgba(255,69,58,1)",bg:"rgba(255,69,58,.06)",border:"rgba(255,69,58,.2)"},
-                  {label:"NEXPORT 연간 비용",value:`${(nexportMonthly*12).toLocaleString()}만원`,sub:`${Math.round(tradeShowBudget*nexportConvRate/tradeShowConvRate*nexportMonthly*12/tradeShowBudget)}배 더 많은 바이어 접근 가능`,color:"var(--green)",bg:"rgba(16,185,129,.06)",border:"rgba(16,185,129,.2)"},
-                  {label:"연간 절감액",value:`${(tradeShowBudget - nexportMonthly*12).toLocaleString()}만원`,sub:`NEXPORT 전환 시 즉시 절약 — ${Math.round((1-nexportMonthly*12/tradeShowBudget)*100)}% 비용 절감`,color:"var(--cyan)",bg:"rgba(34,211,238,.06)",border:"rgba(34,211,238,.2)"},
+                  {label:"인건비 매몰비용",value:`${(monthlySalary * salesMonths).toLocaleString()}만원`,sub:`월 ${monthlySalary}만원 × ${salesMonths}개월, 계약 0건 시 전액 증발`,color:"rgba(255,69,58,1)",bg:"rgba(255,69,58,.06)",border:"rgba(255,69,58,.2)"},
+                  {label:"전시회·출장 추가 비용",value:`${tradeShowPerYear.toLocaleString()}만원`,sub:"연 1~2회 전시회 부스비 + 항공·숙박 (업계 평균)",color:"var(--amber)",bg:"rgba(245,158,11,.06)",border:"rgba(245,158,11,.2)"},
+                  {label:"총 매몰비용 (연간 환산)",value:`${(monthlySalary * 12 + tradeShowPerYear).toLocaleString()}만원`,sub:`이 비용으로 파이프라인이 0건이라면?`,color:"rgba(255,69,58,1)",bg:"rgba(255,69,58,.08)",border:"rgba(255,69,58,.3)"},
+                  {label:"NEXPORT 연간 비용",value:`${(nexportMonthly * 12).toLocaleString()}만원`,sub:`매월 인증 매칭 바이어 공급 · 기존 대비 ${Math.round((1 - nexportMonthly*12/(monthlySalary*12+tradeShowPerYear))*100)}% 절감`,color:"var(--green)",bg:"rgba(16,185,129,.06)",border:"rgba(16,185,129,.2)"},
                 ].map((item,i)=>(
                   <div key={i} style={{padding:"12px 16px",borderRadius:10,background:item.bg,border:`1px solid ${item.border}`,display:"flex",justifyContent:"space-between",alignItems:"center",gap:8}}>
                     <div>
@@ -2186,7 +2196,7 @@ function LandingHero({ onEnter, onLogin, onPilotApply, isMobile }) {
         <div id="features" ref={featRef} style={{padding:isMobile?"0 0 48px":"0 0 80px"}}>
           <div style={{textAlign:"center",marginBottom:isMobile?24:40,opacity:featInView?1:0,transform:featInView?"none":"translateY(16px)",transition:"all .6s cubic-bezier(0.2,0,0,1)"}}>
             <div style={{fontSize:11,fontWeight:700,color:"var(--blue)",textTransform:"uppercase",letterSpacing:".12em",marginBottom:10}}>Features</div>
-            <h2 style={{fontSize:isMobile?22:32,fontWeight:800,letterSpacing:"-.03em",color:"var(--t1)"}}>수출 전 과정을 하나의 플랫폼에서</h2>
+            <h2 style={{fontSize:isMobile?22:32,fontWeight:800,letterSpacing:"-.03em",color:"var(--t1)"}}>AI Agent가 대신 처리하는 영역</h2>
           </div>
           <div style={{display:"grid",gridTemplateColumns:isMobile?"1fr":"repeat(2,1fr)",gap:isMobile?12:16}}>
             {features.map((f,i)=>(
@@ -2493,8 +2503,8 @@ function LandingHero({ onEnter, onLogin, onPilotApply, isMobile }) {
         <div id="cases" style={{padding:isMobile?"0 0 48px":"0 0 80px"}}>
           <div style={{textAlign:"center",marginBottom:isMobile?28:44}}>
             <div style={{fontSize:11,fontWeight:700,color:"var(--cyan)",textTransform:"uppercase",letterSpacing:".12em",marginBottom:10}}>Success Stories</div>
-            <h2 style={{fontSize:isMobile?22:32,fontWeight:800,letterSpacing:"-.03em",color:"var(--t1)"}}>실제 수출 성공 사례</h2>
-            <p style={{fontSize:isMobile?13:15,color:"var(--t3)",marginTop:10}}>NEXPORT를 통해 해외 바이어를 발굴한 한국 중소 제조업체 사례입니다</p>
+            <h2 style={{fontSize:isMobile?22:32,fontWeight:800,letterSpacing:"-.03em",color:"var(--t1)"}}>AI Trade Agent 도입 후 변화</h2>
+            <p style={{fontSize:isMobile?13:15,color:"var(--t3)",marginTop:10}}>구글링·엑셀·번역기 콜드메일에서 벗어난 제조업체 사례입니다</p>
           </div>
           <div style={{display:"grid",gridTemplateColumns:isMobile?"1fr":"repeat(3,1fr)",gap:isMobile?16:20}}>
             {[
@@ -2604,20 +2614,20 @@ function LandingHero({ onEnter, onLogin, onPilotApply, isMobile }) {
         <div style={{margin:"0 0 60px",padding:isMobile?"40px 20px":"56px 40px",borderRadius:20,background:"linear-gradient(135deg,rgba(10,132,255,.09),rgba(191,90,242,.06))",border:"1px solid rgba(10,132,255,.18)",textAlign:"center",position:"relative",overflow:"hidden"}}>
           <div style={{position:"absolute",top:"50%",left:"50%",transform:"translate(-50%,-50%)",width:"60%",height:"60%",borderRadius:"50%",background:"radial-gradient(circle,rgba(10,132,255,.07) 0%,transparent 70%)",pointerEvents:"none"}}/>
           <div style={{position:"relative"}}>
-            <h2 style={{fontSize:isMobile?26:36,fontWeight:900,letterSpacing:"-.03em",color:"var(--t1)",marginBottom:12}}>지금 NEXPORT를 시작하세요</h2>
-            <p style={{fontSize:isMobile?14:16,color:"var(--t2)",marginBottom:32,lineHeight:1.7}}>바이어 발굴에 소비하던 시간을 계약에 투자하세요.<br/>AI가 검증된 글로벌 바이어를 5분 내에 찾아드립니다.</p>
-            <div onClick={onEnter} style={{display:"inline-block",padding:isMobile?"14px 32px":"15px 44px",borderRadius:12,background:"var(--blue)",color:"#fff",fontSize:isMobile?14:16,fontWeight:700,cursor:"pointer",animation:"glowPulse 2.5s ease-in-out infinite",transition:"transform .2s"}}
+            <h2 style={{fontSize:isMobile?26:36,fontWeight:900,letterSpacing:"-.03em",color:"var(--t1)",marginBottom:12}}>매몰비용을 파이프라인으로 바꾸세요</h2>
+            <p style={{fontSize:isMobile?14:16,color:"var(--t2)",marginBottom:32,lineHeight:1.7}}>구글링·엑셀·번역기 콜드메일을 멈추고,<br/>AI Trade Agent에게 바이어 발굴을 맡기세요.</p>
+            <div onClick={onPilotApply} style={{display:"inline-block",padding:isMobile?"14px 32px":"15px 44px",borderRadius:12,background:"var(--blue)",color:"#fff",fontSize:isMobile?14:16,fontWeight:700,cursor:"pointer",animation:"glowPulse 2.5s ease-in-out infinite",transition:"transform .2s"}}
               onMouseEnter={e=>e.currentTarget.style.transform="translateY(-3px)"} onMouseLeave={e=>e.currentTarget.style.transform="none"}>
-              무료로 시작하기 →
+              파일럿 파트너 신청 →
             </div>
-            <div style={{marginTop:14,fontSize:12,color:"var(--t4)"}}>신용카드 불필요 · 즉시 시작 · 60개국 바이어 DB 즉시 접근</div>
+            <div style={{marginTop:14,fontSize:12,color:"var(--t4)"}}>파일럿 기간 중 1:1 온보딩 · 60개국 바이어 커버리지 · 성과 리포트 제공</div>
           </div>
         </div>
 
         {/* Footer */}
         <div style={{padding:"32px 0 40px",borderTop:"1px solid var(--border)"}}>
           <div style={{display:"flex",flexDirection:isMobile?"column":"row",justifyContent:"space-between",alignItems:"center",gap:isMobile?16:0}}>
-            <div style={{fontSize:11,color:"var(--t4)"}}>© 2026 NEXPORT. AI 기반 수출 바이어 매칭 플랫폼</div>
+            <div style={{fontSize:11,color:"var(--t4)"}}>© 2026 NEXPORT. AI Trade Agent for Korean Manufacturers</div>
             <div style={{display:"flex",gap:20,alignItems:"center"}}>
               {[{label:"이용약관",href:"#"},{label:"개인정보처리방침",href:"#"},{label:"고객센터",href:"mailto:support@nexport.trade"}].map((link,i)=>(
                 <a key={i} href={link.href} style={{fontSize:11,color:"var(--t4)",textDecoration:"none",transition:"color .2s"}}
