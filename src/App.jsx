@@ -1673,7 +1673,7 @@ function LandingHero({ onEnter, onLogin, onPilotApply, isMobile }) {
   // ── 데모 모달 ──
   const [showDemo, setShowDemo] = useState(false);
   // ── 연간/월간 요금 토글 ──
-  const [billingAnnual, setBillingAnnual] = useState(false);
+  // billingAnnual 제거됨 — 파일럿 모델로 전환 (Phase 2)
   // ── FAQ 열림 상태 ──
   const [faqOpen, setFaqOpen] = useState(null);
   const [activeRegTab, setActiveRegTab] = useState("cert");
@@ -1909,11 +1909,11 @@ function LandingHero({ onEnter, onLogin, onPilotApply, isMobile }) {
             <div style={{padding:isMobile?"22px 20px":"28px 24px",borderRadius:14,background:"rgba(16,185,129,.04)",border:"1px solid rgba(16,185,129,.18)"}}>
               <div style={{fontSize:12,fontWeight:700,color:"var(--green)",textTransform:"uppercase",letterSpacing:".08em",marginBottom:16}}>NEXPORT 솔루션</div>
               {[
-                "AI가 수 분 내 적격 바이어 TOP 15 자동 추천",
-                "월 9.9만원~부터, 연간 비용 기존의 1/10 수준",
-                "영업 소요 시간 최소 70% 절감 (자체 베타 테스트)",
-                "개인화 콜드이메일 자동 생성 + 오픈/클릭 추적",
-                "인증·규제 필터로 한국산 유리 시장 즉시 발굴",
+                "AI Agent가 매월 인증 매칭 바이어 리드를 파이프라인에 공급",
+                "구글링·엑셀·번역기 콜드메일 작업 제로",
+                "바이어별 맞춤 아웃리치 Agent가 대행",
+                "응답률·미팅 전환 월간 리포트 제공",
+                "인증·규제 필터로 한국산 유리 시장 자동 발굴",
               ].map((t,i)=>(
                 <div key={i} style={{display:"flex",alignItems:"flex-start",gap:8,marginBottom:i<4?10:0}}>
                   <span style={{color:"var(--green)",fontSize:14,lineHeight:1.6,flexShrink:0}}>✓</span>
@@ -2063,10 +2063,10 @@ function LandingHero({ onEnter, onLogin, onPilotApply, isMobile }) {
                 <div style={{fontSize:14,fontWeight:700,color:"var(--green)"}}>NEXPORT 사용 시</div>
               </div>
               {[
-                {label:"월 이용 요금",value:"9.9만원~",sub:"Starter 기준 / 전시회 1회(5,000만원) 대비 500배↓"},
-                {label:"바이어 매칭 방식",value:"AI 정밀 매칭",sub:"규제·인증·산업·지역별 스코어링"},
-                {label:"바이어 발굴까지 걸리는 시간",value:"5분",sub:"검색 → 이메일 확보 → AI 추천 즉시"},
-                {label:"글로벌 바이어 접근",value:"즉시",sub:"60개국 검증된 바이어 DB 즉시 접근"},
+                {label:"월 비용",value:"200만원~",sub:"가치 기반 가격 · 매몰비용 대비 1/3 수준"},
+                {label:"바이어 매칭 방식",value:"AI Agent 자동",sub:"인증·산업·지역 기반 매칭 + 아웃리치 대행"},
+                {label:"첫 리드 도착까지",value:"3주 내",sub:"온보딩 후 Agent가 자동 탐색·발송"},
+                {label:"고객이 할 일",value:"0건",sub:"Agent가 발굴·아웃리치·추적 전 과정 대행"},
               ].map((item,i)=>(
                 <div key={i} style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",padding:"11px 0",borderBottom:i<3?"1px solid rgba(16,185,129,.12)":"none"}}>
                   <div style={{flex:1,paddingRight:12}}>
@@ -2374,85 +2374,56 @@ function LandingHero({ onEnter, onLogin, onPilotApply, isMobile }) {
           )}
         </div>
 
-        {/* ⑥-C PRICING */}
+        {/* ⑥-C PRICING — 파일럿 모델 */}
         <div id="pricing" style={{padding:isMobile?"0 0 48px":"0 0 80px"}}>
           <div style={{textAlign:"center",marginBottom:isMobile?24:44}}>
             <div style={{fontSize:11,fontWeight:700,color:"var(--violet)",textTransform:"uppercase",letterSpacing:".12em",marginBottom:10}}>Pricing</div>
-            <h2 style={{fontSize:isMobile?22:32,fontWeight:800,letterSpacing:"-.03em",color:"var(--t1)"}}>투명한 요금제, 숨겨진 비용 없음</h2>
-            <p style={{fontSize:isMobile?13:15,color:"var(--t3)",marginTop:10}}>14일 무료 체험 · 신용카드 불필요 · 언제든 해지 가능</p>
-            {/* 월간/연간 토글 */}
-            <div style={{display:"inline-flex",alignItems:"center",gap:12,marginTop:20,padding:"6px 8px",borderRadius:40,background:"var(--bg-2)",border:"1px solid var(--border)"}}>
-              <div onClick={()=>setBillingAnnual(false)} style={{padding:"6px 18px",borderRadius:30,fontSize:12,fontWeight:700,cursor:"pointer",transition:"all .2s",background:billingAnnual?"transparent":"var(--blue)",color:billingAnnual?"var(--t3)":"#fff"}}>월간</div>
-              <div onClick={()=>setBillingAnnual(true)} style={{padding:"6px 18px",borderRadius:30,fontSize:12,fontWeight:700,cursor:"pointer",transition:"all .2s",display:"flex",alignItems:"center",gap:6,background:billingAnnual?"var(--blue)":"transparent",color:billingAnnual?"#fff":"var(--t3)"}}>
-                연간
-                <span style={{padding:"2px 8px",borderRadius:10,background:"rgba(16,185,129,.15)",color:"var(--green)",fontSize:10,fontWeight:800}}>20% 할인</span>
-              </div>
-            </div>
+            <h2 style={{fontSize:isMobile?22:32,fontWeight:800,letterSpacing:"-.03em",color:"var(--t1)"}}>가치 기반 가격, 결과로 증명</h2>
+            <p style={{fontSize:isMobile?13:15,color:"var(--t3)",marginTop:10}}>파일럿 기간 중 1:1 온보딩 · 성과 확인 후 본계약 전환</p>
           </div>
-          <div style={{display:"grid",gridTemplateColumns:isMobile?"1fr":"repeat(3,1fr)",gap:isMobile?16:20,maxWidth:960,margin:"0 auto"}}>
-            {/* Free */}
-            <div style={{padding:isMobile?"24px 20px":"32px 28px",borderRadius:16,background:"var(--bg-2)",border:"1px solid var(--border)",boxShadow:"var(--card-shadow)"}}>
-              <div style={{fontSize:12,fontWeight:700,color:"var(--t3)",textTransform:"uppercase",letterSpacing:".08em",marginBottom:8}}>Free</div>
-              <div style={{display:"flex",alignItems:"baseline",gap:4,marginBottom:4}}>
-                <span style={{fontSize:isMobile?32:40,fontWeight:900,color:"var(--t1)"}}>₩0</span>
-                <span style={{fontSize:13,color:"var(--t3)"}}>/월</span>
-              </div>
-              <div style={{fontSize:12,color:"var(--t4)",marginBottom:20}}>기능 탐색용</div>
-              <div style={{borderTop:"1px solid var(--border)",paddingTop:16,display:"flex",flexDirection:"column",gap:10}}>
-                {["바이어 검색 3회/일","AI 매칭 미리보기","기본 국가 필터"].map((t,i)=>(
-                  <div key={i} style={{display:"flex",alignItems:"center",gap:8,fontSize:13,color:"var(--t2)"}}>
-                    <span style={{color:"var(--green)",fontSize:14}}>✓</span>{t}
-                  </div>
-                ))}
-              </div>
-              <div onClick={onEnter} style={{marginTop:24,padding:"12px 0",borderRadius:10,textAlign:"center",fontSize:13,fontWeight:700,cursor:"pointer",border:"1px solid var(--border)",color:"var(--t2)",transition:"all .2s"}}
-                onMouseEnter={e=>{e.currentTarget.style.borderColor="var(--blue)";e.currentTarget.style.color="var(--blue)"}}
-                onMouseLeave={e=>{e.currentTarget.style.borderColor="var(--border)";e.currentTarget.style.color="var(--t2)"}}>
-                무료로 시작
-              </div>
-            </div>
-            {/* Starter — 추천 */}
+          <div style={{display:"grid",gridTemplateColumns:isMobile?"1fr":"1fr 1fr",gap:isMobile?16:24,maxWidth:780,margin:"0 auto"}}>
+            {/* 파일럿 */}
             <div style={{padding:isMobile?"24px 20px":"32px 28px",borderRadius:16,background:"var(--bg-2)",border:"2px solid var(--blue)",boxShadow:"0 0 40px rgba(10,132,255,.12)",position:"relative"}}>
-              <div style={{position:"absolute",top:-12,left:"50%",transform:"translateX(-50%)",padding:"4px 16px",borderRadius:20,background:"var(--blue)",color:"#fff",fontSize:11,fontWeight:700,whiteSpace:"nowrap"}}>가장 인기</div>
-              <div style={{fontSize:12,fontWeight:700,color:"var(--blue)",textTransform:"uppercase",letterSpacing:".08em",marginBottom:8}}>Starter</div>
+              <div style={{position:"absolute",top:-12,left:"50%",transform:"translateX(-50%)",padding:"4px 16px",borderRadius:20,background:"var(--blue)",color:"#fff",fontSize:11,fontWeight:700,whiteSpace:"nowrap"}}>지금 모집 중</div>
+              <div style={{fontSize:12,fontWeight:700,color:"var(--blue)",textTransform:"uppercase",letterSpacing:".08em",marginBottom:8}}>Pilot Partner</div>
               <div style={{display:"flex",alignItems:"baseline",gap:4,marginBottom:4}}>
-                <span style={{fontSize:isMobile?32:40,fontWeight:900,color:"var(--t1)"}}>{billingAnnual?"₩79,200":"₩99,000"}</span>
+                <span style={{fontSize:isMobile?32:40,fontWeight:900,color:"var(--t1)"}}>₩2,000,000</span>
                 <span style={{fontSize:13,color:"var(--t3)"}}>/월</span>
               </div>
-              {billingAnnual && <div style={{fontSize:11,color:"var(--t4)",textDecoration:"line-through",marginBottom:2}}>₩99,000/월</div>}
-              <div style={{fontSize:12,color:"var(--t4)",marginBottom:20}}>수출 시작 단계{billingAnnual?" · 연 ₩950,400":""}</div>
+              <div style={{fontSize:12,color:"var(--t4)",marginBottom:20}}>3개월 파일럿 · 성과 미달 시 전액 환불</div>
               <div style={{borderTop:"1px solid var(--border)",paddingTop:16,display:"flex",flexDirection:"column",gap:10}}>
-                {["바이어 검색 무제한","AI 매칭 월 50회","콜드이메일 월 200건","인증·규제 필터","기본 대시보드"].map((t,i)=>(
+                {["1:1 전담 온보딩 (1회)","AI Agent 바이어 탐색·아웃리치 대행","인증·스펙 기반 매칭","월간 파이프라인 리포트","60개국 바이어 커버리지","파일럿 종료 후 본계약 전환 옵션"].map((t,i)=>(
                   <div key={i} style={{display:"flex",alignItems:"center",gap:8,fontSize:13,color:"var(--t2)"}}>
                     <span style={{color:"var(--green)",fontSize:14}}>✓</span>{t}
                   </div>
                 ))}
               </div>
-              <div onClick={onEnter} style={{marginTop:24,padding:"12px 0",borderRadius:10,textAlign:"center",fontSize:13,fontWeight:700,cursor:"pointer",background:"var(--blue)",color:"#fff",transition:"all .2s"}}
+              <div onClick={onPilotApply} style={{marginTop:24,padding:"12px 0",borderRadius:10,textAlign:"center",fontSize:13,fontWeight:700,cursor:"pointer",background:"var(--blue)",color:"#fff",transition:"all .2s"}}
                 onMouseEnter={e=>e.currentTarget.style.opacity="0.85"} onMouseLeave={e=>e.currentTarget.style.opacity="1"}>
-                14일 무료 체험 →
+                파일럿 파트너 신청 →
               </div>
             </div>
-            {/* Pro */}
-            <div style={{padding:isMobile?"24px 20px":"32px 28px",borderRadius:16,background:"var(--bg-2)",border:"1px solid var(--border)",boxShadow:"var(--card-shadow)"}}>
-              <div style={{fontSize:12,fontWeight:700,color:"var(--violet)",textTransform:"uppercase",letterSpacing:".08em",marginBottom:8}}>Pro</div>
-              <div style={{display:"flex",alignItems:"baseline",gap:4,marginBottom:4}}>
-                <span style={{fontSize:isMobile?32:40,fontWeight:900,color:"var(--t1)"}}>{billingAnnual?"₩232,000":"₩290,000"}</span>
-                <span style={{fontSize:13,color:"var(--t3)"}}>/월</span>
-              </div>
-              {billingAnnual && <div style={{fontSize:11,color:"var(--t4)",textDecoration:"line-through",marginBottom:2}}>₩290,000/월</div>}
-              <div style={{fontSize:12,color:"var(--t4)",marginBottom:20}}>본격 수출 확장{billingAnnual?" · 연 ₩2,784,000":""}</div>
-              <div style={{borderTop:"1px solid var(--border)",paddingTop:16,display:"flex",flexDirection:"column",gap:10}}>
-                {["Starter 전체 기능 포함","AI 매칭 무제한","콜드이메일 무제한","고급 분석 대시보드","우선 기술 지원","API 연동"].map((t,i)=>(
-                  <div key={i} style={{display:"flex",alignItems:"center",gap:8,fontSize:13,color:"var(--t2)"}}>
-                    <span style={{color:"var(--green)",fontSize:14}}>✓</span>{t}
+            {/* 비교 박스 */}
+            <div style={{padding:isMobile?"24px 20px":"32px 28px",borderRadius:16,background:"var(--bg-2)",border:"1px solid var(--border)",boxShadow:"var(--card-shadow)",display:"flex",flexDirection:"column",justifyContent:"center"}}>
+              <div style={{fontSize:12,fontWeight:700,color:"var(--t3)",textTransform:"uppercase",letterSpacing:".08em",marginBottom:16}}>왜 이 가격인가요?</div>
+              <div style={{display:"flex",flexDirection:"column",gap:16}}>
+                {[
+                  {label:"전담 영업 1명 채용",cost:"월 500만원+",note:"교육·관리 비용 별도, 성과 보장 없음"},
+                  {label:"무역 대행사",cost:"월 300~500만원",note:"+ 성공 수수료 10~15%"},
+                  {label:"전시회 1회",cost:"3,000~5,000만원",note:"연 1~2회, 후속 관리 없음"},
+                ].map((item,i)=>(
+                  <div key={i} style={{padding:"12px 16px",borderRadius:10,background:"rgba(255,69,58,.04)",border:"1px solid rgba(255,69,58,.12)"}}>
+                    <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:4}}>
+                      <span style={{fontSize:13,fontWeight:600,color:"var(--t2)"}}>{item.label}</span>
+                      <span style={{fontSize:13,fontWeight:800,color:"rgba(255,69,58,1)",fontFamily:"var(--mono)"}}>{item.cost}</span>
+                    </div>
+                    <div style={{fontSize:11,color:"var(--t4)"}}>{item.note}</div>
                   </div>
                 ))}
               </div>
-              <div onClick={onEnter} style={{marginTop:24,padding:"12px 0",borderRadius:10,textAlign:"center",fontSize:13,fontWeight:700,cursor:"pointer",border:"1px solid var(--violet)",color:"var(--violet)",transition:"all .2s"}}
-                onMouseEnter={e=>{e.currentTarget.style.background="var(--violet)";e.currentTarget.style.color="#fff"}}
-                onMouseLeave={e=>{e.currentTarget.style.background="transparent";e.currentTarget.style.color="var(--violet)"}}>
-                Pro 시작하기 →
+              <div style={{marginTop:20,padding:"14px 16px",borderRadius:10,background:"rgba(16,185,129,.06)",border:"1px solid rgba(16,185,129,.18)",textAlign:"center"}}>
+                <div style={{fontSize:13,fontWeight:700,color:"var(--green)"}}>NEXPORT AI Agent: 월 200만원</div>
+                <div style={{fontSize:11,color:"var(--t3)",marginTop:4}}>바이어 탐색 + 아웃리치 + 리포트 올인원 · 성과 미달 시 환불</div>
               </div>
             </div>
           </div>
@@ -2479,13 +2450,13 @@ function LandingHero({ onEnter, onLogin, onPilotApply, isMobile }) {
               </thead>
               <tbody>
                 {[
-                  {item:"비용",a:"회당 3,000~5,000만원",b:"수수료 15~30%",nx:"월 9.9만원~"},
-                  {item:"바이어 발굴 속도",a:"3~6개월",b:"1~3개월",nx:"수 분"},
-                  {item:"바이어 검증",a:"명함 교환 수준",b:"제한적 DB",nx:"AI 스코어링 + 적합도 분석"},
-                  {item:"아웃리치",a:"수동 이메일",b:"대행 (추가 비용)",nx:"개인화 자동 발송 + 추적"},
+                  {item:"비용",a:"회당 3,000~5,000만원",b:"수수료 15~30%",nx:"월 200만원~ (가치 기반)"},
+                  {item:"바이어 발굴",a:"3~6개월",b:"1~3개월",nx:"Agent가 3주 내 첫 리드"},
+                  {item:"바이어 검증",a:"명함 교환 수준",b:"제한적 DB",nx:"인증·스펙 기반 AI 매칭"},
+                  {item:"아웃리치",a:"수동 이메일",b:"대행 (추가 비용)",nx:"Agent가 맞춤 발송 + 추적"},
                   {item:"인증·규제 대응",a:"별도 컨설팅 필요",b:"일부 지원",nx:"자동 필터링 내장"},
-                  {item:"성과 추적",a:"없음",b:"보고서 (월 1회)",nx:"실시간 대시보드"},
-                  {item:"확장성",a:"연 1~2회 참가",b:"계약 기간 한정",nx:"무제한 / 24시간 가동"},
+                  {item:"고객 작업량",a:"전시회 운영 직접",b:"소통·관리 직접",nx:"온보딩 1회, 이후 Agent 대행"},
+                  {item:"성과 리포트",a:"없음",b:"보고서 (월 1회)",nx:"월간 파이프라인 리포트"},
                 ].map((r,i)=>(
                   <tr key={i} style={{borderBottom:i<6?"1px solid var(--border)":"none"}}>
                     <td style={{padding:"12px 18px",fontSize:13,fontWeight:600,color:"var(--t1)",borderBottom:"1px solid var(--border)"}}>{r.item}</td>
@@ -2589,11 +2560,11 @@ function LandingHero({ onEnter, onLogin, onPilotApply, isMobile }) {
           </div>
           <div style={{maxWidth:720,margin:"0 auto",display:"flex",flexDirection:"column",gap:8}}>
             {[
-              {q:"바이어 데이터는 얼마나 정확한가요?",a:"Hunter.io API와 자체 크롤링 엔진을 결합해 60개국 10만+ 바이어 DB를 구축합니다. 이메일 검증율 95% 이상, 분기마다 데이터를 갱신합니다."},
-              {q:"무료 체험 후 자동으로 결제되나요?",a:"아닙니다. 14일 무료 체험은 신용카드 없이 시작할 수 있으며, 체험 기간 종료 후 자동 결제는 없습니다. 업그레이드는 직접 선택하실 때만 진행됩니다."},
-              {q:"콜드이메일 발송은 어떻게 작동하나요?",a:"NEXPORT AI가 바이어 프로필을 분석해 개인화 이메일을 자동 생성합니다. 발송 후 오픈율·클릭률을 실시간 추적하며, 스팸 방지 최적화가 기본 적용됩니다."},
-              {q:"어떤 업종·제품을 지원하나요?",a:"자동차 부품, 전자·반도체, 의료기기, 화학/소재, 기계·장비, 식품, 건축자재 등 제조업 전 분야를 지원합니다. 산업별 맞춤 인증·규제 필터도 제공합니다."},
-              {q:"기존 CRM이나 Apollo와 연동 가능한가요?",a:"Pro 플랜에서 API 연동을 지원합니다. HubSpot, Salesforce, Apollo.io와의 연동 가이드를 제공하며, 커스텀 연동은 별도 문의해 주세요."},
+              {q:"파일럿 기간은 어떻게 되나요?",a:"3개월 파일럿 후 성과를 함께 리뷰합니다. 목표 리드 수 미달 시 전액 환불 보장이며, 성과 확인 후 본계약으로 전환됩니다."},
+              {q:"우리가 직접 해야 할 일이 있나요?",a:"온보딩 시 제품·인증·타깃 시장 정보를 1회 입력하시면 됩니다. 이후 바이어 탐색, 아웃리치, 추적은 AI Agent가 전담합니다. 매월 리포트로 성과를 확인하세요."},
+              {q:"어떤 업종·제품을 지원하나요?",a:"자동차 부품, 전자·반도체, 의료기기, 화학/소재, 기계·장비 등 인증 게이트 산업을 우선 지원합니다. IATF, FDA, CE, REACH 등 주요 인증 기반 매칭이 강점입니다."},
+              {q:"기존 대행사나 KOTRA와 병행 가능한가요?",a:"네, 기존 채널과 병행하면서 NEXPORT Agent가 추가 파이프라인을 공급하는 구조입니다. 기존 방식의 보완재로 시작하실 수 있습니다."},
+              {q:"성과 미달 시 정말 환불되나요?",a:"파일럿 계약서에 목표 리드 수와 환불 조건이 명시됩니다. 3개월 내 합의된 리드 수에 미달하면 전액 환불합니다. 자세한 내용은 파일럿 신청 후 1:1 상담에서 안내드립니다."},
             ].map((item,i)=>(
               <div key={i} onClick={()=>setFaqOpen(faqOpen===i?null:i)}
                 style={{borderRadius:12,border:"1px solid var(--border)",background:"var(--bg-2)",overflow:"hidden",cursor:"pointer",transition:"border-color .2s"}}
