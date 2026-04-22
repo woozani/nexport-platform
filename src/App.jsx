@@ -1592,7 +1592,7 @@ function MobileDesktopBanner({ onClose }) {
 }
 
 // ─────────── LANDING HERO ───────────
-function LandingHero({ onEnter, onLogin, isMobile }) {
+function LandingHero({ onEnter, onLogin, onPilotApply, isMobile }) {
   const [visible, setVisible] = useState(false);
   useEffect(() => { setTimeout(() => setVisible(true), 80); }, []);
 
@@ -1721,10 +1721,10 @@ function LandingHero({ onEnter, onLogin, isMobile }) {
               </div>
             </div>
             <div style={{padding:"16px 20px",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
-              <div style={{fontSize:12,color:"var(--t3)"}}>직접 체험하고 싶으신가요?</div>
-              <div onClick={()=>{setShowDemo(false);onEnter();}} style={{padding:"9px 22px",borderRadius:9,background:"var(--blue)",color:"#fff",fontSize:13,fontWeight:700,cursor:"pointer",transition:"opacity .18s"}}
+              <div style={{fontSize:12,color:"var(--t3)"}}>파일럿 파트너로 시작하세요</div>
+              <div onClick={()=>{setShowDemo(false);onPilotApply();}} style={{padding:"9px 22px",borderRadius:9,background:"var(--blue)",color:"#fff",fontSize:13,fontWeight:700,cursor:"pointer",transition:"opacity .18s"}}
                 onMouseEnter={e=>e.currentTarget.style.opacity=".85"} onMouseLeave={e=>e.currentTarget.style.opacity="1"}>
-                무료로 시작하기 →
+                파일럿 신청 →
               </div>
             </div>
           </div>
@@ -1771,7 +1771,7 @@ function LandingHero({ onEnter, onLogin, isMobile }) {
             )}
             <div onClick={onLogin} style={{padding:"7px 18px",borderRadius:8,border:"1px solid var(--border)",color:"var(--t2)",fontSize:12,fontWeight:600,cursor:"pointer",transition:"all .18s"}}
               onMouseEnter={e=>e.currentTarget.style.borderColor="var(--border-h)"} onMouseLeave={e=>e.currentTarget.style.borderColor="var(--border)"}>로그인</div>
-            <div onClick={onEnter} style={{padding:"7px 18px",borderRadius:8,background:"var(--blue)",color:"#fff",fontSize:12,fontWeight:600,cursor:"pointer",transition:"all .18s"}}
+            <div onClick={onPilotApply} style={{padding:"7px 18px",borderRadius:8,background:"var(--blue)",color:"#fff",fontSize:12,fontWeight:600,cursor:"pointer",transition:"all .18s"}}
               onMouseEnter={e=>e.currentTarget.style.opacity=".88"} onMouseLeave={e=>e.currentTarget.style.opacity="1"}>파일럿 신청 →</div>
           </div>
         </div>
@@ -1836,7 +1836,7 @@ function LandingHero({ onEnter, onLogin, isMobile }) {
           </div>
 
           <div style={{display:"flex",gap:12,justifyContent:"center",flexWrap:"wrap"}}>
-            <div onClick={onEnter} style={{padding:"13px 34px",borderRadius:10,background:"var(--blue)",color:"#fff",fontSize:14,fontWeight:700,cursor:"pointer",animation:"glowPulse 3s ease-in-out infinite",transition:"transform .2s"}}
+            <div onClick={onPilotApply} style={{padding:"13px 34px",borderRadius:10,background:"var(--blue)",color:"#fff",fontSize:14,fontWeight:700,cursor:"pointer",animation:"glowPulse 3s ease-in-out infinite",transition:"transform .2s"}}
               onMouseEnter={e=>e.currentTarget.style.transform="translateY(-2px)"} onMouseLeave={e=>e.currentTarget.style.transform="none"}>
               파일럿 파트너 신청
             </div>
@@ -5261,6 +5261,7 @@ export default function App() {
       {showLanding && <LandingHero
         onEnter={() => { if (isMobile) { setShowMobileBanner(true); } else { history.pushState({ page: "platform" }, "", location.href); setShowLanding(false); } }}
         onLogin={() => { history.pushState({ page: "platform" }, "", location.href); setShowLanding(false); }}
+        onPilotApply={() => window.open("https://tally.so/r/xXNGaE", "_blank")}
         isMobile={isMobile}
       />}
       {showMobileBanner && <MobileDesktopBanner onClose={() => setShowMobileBanner(false)} />}
