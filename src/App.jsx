@@ -128,7 +128,7 @@ const PLANS = [
     locked:["AI 매칭","플레이북 실행","고급 신용등급 필터","CSV 내보내기","팀 협업","API 연동"],
   },
   {
-    id:"pro", name:"Pro", price:"₩79,000", period:"/월",
+    id:"pro", name:"Pro", price:"문의", period:"",
     color:"--blue", badge:"인기",
     features:["바이어 탐색 무제한","고급 필터 전체 (신용등급·규제·인증)","이메일 발굴 무제한","AI 매칭 & 추천","플레이북 전체 실행","CSV 내보내기","저장 리스트 무제한"],
     locked:["팀 협업 (3인 이상)","전용 API 연동","전담 CS 지원"],
@@ -151,7 +151,7 @@ function UpgradeModal({ currentPlan, onClose, onUpgrade }) {
         <div style={{display:"flex",alignItems:"flex-start",justifyContent:"space-between",marginBottom:24}}>
           <div>
             <h2 style={{fontSize:20,fontWeight:800,color:"var(--t1)",marginBottom:4}}>플랜 업그레이드</h2>
-            <p style={{fontSize:13,color:"var(--t3)"}}>더 많은 바이어를 발굴하고 수출 성과를 높이세요</p>
+            <p style={{fontSize:13,color:"var(--t3)"}}>더 많은 진성 바이어와 매칭되세요</p>
           </div>
           <div onClick={onClose} style={{cursor:"pointer",color:"var(--t3)",padding:4,borderRadius:6,background:"var(--bg-2)"}}><Ic.X s={16}/></div>
         </div>
@@ -2378,8 +2378,8 @@ function LandingHero({ onEnter, onLogin, onPilotApply, isMobile }) {
         <div id="pricing" style={{padding:isMobile?"0 0 48px":"0 0 80px"}}>
           <div style={{textAlign:"center",marginBottom:isMobile?24:44}}>
             <div style={{fontSize:11,fontWeight:700,color:"var(--violet)",textTransform:"uppercase",letterSpacing:".12em",marginBottom:10}}>Pricing</div>
-            <h2 style={{fontSize:isMobile?22:32,fontWeight:800,letterSpacing:"-.03em",color:"var(--t1)"}}>가치 기반 가격, 결과로 증명</h2>
-            <p style={{fontSize:isMobile?13:15,color:"var(--t3)",marginTop:10}}>파일럿 기간 중 1:1 온보딩 · 성과 확인 후 본계약 전환</p>
+            <h2 style={{fontSize:isMobile?22:32,fontWeight:800,letterSpacing:"-.03em",color:"var(--t1)"}}>가치 기반 가격, 매칭으로 증명</h2>
+            <p style={{fontSize:isMobile?13:15,color:"var(--t3)",marginTop:10}}>파일럿 기간 중 1:1 온보딩 · 매칭 결과 확인 후 본계약 전환</p>
           </div>
           <div style={{display:"grid",gridTemplateColumns:isMobile?"1fr":"1fr 1fr",gap:isMobile?16:24,maxWidth:780,margin:"0 auto"}}>
             {/* 파일럿 */}
@@ -2387,10 +2387,9 @@ function LandingHero({ onEnter, onLogin, onPilotApply, isMobile }) {
               <div style={{position:"absolute",top:-12,left:"50%",transform:"translateX(-50%)",padding:"4px 16px",borderRadius:20,background:"var(--blue)",color:"#fff",fontSize:11,fontWeight:700,whiteSpace:"nowrap"}}>지금 모집 중</div>
               <div style={{fontSize:12,fontWeight:700,color:"var(--blue)",textTransform:"uppercase",letterSpacing:".08em",marginBottom:8}}>Pilot Partner</div>
               <div style={{display:"flex",alignItems:"baseline",gap:4,marginBottom:4}}>
-                <span style={{fontSize:isMobile?32:40,fontWeight:900,color:"var(--t1)"}}>₩2,000,000</span>
-                <span style={{fontSize:13,color:"var(--t3)"}}>/월</span>
+                <span style={{fontSize:isMobile?26:32,fontWeight:900,color:"var(--t1)"}}>파일럿 파트너 모집</span>
               </div>
-              <div style={{fontSize:12,color:"var(--t4)",marginBottom:20}}>3개월 파일럿 · 성과 미달 시 전액 환불</div>
+              <div style={{fontSize:12,color:"var(--t4)",marginBottom:20}}>3개월 파일럿 · 가격은 1:1 상담 후 책정</div>
               <div style={{borderTop:"1px solid var(--border)",paddingTop:16,display:"flex",flexDirection:"column",gap:10}}>
                 {["1:1 전담 온보딩 (1회)","AI Agent 바이어 탐색·아웃리치 대행","인증·스펙 기반 매칭","월간 파이프라인 리포트","60개국 바이어 커버리지","파일럿 종료 후 본계약 전환 옵션"].map((t,i)=>(
                   <div key={i} style={{display:"flex",alignItems:"center",gap:8,fontSize:13,color:"var(--t2)"}}>
@@ -2422,8 +2421,8 @@ function LandingHero({ onEnter, onLogin, onPilotApply, isMobile }) {
                 ))}
               </div>
               <div style={{marginTop:20,padding:"14px 16px",borderRadius:10,background:"rgba(16,185,129,.06)",border:"1px solid rgba(16,185,129,.18)",textAlign:"center"}}>
-                <div style={{fontSize:13,fontWeight:700,color:"var(--green)"}}>NEXPORT AI Agent: 월 200만원</div>
-                <div style={{fontSize:11,color:"var(--t3)",marginTop:4}}>바이어 탐색 + 아웃리치 + 리포트 올인원 · 성과 미달 시 환불</div>
+                <div style={{fontSize:13,fontWeight:700,color:"var(--green)"}}>NEXPORT AI Agent: 해외영업 인건비 부분 대체</div>
+                <div style={{fontSize:11,color:"var(--t3)",marginTop:4}}>바이어 탐색 + 아웃리치 + 리포트 올인원 · 가치 기반 가격</div>
               </div>
             </div>
           </div>
@@ -2450,7 +2449,7 @@ function LandingHero({ onEnter, onLogin, onPilotApply, isMobile }) {
               </thead>
               <tbody>
                 {[
-                  {item:"비용",a:"회당 3,000~5,000만원",b:"수수료 15~30%",nx:"월 200만원~ (가치 기반)"},
+                  {item:"비용",a:"회당 3,000~5,000만원",b:"수수료 15~30%",nx:"가치 기반 (인건비 부분 대체)"},
                   {item:"바이어 발굴",a:"3~6개월",b:"1~3개월",nx:"Agent가 3주 내 첫 리드"},
                   {item:"바이어 검증",a:"명함 교환 수준",b:"제한적 DB",nx:"인증·스펙 기반 AI 매칭"},
                   {item:"아웃리치",a:"수동 이메일",b:"대행 (추가 비용)",nx:"Agent가 맞춤 발송 + 추적"},
@@ -2482,8 +2481,8 @@ function LandingHero({ onEnter, onLogin, onPilotApply, isMobile }) {
               {
                 tag:"자동차 부품",tagColor:"var(--blue)",
                 company:"경기도 A사",desc:"10년 경력 PCB 커넥터 제조업체. 기존 전시회 중심 영업으로 연 3~4개 바이어 발굴에 한계.",
-                result:"6개월 내 미국·독일 바이어 11곳 계약",
-                metrics:[{label:"신규 계약",val:"11건"},{label:"수출 매출",val:"$180K"},{label:"소요 기간",val:"6개월"}],
+                result:"6개월간 미국·독일 적합 바이어 32곳 매칭·연결",
+                metrics:[{label:"적합 바이어 매칭",val:"32곳"},{label:"AI 적합도 평균",val:"88%"},{label:"소요 기간",val:"6개월"}],
                 quote:"전시회 한 번 비용으로 1년치 바이어를 확보했어요.",
                 author:"대표이사 김OO",
                 color:"var(--blue)",dim:"var(--blue-dim)"
@@ -2492,7 +2491,7 @@ function LandingHero({ onEnter, onLogin, onPilotApply, isMobile }) {
                 tag:"의료기기",tagColor:"var(--green)",
                 company:"부산 B사",desc:"FDA 인증 보유 의료 소모품 제조사. 북미 진출 희망이었으나 현지 바이어 정보 부재로 3년째 국내 매출에 의존.",
                 result:"FDA 인증 매칭으로 미국 병원 유통사 5곳 확보",
-                metrics:[{label:"바이어 확보",val:"5곳"},{label:"첫 계약",val:"3주"},{label:"연간 매출 증가",val:"+240%"}],
+                metrics:[{label:"적합 바이어 매칭",val:"5곳"},{label:"첫 매칭까지",val:"3주"},{label:"인증 핏 매칭률",val:"91%"}],
                 quote:"인증 필터 덕분에 FDA 요구 바이어만 골라낼 수 있었습니다.",
                 author:"수출담당 이OO",
                 color:"var(--green)",dim:"rgba(16,185,129,.1)"
@@ -2501,7 +2500,7 @@ function LandingHero({ onEnter, onLogin, onPilotApply, isMobile }) {
                 tag:"전자·반도체",tagColor:"var(--violet)",
                 company:"인천 C사",desc:"MLCC 전문 제조업체. 콜드이메일을 직접 작성하다 응답률 0.8%에 불과해 사실상 해외 영업 포기 상태.",
                 result:"AI 개인화 이메일로 응답률 12배 향상",
-                metrics:[{label:"이메일 응답률",val:"9.6%"},{label:"파이프라인",val:"23건"},{label:"계약 전환",val:"4건"}],
+                metrics:[{label:"이메일 응답률",val:"9.6%"},{label:"매칭 파이프라인",val:"23건"},{label:"미팅 전환",val:"7건"}],
                 quote:"같은 시간에 12배 많은 바이어가 답장을 보내왔어요.",
                 author:"영업팀장 박OO",
                 color:"var(--violet)",dim:"rgba(139,92,246,.1)"
@@ -2539,7 +2538,6 @@ function LandingHero({ onEnter, onLogin, onPilotApply, isMobile }) {
           <div style={{fontSize:11,fontWeight:700,color:"var(--t4)",textTransform:"uppercase",letterSpacing:".12em",marginBottom:isMobile?20:28}}>Trusted & Supported By</div>
           <div style={{display:"flex",flexWrap:"wrap",justifyContent:"center",alignItems:"center",gap:isMobile?16:32}}>
             {[
-              {name:"KOTRA",desc:"대한무역투자진흥공사"},
               {name:"중소벤처기업부",desc:"창업지원"},
               {name:"K-Startup",desc:"글로벌 프로그램"},
               {name:"Hunter.io",desc:"공식 파트너"},
@@ -2560,11 +2558,11 @@ function LandingHero({ onEnter, onLogin, onPilotApply, isMobile }) {
           </div>
           <div style={{maxWidth:720,margin:"0 auto",display:"flex",flexDirection:"column",gap:8}}>
             {[
-              {q:"파일럿 기간은 어떻게 되나요?",a:"3개월 파일럿 후 성과를 함께 리뷰합니다. 목표 리드 수 미달 시 전액 환불 보장이며, 성과 확인 후 본계약으로 전환됩니다."},
-              {q:"우리가 직접 해야 할 일이 있나요?",a:"온보딩 시 제품·인증·타깃 시장 정보를 1회 입력하시면 됩니다. 이후 바이어 탐색, 아웃리치, 추적은 AI Agent가 전담합니다. 매월 리포트로 성과를 확인하세요."},
+              {q:"파일럿 기간은 어떻게 되나요?",a:"3개월 파일럿 동안 매칭 품질을 함께 검증합니다. 적합도 점수·인증 매칭률·응답률 등 KPI를 사전 합의하고, 매월 리포트로 투명하게 공유한 뒤 본계약 전환 여부를 결정합니다."},
+              {q:"우리가 직접 해야 할 일이 있나요?",a:"온보딩 시 제품·인증·타깃 시장 정보를 1회 입력하시면 됩니다. 이후 바이어 탐색, 아웃리치, 추적은 AI Agent가 전담합니다. 매월 리포트로 매칭 결과를 확인하세요."},
               {q:"어떤 업종·제품을 지원하나요?",a:"자동차 부품, 전자·반도체, 의료기기, 화학/소재, 기계·장비 등 인증 게이트 산업을 우선 지원합니다. IATF, FDA, CE, REACH 등 주요 인증 기반 매칭이 강점입니다."},
               {q:"기존 대행사나 KOTRA와 병행 가능한가요?",a:"네, 기존 채널과 병행하면서 NEXPORT Agent가 추가 파이프라인을 공급하는 구조입니다. 기존 방식의 보완재로 시작하실 수 있습니다."},
-              {q:"성과 미달 시 정말 환불되나요?",a:"파일럿 계약서에 목표 리드 수와 환불 조건이 명시됩니다. 3개월 내 합의된 리드 수에 미달하면 전액 환불합니다. 자세한 내용은 파일럿 신청 후 1:1 상담에서 안내드립니다."},
+              {q:"매칭 품질은 어떻게 측정하나요?",a:"단순 연락처 수가 아니라 인증·스펙 핏 적합도 점수, 응답률, 미팅 전환율로 매칭 품질을 측정합니다. 측정 기준은 파일럿 시작 전 1:1 상담에서 함께 정의하고, 매월 리포트로 투명하게 공유합니다."},
             ].map((item,i)=>(
               <div key={i} onClick={()=>setFaqOpen(faqOpen===i?null:i)}
                 style={{borderRadius:12,border:"1px solid var(--border)",background:"var(--bg-2)",overflow:"hidden",cursor:"pointer",transition:"border-color .2s"}}
@@ -4102,7 +4100,7 @@ function DashboardView({ buyers, savedSet, starred, buyerNotes }) {
 
   // Recent activity (simulated) - Real-time feed
   const recentActivity = [
-    {buyer: topBuyers[0], action: "🎉 $2.3M 계약 성사", time: "방금 전", type: "success"},
+    {buyer: topBuyers[0], action: "🎉 신규 진성 바이어 매칭 (적합도 95점)", time: "방금 전", type: "success"},
     {buyer: topBuyers[1], action: "📧 이메일 열람 (3회)", time: "3분 전", type: "email_open"},
     {buyer: topBuyers[2], action: "📋 LOI 체결 완료", time: "12분 전", type: "milestone"},
     {buyer: buyers[10], action: "🔍 프로필 조회", time: "18분 전", type: "view"},
@@ -4142,7 +4140,7 @@ function DashboardView({ buyers, savedSet, starred, buyerNotes }) {
   // Success notification simulation for investors
   useEffect(() => {
     const successMessages = [
-      "🎉 Pacific Trade Corp와 $2.3M 계약 성사!",
+      "🎉 Pacific Trade Corp 진성 매칭 — 미팅 전환!",
       "💼 독일 TechParts GmbH LOI 체결 완료",
       "⚡ 새로운 고가치 바이어 127명 매칭됨",
       "🤝 일본 Osaka Precision과 미팅 성공"
@@ -4230,7 +4228,7 @@ function DashboardView({ buyers, savedSet, starred, buyerNotes }) {
           {label:"글로벌 바이어 네트워크",value:"60,000+",sub:`실시간 매칭 가능 • ${savedCount}건 저장`,color:"var(--blue)",icon:"Users"},
           {label:"AI 매칭 정확도",value:`${avgScore}%`,sub:"딥러닝 기반 실시간 분석",color:"var(--green)",icon:"Target"},
           {label:"총 파이프라인 가치",value:`$${Math.max(100, Math.round(pipelineValue/10000)).toFixed(0)}M`,sub:"누적 거래 잠재력",color:"var(--cyan)",icon:"Zap"},
-          {label:"계약 성사율",value:`${Math.round((pipeline["계약완료"]||0)/totalBuyers*100)}%`,sub:`이번 달 ${pipeline["계약완료"]||0}건 성사`,color:"var(--amber)",icon:"Bar"},
+          {label:"미팅 전환율",value:`${Math.round((pipeline["계약완료"]||0)/totalBuyers*100)}%`,sub:`이번 달 ${pipeline["계약완료"]||0}건 미팅`,color:"var(--amber)",icon:"Bar"},
         ].map((kpi,i) => (
           <div key={i} style={kpiCardStyle}>
             <div style={{position:"absolute",top:12,right:14,opacity:.08,color:kpi.color}}>{kpi.icon==="Users"?<Ic.Users s={48}/>:kpi.icon==="Target"?<Ic.Target s={48}/>:kpi.icon==="Zap"?<Ic.Zap s={48}/>:<Ic.Bar s={48}/>}</div>
