@@ -1924,6 +1924,49 @@ function LandingHero({ onEnter, onLogin, onPilotApply, isMobile }) {
           </div>
         </div>
 
+        {/* ②-C PERSONA STORY — 반월시화공단 박성호 과장 */}
+        <div style={{padding:isMobile?"0 0 56px":"0 0 80px"}}>
+          <div style={{textAlign:"center",marginBottom:isMobile?28:44}}>
+            <div style={{display:"inline-flex",alignItems:"center",gap:6,padding:"4px 14px",borderRadius:20,background:"rgba(245,158,11,.1)",border:"1px solid rgba(245,158,11,.28)",fontSize:11,fontWeight:700,color:"var(--amber)",marginBottom:12,letterSpacing:".04em"}}>
+              현장의 1년
+            </div>
+            <h2 style={{fontSize:isMobile?22:32,fontWeight:800,letterSpacing:"-.03em",color:"var(--t1)"}}>반월시화공단 박성호 과장의 1년</h2>
+            <p style={{fontSize:isMobile?13:15,color:"var(--t3)",marginTop:10}}>매출 45억 자동차부품 제조사 · 해외영업 담당 1인</p>
+          </div>
+          <div style={{display:isMobile?"flex":"grid",flexDirection:isMobile?"column":undefined,gridTemplateColumns:isMobile?undefined:"1fr 56px 1fr",gap:isMobile?"12px":0,alignItems:"stretch",maxWidth:920,margin:"0 auto"}}>
+            <div style={{padding:isMobile?"22px 20px":"30px 28px",borderRadius:16,background:"rgba(255,69,58,.04)",border:"1px solid rgba(255,69,58,.2)"}}>
+              <div style={{fontSize:12,fontWeight:700,color:"rgba(255,69,58,1)",textTransform:"uppercase",letterSpacing:".08em",marginBottom:14}}>지금까지</div>
+              <p style={{fontSize:14,color:"var(--t2)",lineHeight:1.8,marginBottom:18}}>Apollo? LinkedIn Sales Navigator? 들어는 봤지만 결제 권한이 없고 영어도 버겁다. 매일 아침 구글에 <b style={{color:"var(--t1)"}}>'automotive parts importer Germany'</b>를 검색해 홈페이지 연락처를 엑셀에 붙여넣는다. 일주일에 30개, 콜드메일은 파파고로 돌린다.</p>
+              <div style={{display:"flex",gap:10}}>
+                {[{v:"300통",l:"1년 발송"},{v:"2건",l:"회신"},{v:"0건",l:"수주"}].map((m,i)=>(
+                  <div key={i} style={{flex:1,textAlign:"center",padding:"12px 4px",borderRadius:10,background:"rgba(255,69,58,.06)",border:"1px solid rgba(255,69,58,.15)"}}>
+                    <div style={{fontSize:isMobile?18:22,fontWeight:900,color:"rgba(255,69,58,1)"}}>{m.v}</div>
+                    <div style={{fontSize:10,color:"var(--t4)",marginTop:2}}>{m.l}</div>
+                  </div>
+                ))}
+              </div>
+              <p style={{fontSize:12,color:"var(--t4)",fontStyle:"italic",marginTop:16,lineHeight:1.6}}>"왜 수출이 안 나오냐"는 사장님 물음에, 박 과장은 답할 말이 없다.</p>
+            </div>
+            <div style={{display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
+              <div style={{fontSize:13,fontWeight:900,color:"var(--t4)",letterSpacing:".06em",padding:isMobile?"4px 0":0}}>VS</div>
+            </div>
+            <div style={{padding:isMobile?"22px 20px":"30px 28px",borderRadius:16,background:"rgba(16,185,129,.05)",border:"1px solid rgba(16,185,129,.25)",position:"relative",overflow:"hidden"}}>
+              <div style={{position:"absolute",top:0,right:0,padding:"4px 14px",background:"var(--green)",borderRadius:"0 16px 0 12px",fontSize:10,fontWeight:700,color:"#fff"}}>NEXPORT</div>
+              <div style={{fontSize:12,fontWeight:700,color:"var(--green)",textTransform:"uppercase",letterSpacing:".08em",marginBottom:14}}>NEXPORT 도입 후</div>
+              <p style={{fontSize:14,color:"var(--t2)",lineHeight:1.8,marginBottom:18}}>온보딩 1회로 제품·인증·타깃 시장을 입력하면 끝. 이후 <b style={{color:"var(--t1)"}}>IATF 인증 핏이 맞는 진성 바이어</b>가 매월 AI 적합도 점수와 함께 파이프라인에 꽂힌다. 구글링·엑셀·번역기 작업은 0.</p>
+              <div style={{display:"flex",gap:10}}>
+                {[{v:"30~50건",l:"월 매칭"},{v:"AI 점수",l:"적합도 검증"},{v:"0건",l:"고객 작업"}].map((m,i)=>(
+                  <div key={i} style={{flex:1,textAlign:"center",padding:"12px 4px",borderRadius:10,background:"rgba(16,185,129,.08)",border:"1px solid rgba(16,185,129,.18)"}}>
+                    <div style={{fontSize:isMobile?18:22,fontWeight:900,color:"var(--green)"}}>{m.v}</div>
+                    <div style={{fontSize:10,color:"var(--t4)",marginTop:2}}>{m.l}</div>
+                  </div>
+                ))}
+              </div>
+              <p style={{fontSize:12,color:"var(--t4)",fontStyle:"italic",marginTop:16,lineHeight:1.6}}>박 과장은 이제 '매월 몇 곳과 매칭됐는지'를 사장님께 숫자로 보고한다.</p>
+            </div>
+          </div>
+        </div>
+
         {/* ③ PRODUCT PREVIEW CARD — 데스크탑 전용 */}
         {!isMobile && <div style={{display:"flex",justifyContent:"center",padding:"0 0 72px",opacity:visible?1:0,transform:visible?"none":"translateY(30px)",transition:"all .9s cubic-bezier(0.2,0,0,1) .2s"}}>
           <div style={{width:"100%",maxWidth:720,borderRadius:16,overflow:"hidden",boxShadow:"var(--modal-shadow)",border:"1px solid var(--border)",background:"var(--bg-1)",animation:"floatCard 5s ease-in-out infinite",position:"relative"}}>
@@ -2039,8 +2082,9 @@ function LandingHero({ onEnter, onLogin, onPilotApply, isMobile }) {
                 {label:"Cold Email 응답률",value:"1% 미만",sub:"\"3년 보냈는데 실계약 0건\" — Scott"},
                 {label:"바이어 발굴까지 걸리는 시간",value:"수 개월",sub:"준비 → 현장 미팅 → 팔로업 전 과정"},
                 {label:"검증 바이어 전환율",value:"1% 미만",sub:"전시회 방문객 대비 실계약 비율"},
+                {label:"구매한 바이어 DB",value:"절반 폐업·반송",sub:"\"200만원 명부 샀더니 절반이 죽은 연락처\""},
               ].map((item,i)=>(
-                <div key={i} style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",padding:"11px 0",borderBottom:i<3?"1px solid rgba(255,69,58,.1)":"none"}}>
+                <div key={i} style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",padding:"11px 0",borderBottom:i<4?"1px solid rgba(255,69,58,.1)":"none"}}>
                   <div style={{flex:1,paddingRight:12}}>
                     <div style={{fontSize:12,color:"var(--t2)",fontWeight:500,lineHeight:1.4}}>{item.label}</div>
                     <div style={{fontSize:10,color:"var(--t4)",marginTop:2,lineHeight:1.4,fontStyle:"italic"}}>{item.sub}</div>
@@ -2067,8 +2111,9 @@ function LandingHero({ onEnter, onLogin, onPilotApply, isMobile }) {
                 {label:"바이어 매칭 방식",value:"AI Agent 자동",sub:"인증·산업·지역 기반 매칭 + 아웃리치 대행"},
                 {label:"첫 리드 도착까지",value:"3주 내",sub:"온보딩 후 Agent가 자동 탐색·발송"},
                 {label:"고객이 할 일",value:"0건",sub:"Agent가 발굴·아웃리치·추적 전 과정 대행"},
+                {label:"바이어 데이터 신선도",value:"매월 갱신",sub:"AI가 진성 여부 재검증 후 공급"},
               ].map((item,i)=>(
-                <div key={i} style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",padding:"11px 0",borderBottom:i<3?"1px solid rgba(16,185,129,.12)":"none"}}>
+                <div key={i} style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",padding:"11px 0",borderBottom:i<4?"1px solid rgba(16,185,129,.12)":"none"}}>
                   <div style={{flex:1,paddingRight:12}}>
                     <div style={{fontSize:12,color:"var(--t2)",fontWeight:500,lineHeight:1.4}}>{item.label}</div>
                     <div style={{fontSize:10,color:"var(--t4)",marginTop:2,lineHeight:1.4,fontStyle:"italic"}}>{item.sub}</div>
@@ -2435,32 +2480,34 @@ function LandingHero({ onEnter, onLogin, onPilotApply, isMobile }) {
               Comparison
             </div>
             <h2 style={{fontSize:isMobile?22:32,fontWeight:800,letterSpacing:"-.03em",color:"var(--t1)"}}>기존 수출 지원 방식과 비교</h2>
-            <p style={{fontSize:isMobile?13:15,color:"var(--t3)",marginTop:10}}>NEXPORT는 기존 인프라의 구조적 한계를 AI로 해결합니다</p>
+            <p style={{fontSize:isMobile?13:15,color:"var(--t3)",marginTop:10}}>LinkedIn Sales Navigator 등 직접 대안은 '사람'을 찾지만, NEXPORT는 인증·핏이 맞는 '진성 바이어'를 찾습니다</p>
           </div>
           <div style={{overflowX:isMobile?"auto":"visible",WebkitOverflowScrolling:"touch"}}>
-            <table style={{width:"100%",minWidth:isMobile?600:"auto",borderCollapse:"separate",borderSpacing:0,borderRadius:14,overflow:"hidden",border:"1px solid var(--border)",opacity:compInView?1:0,transform:compInView?"none":"translateY(16px)",transition:"all .7s cubic-bezier(0.2,0,0,1) .2s"}}>
+            <table style={{width:"100%",minWidth:isMobile?760:"auto",borderCollapse:"separate",borderSpacing:0,borderRadius:14,overflow:"hidden",border:"1px solid var(--border)",opacity:compInView?1:0,transform:compInView?"none":"translateY(16px)",transition:"all .7s cubic-bezier(0.2,0,0,1) .2s"}}>
               <thead>
                 <tr style={{background:"var(--bg-2)"}}>
-                  <th style={{padding:"14px 18px",fontSize:12,fontWeight:700,color:"var(--t3)",textAlign:"left",borderBottom:"1px solid var(--border)",width:"28%"}}>비교 항목</th>
+                  <th style={{padding:"14px 18px",fontSize:12,fontWeight:700,color:"var(--t3)",textAlign:"left",borderBottom:"1px solid var(--border)",width:"22%"}}>비교 항목</th>
                   <th style={{padding:"14px 18px",fontSize:12,fontWeight:700,color:"var(--t4)",textAlign:"center",borderBottom:"1px solid var(--border)"}}>전시회 / KOTRA</th>
                   <th style={{padding:"14px 18px",fontSize:12,fontWeight:700,color:"var(--t4)",textAlign:"center",borderBottom:"1px solid var(--border)"}}>무역 대행사</th>
+                  <th style={{padding:"14px 18px",fontSize:12,fontWeight:700,color:"var(--t4)",textAlign:"center",borderBottom:"1px solid var(--border)"}}>LinkedIn Sales Nav</th>
                   <th style={{padding:"14px 18px",fontSize:12,fontWeight:700,color:"var(--blue)",textAlign:"center",borderBottom:"1px solid var(--border)",background:"rgba(10,132,255,.04)"}}>NEXPORT</th>
                 </tr>
               </thead>
               <tbody>
                 {[
-                  {item:"비용",a:"회당 3,000~5,000만원",b:"수수료 15~30%",nx:"가치 기반 (인건비 부분 대체)"},
-                  {item:"바이어 발굴",a:"3~6개월",b:"1~3개월",nx:"Agent가 3주 내 첫 리드"},
-                  {item:"바이어 검증",a:"명함 교환 수준",b:"제한적 DB",nx:"인증·스펙 기반 AI 매칭"},
-                  {item:"아웃리치",a:"수동 이메일",b:"대행 (추가 비용)",nx:"Agent가 맞춤 발송 + 추적"},
-                  {item:"인증·규제 대응",a:"별도 컨설팅 필요",b:"일부 지원",nx:"자동 필터링 내장"},
-                  {item:"고객 작업량",a:"전시회 운영 직접",b:"소통·관리 직접",nx:"온보딩 1회, 이후 Agent 대행"},
-                  {item:"성과 리포트",a:"없음",b:"보고서 (월 1회)",nx:"월간 파이프라인 리포트"},
+                  {item:"비용",a:"회당 3,000~5,000만원",b:"수수료 15~30%",ln:"월 $99~179 (1인)",nx:"가치 기반 (인건비 부분 대체)"},
+                  {item:"바이어 발굴",a:"3~6개월",b:"1~3개월",ln:"검색은 빠름",nx:"Agent가 3주 내 첫 리드"},
+                  {item:"바이어 검증",a:"명함 교환 수준",b:"제한적 DB",ln:"직함·회사만, 핏은 모름",nx:"인증·스펙 기반 AI 매칭"},
+                  {item:"아웃리치",a:"수동 이메일",b:"대행 (추가 비용)",ln:"수동 InMail",nx:"Agent가 맞춤 발송 + 추적"},
+                  {item:"인증·규제 대응",a:"별도 컨설팅 필요",b:"일부 지원",ln:"미지원",nx:"자동 필터링 내장"},
+                  {item:"고객 작업량",a:"전시회 운영 직접",b:"소통·관리 직접",ln:"검색·발송·추적 직접",nx:"온보딩 1회, 이후 Agent 대행"},
+                  {item:"성과 리포트",a:"없음",b:"보고서 (월 1회)",ln:"기본 지표만",nx:"월간 파이프라인 리포트"},
                 ].map((r,i)=>(
                   <tr key={i} style={{borderBottom:i<6?"1px solid var(--border)":"none"}}>
                     <td style={{padding:"12px 18px",fontSize:13,fontWeight:600,color:"var(--t1)",borderBottom:"1px solid var(--border)"}}>{r.item}</td>
                     <td style={{padding:"12px 18px",fontSize:12,color:"var(--t3)",textAlign:"center",borderBottom:"1px solid var(--border)"}}>{r.a}</td>
                     <td style={{padding:"12px 18px",fontSize:12,color:"var(--t3)",textAlign:"center",borderBottom:"1px solid var(--border)"}}>{r.b}</td>
+                    <td style={{padding:"12px 18px",fontSize:12,color:"var(--t3)",textAlign:"center",borderBottom:"1px solid var(--border)"}}>{r.ln}</td>
                     <td style={{padding:"12px 18px",fontSize:12,fontWeight:700,color:"var(--blue)",textAlign:"center",borderBottom:"1px solid var(--border)",background:"rgba(10,132,255,.02)"}}>{r.nx}</td>
                   </tr>
                 ))}
@@ -2531,15 +2578,16 @@ function LandingHero({ onEnter, onLogin, onPilotApply, isMobile }) {
               </div>
             ))}
           </div>
+          <div style={{maxWidth:760,margin:"18px auto 0",padding:"13px 18px",borderRadius:12,background:"var(--blue-dim)",border:"1px solid rgba(10,132,255,.2)",textAlign:"center"}}>
+            <span style={{fontSize:13,color:"var(--t2)",fontWeight:600}}>직접 경쟁 <b style={{color:"var(--blue)"}}>LinkedIn Sales Navigator</b>는 '사람'을 찾습니다 — NEXPORT는 인증·스펙 핏이 맞는 '진성 바이어'를 찾습니다.</span>
+          </div>
         </div>
 
         {/* ⑥-E 신뢰 요소 — 지원 기관 & 수상 */}
         <div style={{padding:isMobile?"0 0 48px":"0 0 80px",textAlign:"center"}}>
-          <div style={{fontSize:11,fontWeight:700,color:"var(--t4)",textTransform:"uppercase",letterSpacing:".12em",marginBottom:isMobile?20:28}}>Trusted & Supported By</div>
+          <div style={{fontSize:11,fontWeight:700,color:"var(--t4)",textTransform:"uppercase",letterSpacing:".12em",marginBottom:isMobile?20:28}}>Technology Partner</div>
           <div style={{display:"flex",flexWrap:"wrap",justifyContent:"center",alignItems:"center",gap:isMobile?16:32}}>
             {[
-              {name:"중소벤처기업부",desc:"창업지원"},
-              {name:"K-Startup",desc:"글로벌 프로그램"},
               {name:"Hunter.io",desc:"공식 파트너"},
             ].map((org,i)=>(
               <div key={i} style={{padding:isMobile?"12px 18px":"14px 28px",borderRadius:10,background:"var(--bg-2)",border:"1px solid var(--border)",display:"flex",flexDirection:"column",alignItems:"center",gap:4,minWidth:isMobile?120:140}}>
@@ -3826,7 +3874,7 @@ function KanbanPipeline({ buyers }) {
       <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:6}}>
         <Ic.Grid s={14}/>
         <span style={{fontSize:13,fontWeight:700}}>딜 파이프라인</span>
-        <span style={{fontSize:11,color:"var(--t4)",marginLeft:"auto"}}>{stages.reduce((a,s)=>a+s.count,0)}건 · 예상 총 매출 <span style={{fontWeight:700,color:"var(--green)",fontFamily:"var(--mono)"}}>${totalValue.toFixed(1)}M</span></span>
+        <span style={{fontSize:11,color:"var(--t4)",marginLeft:"auto"}}>{stages.reduce((a,s)=>a+s.count,0)}건 · 파이프라인 잠재가치 <span style={{fontWeight:700,color:"var(--green)",fontFamily:"var(--mono)"}}>${totalValue.toFixed(1)}M</span></span>
       </div>
       {/* Funnel progress bar */}
       <div style={{display:"flex",gap:2,marginBottom:14,height:6,borderRadius:3,overflow:"hidden"}}>
@@ -3850,7 +3898,7 @@ function KanbanPipeline({ buyers }) {
                 <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
                   <span style={{fontSize:10,color:"var(--green)",fontWeight:700,fontFamily:"var(--mono)"}}>${stageVal.toFixed(1)}M</span>
                   {si<4&&<span style={{fontSize:9,color:"var(--t4)"}}>→ 전환 {st.convRate}%</span>}
-                  {si===4&&<span style={{fontSize:9,color:"var(--green)",fontWeight:600}}>성사</span>}
+                  {si===4&&<span style={{fontSize:9,color:"var(--green)",fontWeight:600}}>전환</span>}
                 </div>
               </div>
               {/* Cards */}
@@ -4102,7 +4150,7 @@ function DashboardView({ buyers, savedSet, starred, buyerNotes }) {
   const recentActivity = [
     {buyer: topBuyers[0], action: "🎉 신규 진성 바이어 매칭 (적합도 95점)", time: "방금 전", type: "success"},
     {buyer: topBuyers[1], action: "📧 이메일 열람 (3회)", time: "3분 전", type: "email_open"},
-    {buyer: topBuyers[2], action: "📋 LOI 체결 완료", time: "12분 전", type: "milestone"},
+    {buyer: topBuyers[2], action: "📋 LOI 단계 진입", time: "12분 전", type: "milestone"},
     {buyer: buyers[10], action: "🔍 프로필 조회", time: "18분 전", type: "view"},
     {buyer: buyers[15], action: "📎 견적서 다운로드", time: "25분 전", type: "download"},
     {buyer: topBuyers[3], action: "🤝 온라인 미팅 완료", time: "1시간 전", type: "meeting"},
@@ -4141,7 +4189,7 @@ function DashboardView({ buyers, savedSet, starred, buyerNotes }) {
   useEffect(() => {
     const successMessages = [
       "🎉 Pacific Trade Corp 진성 매칭 — 미팅 전환!",
-      "💼 독일 TechParts GmbH LOI 체결 완료",
+      "💼 독일 TechParts GmbH 미팅 확정",
       "⚡ 새로운 고가치 바이어 127명 매칭됨",
       "🤝 일본 Osaka Precision과 미팅 성공"
     ];
@@ -4416,7 +4464,7 @@ function DashboardView({ buyers, savedSet, starred, buyerNotes }) {
                   <div style={{display:"flex",flexDirection:"column",alignItems:"flex-end",flexShrink:0}}>
                     <span style={{fontSize:10,color:"var(--t4)"}}>{a.time}</span>
                     <span style={{fontSize:8,padding:"1px 5px",borderRadius:3,marginTop:3,background:activityColors[a.type]+"15",color:activityColors[a.type],fontWeight:600}}>
-                      {({success:"계약",milestone:"마일스톤",meeting:"미팅",match:"매칭",email_open:"열람",view:"조회",download:"다운로드",reply:"응답",sequence:"시퀀스",signal:"시그널"})[a.type]||a.type}
+                      {({success:"전환",milestone:"마일스톤",meeting:"미팅",match:"매칭",email_open:"열람",view:"조회",download:"다운로드",reply:"응답",sequence:"시퀀스",signal:"시그널"})[a.type]||a.type}
                     </span>
                   </div>
                 </div>
