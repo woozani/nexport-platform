@@ -2588,6 +2588,8 @@ function LandingHero({ onEnter, onLogin, onPilotApply, isMobile }) {
           <div style={{fontSize:11,fontWeight:700,color:"var(--t4)",textTransform:"uppercase",letterSpacing:".12em",marginBottom:isMobile?20:28}}>Technology Partner</div>
           <div style={{display:"flex",flexWrap:"wrap",justifyContent:"center",alignItems:"center",gap:isMobile?16:32}}>
             {[
+              {name:"중소벤처기업부",desc:"창업지원"},
+              {name:"K-Startup",desc:"글로벌 프로그램"},
               {name:"Hunter.io",desc:"공식 파트너"},
             ].map((org,i)=>(
               <div key={i} style={{padding:isMobile?"12px 18px":"14px 28px",borderRadius:10,background:"var(--bg-2)",border:"1px solid var(--border)",display:"flex",flexDirection:"column",alignItems:"center",gap:4,minWidth:isMobile?120:140}}>
