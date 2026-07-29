@@ -5052,6 +5052,13 @@ function EmailFinderView() {
   );
 }
 
+// ── 도메인 분리: nexport.trade(랜딩) / app.nexport.trade(웹앱) ──
+// localhost·*.vercel.app 은 기존 SPA 토글 동작 유지 (개발·데모용)
+const HOSTNAME = typeof window !== "undefined" ? window.location.hostname : "";
+const IS_APP_HOST = HOSTNAME.startsWith("app.");
+const IS_LANDING_HOST = HOSTNAME === "nexport.trade" || HOSTNAME === "www.nexport.trade";
+const APP_URL = "https://app.nexport.trade";
+
 export default function App() {
   const [filters, setFilters] = useState({industries:[],regions:[],sizes:[],certs:[],intents:[],regulations:[],grades:[],scoreMin:0,scoreMax:100});
   const [sideCollapsed, setSideCollapsed] = useState(false);
@@ -5059,13 +5066,14 @@ export default function App() {
   const [detailBuyer, setDetailBuyer] = useState(null);
   const [showAssistant, setShowAssistant] = useState(false);
   const [emailBuyer, setEmailBuyer] = useState(null);
-  const [showLanding, setShowLanding] = useState(true);
+  const [showLanding, setShowLanding] = useState(!IS_APP_HOST);
   const isMobile = useIsMobile();
   const [showMobileBanner, setShowMobileBanner] = useState(false);
 
   // 뒤로가기/앞으로가기 랜딩↔플랫폼 전환
   useEffect(() => {
     const onPop = (e) => {
+      if (IS_APP_HOST) return; // 앱 전용 도메인에서는 랜딩 복귀 없음
       if (e.state?.page === "platform") {
         setShowLanding(false);
         setShowMobileBanner(false);
@@ -5288,12 +5296,13 @@ export default function App() {
     <>
       <style>{CSS}</style>
       {showLanding && <LandingHero
-        onEnter={() => { if (isMobile) { setShowMobileBanner(true); } else { history.pushState({ page: "platform" }, "", location.href); setShowLanding(false); } }}
-        onLogin={() => { history.pushState({ page: "platform" }, "", location.href); setShowLanding(false); }}
+        onEnter={() => { if (isMobile) { setShowMobileBanner(true); } else if (IS_LANDING_HOST) { window.location.href = APP_URL; } else { history.pushState({ page: "platform" }, "", location.href); setShowLanding(false); } }}
+        onLogin={() => { if (IS_LANDING_HOST) { window.location.href = APP_URL; } else { history.pushState({ page: "platform" }, "", location.href); setShowLanding(false); } }}
         onPilotApply={() => window.open("https://tally.so/r/xXNGaE", "_blank")}
         isMobile={isMobile}
       />}
       {showMobileBanner && <MobileDesktopBanner onClose={() => setShowMobileBanner(false)} />}
+      {IS_APP_HOST && isMobile && <MobileDesktopBanner onClose={() => { window.location.href = "https://nexport.trade"; }} />}
 
       {!showLanding && !isMobile && (<>
       {/* App-level Toast */}
