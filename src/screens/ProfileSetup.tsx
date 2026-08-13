@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useStore } from '../store'
-import { Field, Logo } from '../components/ui'
+import { Field, Logo, OnboardSteps } from '../components/ui'
 
 const INDUSTRIES = ['수처리/환경설비', '의료기기', '자동차부품', '전자부품', '화학소재', '기계/설비', '기타']
 const CERTS = ['FDA', 'CE', 'ISO 13485', 'IATF 16949']
@@ -21,7 +21,8 @@ export function ProfileSetup() {
     <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24 }}>
       <div className="card fade-up" style={{ width: 560, padding: 32 }}>
         <Logo />
-        <h1 style={{ fontSize: 20, margin: '20px 0 4px' }}>회사 프로필 작성</h1>
+        <OnboardSteps current={2} />
+        <h1 style={{ fontSize: 20, margin: '0 0 4px' }}>회사 프로필 작성</h1>
         <p style={{ fontSize: 13, color: 'var(--t3)', marginBottom: 24 }}>
           이 내용이 AI 바이어 매칭의 입력값이 됩니다. 자세할수록 추천이 정확해집니다.
         </p>

@@ -25,6 +25,17 @@ export function Recommendations() {
         프로필 서술 기반으로 AI가 선별한 바이어입니다. 바이어 1명은 회원님께 독점 매칭됩니다. 연락처는 노출되지 않으며 발송은 플랫폼 안에서 이뤄집니다.
       </p>
 
+      {rec.length === 0 && (
+        <div className="card" style={{ padding: 48, textAlign: 'center' }}>
+          <div style={{ fontSize: 28, marginBottom: 10 }}>📭</div>
+          <div style={{ fontSize: 15, fontWeight: 800, marginBottom: 6 }}>이번 달 추천이 모두 소진되었습니다</div>
+          <div style={{ fontSize: 13, color: 'var(--t3)', lineHeight: 1.6 }}>
+            다음 추천 배치는 <b>매월 1일</b>에 자동 갱신됩니다.<br />
+            발송한 바이어의 진행 상황은 <b>발송 현황</b>에서 계속 추적할 수 있습니다.
+          </div>
+        </div>
+      )}
+
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(340px, 1fr))', gap: 14 }}>
         {rec.map((b) => (
           <div key={b.id} className="card fade-up" style={{ padding: 18, display: 'flex', flexDirection: 'column', gap: 10 }}>

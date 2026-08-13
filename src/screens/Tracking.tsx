@@ -73,7 +73,7 @@ function TrackCard({ buyer: b, onFollowup, onViewReply }: { buyer: Buyer; onFoll
                 {s.done ? '✓' : i + 1}
               </div>
               <div style={{ fontSize: 11, fontWeight: 700, color: s.done ? 'var(--t1)' : 'var(--t3)' }}>{s.label}</div>
-              <div style={{ fontSize: 10, color: 'var(--t3)' }}>{s.at ? `D+${daysSince(s.at) === 0 ? 0 : daysSince(s.at)}일 전` : '—'}</div>
+              <div style={{ fontSize: 10, color: 'var(--t3)' }}>{s.at ? (daysSince(s.at) === 0 ? '오늘' : `${daysSince(s.at)}일 전`) : '—'}</div>
             </div>
             {i < steps.length - 1 && (
               <div style={{ flex: 1, height: 2, background: steps[i + 1].done ? 'var(--green)' : 'var(--bg-3)', margin: '0 4px 28px' }} />
