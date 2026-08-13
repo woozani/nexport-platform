@@ -48,7 +48,10 @@ export function Recommendations() {
               <button className="btn btn-primary" style={{ flex: 1 }} onClick={() => openCompose(b.id)}>
                 ✉ 메일 보내기
               </button>
-              <button className="btn btn-ghost" onClick={() => setExcludeTarget(b)}>제외</button>
+              {/* 발송 후에는 제외 불가 — 매칭 락은 기간 기반으로만 해제 (데이터그레이드 시나리오 §4) */}
+              {b.status === 'none' && (
+                <button className="btn btn-ghost" onClick={() => setExcludeTarget(b)}>제외</button>
+              )}
             </div>
           </div>
         ))}

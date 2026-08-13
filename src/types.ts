@@ -6,6 +6,12 @@ export type TrackStatus = 'none' | 'sent' | 'opened' | 'attach_opened' | 'replie
 
 export type ExcludeReason = '분야가 맞지 않음' | '규모가 맞지 않음' | '기타'
 
+// 거래 단계 — 고객여정 기획서 v0.2 화면 10 (수수료 연결 지점)
+export type DealStage = 'none' | 'meeting' | 'sample' | 'quote' | 'contract'
+export const DEAL_STAGE_LABEL: Record<DealStage, string> = {
+  none: '미진행', meeting: '미팅', sample: '샘플', quote: '견적', contract: '계약',
+}
+
 export interface Buyer {
   id: string
   maskedName: string // 예: "Aqua*** Inc." — 하드 제약: 회사명 부분 마스킹
@@ -25,6 +31,8 @@ export interface Buyer {
   offPlatform: boolean // 영업보고서 오프-플랫폼 체크 반영
   matchCount: number // 누적 매칭 횟수 (COLD/DEAD 판정 입력)
   excludedReason?: ExcludeReason
+  replyBody?: string // 플랫폼 수신함에서 보여줄 회신 본문 (mock)
+  dealStage?: DealStage
 }
 
 export interface CompanyProfile {
