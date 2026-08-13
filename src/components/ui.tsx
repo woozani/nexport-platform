@@ -72,6 +72,36 @@ export function Field({ label, children, hint }: { label: string; children: Reac
   )
 }
 
+// 온보딩 진행 표시 — 가입(1) → 프로필(2) → 미리보기(3)
+export function OnboardSteps({ current }: { current: 1 | 2 | 3 }) {
+  const STEPS = ['회원가입', '회사 프로필', '바이어 미리보기']
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', gap: 8, margin: '18px 0 22px' }}>
+      {STEPS.map((label, i) => {
+        const n = (i + 1) as 1 | 2 | 3
+        const done = n < current
+        const active = n === current
+        return (
+          <div key={label} style={{ display: 'flex', alignItems: 'center', gap: 8, flex: i < STEPS.length - 1 ? 1 : 'none' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+              <div style={{
+                width: 20, height: 20, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                fontSize: 11, fontWeight: 800,
+                background: done ? 'var(--green)' : active ? 'var(--blue)' : 'var(--bg-3)',
+                color: done || active ? '#fff' : 'var(--t3)',
+              }}>
+                {done ? '✓' : n}
+              </div>
+              <span style={{ fontSize: 11, fontWeight: active ? 800 : 600, color: active ? 'var(--t1)' : 'var(--t3)', whiteSpace: 'nowrap' }}>{label}</span>
+            </div>
+            {i < STEPS.length - 1 && <div style={{ flex: 1, height: 2, background: done ? 'var(--green)' : 'var(--bg-3)', borderRadius: 2 }} />}
+          </div>
+        )
+      })}
+    </div>
+  )
+}
+
 export function Toast() {
   const toast = useStore((s) => s.toast)
   const setToast = useStore((s) => s.setToast)

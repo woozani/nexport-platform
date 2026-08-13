@@ -29,8 +29,27 @@ export function ComposeMail({ followup = false }: { followup?: boolean }) {
   const [body, setBody] = useState(draft.body)
   const [attachCatalog, setAttachCatalog] = useState(true)
   const [confirming, setConfirming] = useState(false)
+  const [tone, setTone] = useState<'기본' | '격식' | '간결'>('기본')
 
   if (!buyer) return null
+
+  // [AI 다시 쓰기] — 톤 변형 mock 로테이션 (실서비스는 LLM 재생성)
+  const rewrite = () => {
+    const next = tone === '기본' ? '격식' : tone === '격식' ? '간결' : '기본'
+    setTone(next)
+    const certs = profile?.certs.length ? profile.certs.join(', ') : 'ISO-certified'
+    const who = `${user?.managerName ?? ''}, ${user?.company ?? ''}`
+    if (next === '격식') {
+      setSubject(`Partnership Inquiry from ${user?.company ?? 'a Korean manufacturer'} (${certs})`)
+      setBody(`Dear Procurement Team,\n\nI hope this message finds you well. I am writing on behalf of ${user?.company ?? ''}, a certified Korean manufacturer (${certs}).\n\n${profile?.description ?? ''}\n\nGiven that ${buyer.summary} we believe a partnership could bring mutual value. Please find our catalog attached for your kind review.\n\nWe would be honored to schedule a brief introductory call at your convenience.\n\nSincerely,\n${who}`)
+    } else if (next === '간결') {
+      setSubject(`${certs} Korean supplier — quick intro`)
+      setBody(`Hi,\n\n${user?.company ?? ''} here — Korean manufacturer, ${certs}.\n\n${buyer.summary} That's exactly who we supply.\n\nCatalog attached. Open to a 15-min call this week?\n\n${user?.managerName ?? ''}`)
+    } else {
+      setSubject(draft.subject)
+      setBody(draft.body)
+    }
+  }
 
   return (
     <Modal onClose={closeCompose} width={640}>
@@ -43,8 +62,13 @@ export function ComposeMail({ followup = false }: { followup?: boolean }) {
         <Pill>📍 {buyer.region}</Pill>
         <Pill>연락처 비노출 · 플랫폼 발송</Pill>
       </div>
-      <div style={{ fontSize: 11, color: 'var(--t3)', background: 'var(--bg-2)', borderRadius: 8, padding: '8px 10px', marginBottom: 14 }}>
-        ✨ 회사 프로필과 바이어 정보를 기반으로 AI가 작성한 초안입니다. 자유롭게 수정 후 발송하세요.
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 14 }}>
+        <div style={{ flex: 1, fontSize: 11, color: 'var(--t3)', background: 'var(--bg-2)', borderRadius: 8, padding: '8px 10px' }}>
+          ✨ 회사 프로필과 바이어 정보 기반 AI 초안입니다. 자유롭게 수정 후 발송하세요.
+        </div>
+        <button className="btn btn-ghost" style={{ fontSize: 12, whiteSpace: 'nowrap' }} onClick={rewrite} title="톤을 바꿔 다시 작성합니다">
+          ✨ AI 다시 쓰기 <span style={{ color: 'var(--blue)', fontWeight: 800 }}>({tone})</span>
+        </button>
       </div>
       <div style={{ marginBottom: 10 }}>
         <input value={subject} onChange={(e) => setSubject(e.target.value)} style={{ fontWeight: 700 }} />

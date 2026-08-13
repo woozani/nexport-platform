@@ -56,9 +56,9 @@ function Shell() {
   const isFollowup = !!composeBuyer && composeBuyer.status !== 'none' && !composeBuyer.repliedAt && daysSince(composeBuyer.sentAt) >= FOLLOWUP_DAYS
 
   return (
-    <div style={{ display: 'flex', minHeight: '100vh' }}>
-      <aside className="no-print" style={{ width: 210, background: 'var(--bg-1)', borderRight: '1px solid var(--border)', padding: '20px 12px', display: 'flex', flexDirection: 'column', gap: 4, position: 'sticky', top: 0, height: '100vh' }}>
-        <div style={{ padding: '0 8px 18px' }}><Logo size={22} /></div>
+    <div className="shell" style={{ display: 'flex', minHeight: '100vh' }}>
+      <aside className="no-print sidebar" style={{ width: 210, background: 'var(--bg-1)', borderRight: '1px solid var(--border)', padding: '20px 12px', display: 'flex', flexDirection: 'column', gap: 4, position: 'sticky', top: 0, height: '100vh' }}>
+        <div className="sidebar-logo" style={{ padding: '0 8px 18px' }}><Logo size={22} /></div>
         {MENU.map((m) => (
           <button
             key={m.key}
@@ -74,8 +74,8 @@ function Shell() {
             <span style={{ width: 16 }}>{m.icon}</span> {m.label}
           </button>
         ))}
-        <div style={{ flex: 1 }} />
-        <div style={{ padding: '12px 8px', borderTop: '1px solid var(--border)', fontSize: 12 }}>
+        <div className="sidebar-spacer" style={{ flex: 1 }} />
+        <div className="sidebar-user" style={{ padding: '12px 8px', borderTop: '1px solid var(--border)', fontSize: 12 }}>
           <div style={{ fontWeight: 800 }}>{user?.managerName}</div>
           <div style={{ color: 'var(--t3)', marginTop: 2 }}>{user?.company}</div>
           <div style={{ marginTop: 6, display: 'inline-block', padding: '2px 8px', borderRadius: 6, background: 'var(--blue-dim)', color: 'var(--blue)', fontWeight: 800, fontSize: 11 }}>
@@ -84,7 +84,7 @@ function Shell() {
         </div>
       </aside>
 
-      <main style={{ flex: 1, padding: '28px 32px', maxWidth: 1100 }}>
+      <main className="main" style={{ flex: 1, padding: '28px 32px', maxWidth: 1100 }}>
         {view === 'dashboard' && <Dashboard />}
         {view === 'recommend' && <Recommendations />}
         {view === 'tracking' && <Tracking />}

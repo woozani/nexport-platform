@@ -44,6 +44,20 @@ input:focus, textarea:focus, select:focus { outline: 2px solid var(--blue-dim); 
 .overlay { position: fixed; inset: 0; background: rgba(15, 26, 42, 0.45); display: flex; align-items: center; justify-content: center; z-index: 100; }
 @keyframes fadeUp { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
 .fade-up { animation: fadeUp .25s ease; }
+/* 모바일 최소 방어 — 데스크톱 데모 우선, 깨지지만 않게 (out_of_scope 최소 조건) */
+@media (max-width: 768px) {
+  .shell { flex-direction: column; }
+  .sidebar {
+    width: 100% !important; height: auto !important; position: static !important;
+    flex-direction: row !important; align-items: center; overflow-x: auto;
+    padding: 10px 12px !important; gap: 2px !important;
+    border-right: none !important; border-bottom: 1px solid var(--border);
+  }
+  .sidebar-logo { padding: 0 10px 0 0 !important; }
+  .sidebar-user, .sidebar-spacer { display: none !important; }
+  .sidebar button { white-space: nowrap; padding: 8px 10px !important; font-size: 12px !important; }
+  .main { padding: 16px !important; }
+}
 @media print {
   .no-print { display: none !important; }
   body { background: #fff; }

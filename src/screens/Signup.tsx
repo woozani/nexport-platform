@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useStore } from '../store'
-import { Field, Logo } from '../components/ui'
+import { Field, Logo, OnboardSteps } from '../components/ui'
 
 // 화면 2. 회원가입 — 검증은 mock (백엔드 없음)
 export function Signup() {
@@ -18,7 +18,8 @@ export function Signup() {
     <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24 }}>
       <div className="card fade-up" style={{ width: 440, padding: 32 }}>
         <Logo />
-        <h1 style={{ fontSize: 20, margin: '20px 0 4px' }}>회원가입</h1>
+        <OnboardSteps current={1} />
+        <h1 style={{ fontSize: 20, margin: '0 0 4px' }}>회원가입</h1>
         <p style={{ fontSize: 13, color: 'var(--t3)', marginBottom: 24 }}>가입 후 바로 내 바이어를 확인할 수 있습니다.</p>
         <Field label="이메일 *"><input value={f.email} onChange={(e) => setF({ ...f, email: e.target.value })} placeholder="you@company.co.kr" /></Field>
         <Field label="비밀번호 *"><input type="password" value={f.password} onChange={(e) => setF({ ...f, password: e.target.value })} /></Field>
