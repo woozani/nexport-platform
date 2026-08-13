@@ -1,5 +1,6 @@
 import { useStore, useSel, funnelCounts, selectRecommended } from '../store'
 import { GradeBadge, StatusBadge } from '../components/ui'
+import { DEAL_STAGE_LABEL } from '../types'
 
 const CHECK_ITEMS: { key: keyof ReturnType<typeof getChecks>; label: string }[] = [
   { key: 'separateEmail', label: '별도 이메일 진행 중' },
@@ -112,8 +113,31 @@ export function Report() {
             ✓ 오프-플랫폼 활동이 기록되었습니다 — 진행 중인 바이어의 매칭 락이 연장됩니다.
           </div>
         )}
+        {(report.checks.sampleDiscussion || report.checks.videoMeeting) && (
+          <DealStagePrompt />
+        )}
       </div>
       <div style={{ fontSize: 11, color: 'var(--t3)', textAlign: 'center' }}>NEXPORT 월간 영업 보고서 · 생성일 {new Date().toLocaleDateString('ko-KR')}</div>
+    </div>
+  )
+}
+
+// 화면 10 유도 — [샘플 논의] 이상 진행 체크 시 거래 단계 업데이트 안내 (수수료 연결)
+function DealStagePrompt() {
+  const rec = useSel(selectRecommended)
+  const openReply = useStore((s) => s.openReply)
+  const candidates = rec.filter((b) => b.repliedAt || b.offPlatform)
+  if (candidates.length === 0) return null
+  return (
+    <div className="no-print" style={{ marginTop: 12, background: 'var(--blue-dim)', border: '1px solid var(--blue)', borderRadius: 10, padding: '12px 14px' }}>
+      <div style={{ fontSize: 13, fontWeight: 800, color: 'var(--blue)', marginBottom: 6 }}>거래 단계를 업데이트해주세요</div>
+      <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+        {candidates.map((b) => (
+          <button key={b.id} className="btn btn-ghost" style={{ fontSize: 12 }} onClick={() => openReply(b.id)}>
+            {b.maskedName} · 현재 {DEAL_STAGE_LABEL[b.dealStage ?? 'none']} →
+          </button>
+        ))}
+      </div>
     </div>
   )
 }

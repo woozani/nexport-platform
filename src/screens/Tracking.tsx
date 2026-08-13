@@ -6,6 +6,7 @@ import { Buyer, FOLLOWUP_DAYS, RELEASE_DAYS } from '../types'
 export function Tracking() {
   const sent = useSel(selectSent)
   const openCompose = useStore((s) => s.openCompose)
+  const openReply = useStore((s) => s.openReply)
 
   return (
     <div>
@@ -19,13 +20,13 @@ export function Tracking() {
         </div>
       )}
       <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-        {sent.map((b) => <TrackCard key={b.id} buyer={b} onFollowup={() => openCompose(b.id)} />)}
+        {sent.map((b) => <TrackCard key={b.id} buyer={b} onFollowup={() => openCompose(b.id)} onViewReply={() => openReply(b.id)} />)}
       </div>
     </div>
   )
 }
 
-function TrackCard({ buyer: b, onFollowup }: { buyer: Buyer; onFollowup: () => void }) {
+function TrackCard({ buyer: b, onFollowup, onViewReply }: { buyer: Buyer; onFollowup: () => void; onViewReply: () => void }) {
   const d = daysSince(b.sentAt)
   const noResponse = !b.repliedAt
   const followupDue = noResponse && d >= FOLLOWUP_DAYS && d < RELEASE_DAYS
@@ -81,11 +82,20 @@ function TrackCard({ buyer: b, onFollowup }: { buyer: Buyer; onFollowup: () => v
         ))}
       </div>
 
-      {followupDue && !b.secondSentAt && (
-        <button className="btn btn-primary" style={{ fontSize: 12, padding: '8px 16px' }} onClick={onFollowup}>
-          ✉ 2차 메일 보내기
-        </button>
-      )}
+      {(followupDue && !b.secondSentAt) || b.repliedAt ? (
+        <div style={{ display: 'flex', gap: 8, marginTop: 12 }}>
+          {followupDue && !b.secondSentAt && (
+            <button className="btn btn-primary" style={{ fontSize: 12, padding: '8px 16px' }} onClick={onFollowup}>
+              ✉ 2차 메일 보내기
+            </button>
+          )}
+          {b.repliedAt && (
+            <button className="btn btn-primary" style={{ fontSize: 12, padding: '8px 16px', background: 'var(--green)' }} onClick={onViewReply}>
+              📩 회신 확인하기
+            </button>
+          )}
+        </div>
+      ) : null}
     </div>
   )
 }

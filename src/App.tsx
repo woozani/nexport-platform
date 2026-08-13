@@ -11,6 +11,7 @@ import { ComposeMail } from './screens/ComposeMail'
 import { Tracking } from './screens/Tracking'
 import { Report } from './screens/Report'
 import { MyPage } from './screens/MyPage'
+import { ReplyModal } from './screens/ReplyInbox'
 import { daysSince } from './store'
 import { FOLLOWUP_DAYS } from './types'
 
@@ -25,10 +26,25 @@ const MENU: { key: View; label: string; icon: string }[] = [
 
 export default function App() {
   const stage = useStore((s) => s.stage)
-  if (stage === 'signup') return <><Signup /><Toast /></>
-  if (stage === 'profile') return <><ProfileSetup /><Toast /></>
-  if (stage === 'hook') return <><PreviewHook /><Toast /></>
+  if (stage === 'signup') return <><Signup /><Toast /><DemoReset /></>
+  if (stage === 'profile') return <><ProfileSetup /><Toast /><DemoReset /></>
+  if (stage === 'hook') return <><PreviewHook /><Toast /><DemoReset /></>
   return <Shell />
+}
+
+// 시연용 초기화 — persist된 상태를 비우고 처음부터
+function DemoReset() {
+  const resetDemo = useStore((s) => s.resetDemo)
+  return (
+    <button
+      className="btn no-print"
+      onClick={resetDemo}
+      title="데모 상태를 초기화합니다"
+      style={{ position: 'fixed', bottom: 14, right: 14, zIndex: 200, fontSize: 11, padding: '6px 12px', background: 'var(--bg-1)', color: 'var(--t3)', border: '1px solid var(--border)', borderRadius: 20 }}
+    >
+      ↺ 데모 초기화
+    </button>
+  )
 }
 
 function Shell() {
@@ -77,7 +93,9 @@ function Shell() {
       </main>
 
       {composeBuyerId && <ComposeMail followup={isFollowup} />}
+      <ReplyModal />
       <Toast />
+      <DemoReset />
     </div>
   )
 }

@@ -1,7 +1,8 @@
 import { create } from 'zustand'
+import { persist } from 'zustand/middleware'
 import { useShallow } from 'zustand/react/shallow'
 import {
-  Buyer, CompanyProfile, ExcludeReason, Grade, ReportInput, Stage, UserAccount, View,
+  Buyer, CompanyProfile, DealStage, ExcludeReason, Grade, ReportInput, Stage, UserAccount, View,
   PLAN_QUOTA, PREVIEW_REFRESH_LIMIT, REFILL_LIMIT,
 } from './types'
 import { MOCK_BUYERS } from './data/mockBuyers'
@@ -40,6 +41,7 @@ interface AppState {
   previewRefreshLeft: number
   refillUsed: number
   composeBuyerId: string | null
+  replyViewBuyerId: string | null
   report: ReportInput
   toast: string | null
 
@@ -55,24 +57,32 @@ interface AppState {
   setReport: (r: Partial<ReportInput>) => void
   setToast: (t: string | null) => void
   updateProfile: (p: Partial<CompanyProfile>) => void
+  openReply: (buyerId: string | null) => void
+  setDealStage: (buyerId: string, stage: DealStage) => void
+  resetDemo: () => void
 }
 
-export const useStore = create<AppState>((set, get) => ({
-  stage: 'signup',
-  view: 'dashboard',
+const initialState = {
+  stage: 'signup' as Stage,
+  view: 'dashboard' as View,
   user: null,
   profile: null,
   buyers: MOCK_BUYERS,
-  recommendedIds: [],
+  recommendedIds: [] as string[],
   previewPage: 0,
   previewRefreshLeft: PREVIEW_REFRESH_LIMIT,
   refillUsed: 0,
   composeBuyerId: null,
+  replyViewBuyerId: null,
   report: {
     checks: { separateEmail: false, catalogSent: false, sampleDiscussion: false, videoMeeting: false, phoneCall: false },
     memo: '',
   },
   toast: null,
+}
+
+export const useStore = create<AppState>()(persist((set, get) => ({
+  ...initialState,
 
   signup: (u) => set({ user: { ...u, plan: 'Standard' }, stage: 'profile' }),
 
@@ -136,6 +146,22 @@ export const useStore = create<AppState>((set, get) => ({
     })),
   setToast: (t) => set({ toast: t }),
   updateProfile: (p) => set((st) => ({ profile: st.profile ? { ...st.profile, ...p } : st.profile })),
+  openReply: (buyerId) => set({ replyViewBuyerId: buyerId }),
+  setDealStage: (buyerId, stage) =>
+    set((st) => ({
+      buyers: st.buyers.map((b) => (b.id === buyerId ? { ...b, dealStage: stage } : b)),
+      toast:
+        stage === 'contract'
+          ? '🎉 계약 단계로 업데이트되었습니다. 성사 수수료 프로세스 안내 메일이 발송됩니다. (mock)'
+          : '거래 단계가 업데이트되었습니다. 해당 바이어의 매칭이 유지됩니다.',
+    })),
+  resetDemo: () => {
+    set({ ...initialState, buyers: MOCK_BUYERS })
+    try { localStorage.removeItem('nexport-v02-demo') } catch { /* noop */ }
+  },
+}), {
+  name: 'nexport-v02-demo', // F5 새로고침에도 시연 상태 유지
+  partialize: (st) => ({ ...st, toast: null, composeBuyerId: null, replyViewBuyerId: null }),
 }))
 
 // 파생 셀렉터용 훅 — 새 배열/객체를 반환하는 셀렉터는 반드시 이걸로 구독 (무한 루프 방지)
