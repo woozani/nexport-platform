@@ -5052,11 +5052,10 @@ function EmailFinderView() {
   );
 }
 
-// ── 도메인 분리: nexport.trade(랜딩) / app.nexport.trade(웹앱) ──
-// localhost·*.vercel.app 은 기존 SPA 토글 동작 유지 (개발·데모용)
-const HOSTNAME = typeof window !== "undefined" ? window.location.hostname : "";
-const IS_APP_HOST = HOSTNAME.startsWith("app.");
-const IS_LANDING_HOST = HOSTNAME === "nexport.trade" || HOSTNAME === "www.nexport.trade";
+// ── 제품 전용 리포 — 랜딩은 woozani/nexport-landing (nexport.trade)으로 분리 ──
+// 이 리포는 app.nexport.trade 웹앱만 서빙한다. 모바일 접속 시 데스크톱 안내 후 랜딩으로 유도.
+const IS_APP_HOST = true;
+const IS_LANDING_HOST = false;
 const APP_URL = "https://app.nexport.trade";
 
 export default function App() {
