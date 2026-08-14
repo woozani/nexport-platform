@@ -5,8 +5,9 @@
   usage: Claude Code 작업 지시용. docs/specs/ 에 배치.
   scope: 정책 No.1 ~ No.4 (No.5~8은 2부에서 추가 예정)
 -->
-<nexport_dev_spec version="1.1" date="2026-08-14" part="1" items="1-4" lang="ko">
-  <!-- v1.1 (2026-08-14): policy 2 스코프 개정 — 화학(수처리) 섹터 삭제, 산업 기계요소(밸브·펌프·파스너) 추가. 근거: 시장조사_한미해상수출_Top20_분산도_20260814.md -->
+<nexport_dev_spec version="1.2" date="2026-08-14" part="1" items="1-4" lang="ko">
+  <!-- v1.1 (2026-08-14): 화학(수처리) 삭제, 산업 기계요소 추가 -->
+  <!-- v1.2 (2026-08-14): SME 기준 5카테고리로 최종 확정 — 화장품·플라스틱 완제품·접착제·고무·공구. 근거: 섹터구성_SME기준_5카테고리_확정_20260814.md -->
   <policy id="1" title="수집한 데이터 판매 정책" status="confirmed">
     <decision>데이터 판매는 영구 제외. "메일 발송 → 응답 시 열람" 구조로 확정. 리스트 일괄 내보내기(bulk export) 기능 삭제.</decision>
     <dev_requirements>
@@ -21,7 +22,7 @@
     <decision>자유 키워드를 표준 태그 체계로 정규화 후 태그로 매칭. 중심축은 HS 코드.</decision>
     <tag_schema>산업 대분류(Apollo 매핑) / 품목(HS 6자리) / 요구 인증 / 지역·규모</tag_schema>
     <pipeline>수집 → 정규화(동의어 통합) → LLM 배치 분류(적재 시 1회) → 사람 검수(저신뢰만)</pipeline>
-    <scope_limitation revised="v1.1">초기 태그 체계는 자동차부품(8708)·의료기기(9018/9021)·산업 기계요소(8481 밸브/8413 펌프/7318 파스너) 3개 섹터만 깊게 구축. 화학·수처리는 대기업 지배(원료)·물량 빈약(8421)으로 제외, 화장품은 ICP(제조업 인증 게이트) 밖으로 제외.</scope_limitation>
+    <scope_limitation revised="v1.2">초기 태그 체계는 SME 기준 5카테고리만 깊게 구축: 화장품(3304)·플라스틱 완제품(3926 필터 전제)·접착제/실란트(3506)·고무 제품(4016)·산업용 공구(8207). 선정 원칙 = 대기업 의존도 낮음 + 거래 발생 용이 + SME 수출 실적 상위. 자동차 애프터마켓(8708.30)·의료기기(9018/9021)는 확장 후보 풀.</scope_limitation>
   </policy>
   <policy id="3" title="매칭 방식" status="confirmed">
     <decision>하이브리드: 1차 필터는 박스(섹터×지역×규모, 얕게), 정밀 매칭은 서술형 필드 1개(임베딩 유사도). LLM 생성은 매칭 사유 1줄 요약(상위 N건)에만.</decision>
