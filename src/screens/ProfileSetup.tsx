@@ -3,8 +3,8 @@ import { useStore } from '../store'
 import { Field, Logo, OnboardSteps } from '../components/ui'
 
 // 박스 필터는 얕게 — 초기 3개 섹터만 깊게 구축 (dev_spec policy 2 scope_limitation + policy 3 hybrid)
-// 데모 주: 수처리는 화학·환경 섹터에 포함해 시연 (실서비스 택소노미는 프로벤타 초안 기준)
-const SECTORS = ['의료기기', '자동차부품', '화학·환경(수처리)']
+// 2026-08-14 스코프 확정: 화학·수처리 삭제, 산업 기계요소(밸브·펌프·파스너) 추가
+const SECTORS = ['자동차부품', '의료기기', '산업 기계요소']
 const CERTS = ['FDA', 'CE', 'ISO 13485', 'IATF 16949']
 
 // 화면 3. 회사 프로필 작성 ★핵심 — 서술형(주관식) 우선, 구조 입력은 보조 (8/13 회의 전환사항)
@@ -37,7 +37,7 @@ export function ProfileSetup() {
             rows={5}
             value={desc}
             onChange={(e) => setDesc(e.target.value)}
-            placeholder="예: 산업용 정수처리 필터를 제조합니다. 미국의 수처리 설비 업체나 유통사를 찾고 있습니다."
+            placeholder="예: 자동차용 브레이크 패드를 제조합니다. IATF 16949 인증을 보유하고 있고 미국의 애프터마켓 부품 유통사를 찾고 있습니다."
           />
         </Field>
 
