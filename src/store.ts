@@ -186,10 +186,10 @@ export const useStore = create<AppState>()(persist((set, get) => ({
   },
   resetDemo: () => {
     set({ ...initialState, buyers: MOCK_BUYERS })
-    try { localStorage.removeItem('nexport-v02-demo') } catch { /* noop */ }
+    try { localStorage.removeItem('nexport-v02-demo-v2') } catch { /* noop */ }
   },
 }), {
-  name: 'nexport-v02-demo', // F5 새로고침에도 시연 상태 유지
+  name: 'nexport-v02-demo-v2', // F5 유지 + 섹터 개편 시 키 버전업으로 구버전 상태 폐기
   partialize: (st) => ({ ...st, toast: null, composeBuyerId: null, replyViewBuyerId: null }),
 }))
 

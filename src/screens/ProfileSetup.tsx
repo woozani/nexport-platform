@@ -3,9 +3,9 @@ import { useStore } from '../store'
 import { Field, Logo, OnboardSteps } from '../components/ui'
 
 // 박스 필터는 얕게 — 초기 3개 섹터만 깊게 구축 (dev_spec policy 2 scope_limitation + policy 3 hybrid)
-// 2026-08-14 스코프 확정: 화학·수처리 삭제, 산업 기계요소(밸브·펌프·파스너) 추가
-const SECTORS = ['자동차부품', '의료기기', '산업 기계요소']
-const CERTS = ['FDA', 'CE', 'ISO 13485', 'IATF 16949']
+// 2026-08-14 SME 기준 5카테고리 확정 (섹터구성_SME기준_5카테고리_확정 문서)
+const SECTORS = ['화장품', '플라스틱 완제품', '접착제·실란트', '고무 제품', '산업용 공구']
+const CERTS = ['FDA 등록', 'MoCRA', 'ISO 22716', 'UL/ASTM', 'ISO 9001']
 
 // 화면 3. 회사 프로필 작성 ★핵심 — 서술형(주관식) 우선, 구조 입력은 보조 (8/13 회의 전환사항)
 export function ProfileSetup() {
@@ -37,7 +37,7 @@ export function ProfileSetup() {
             rows={5}
             value={desc}
             onChange={(e) => setDesc(e.target.value)}
-            placeholder="예: 자동차용 브레이크 패드를 제조합니다. IATF 16949 인증을 보유하고 있고 미국의 애프터마켓 부품 유통사를 찾고 있습니다."
+            placeholder="예: 기초 스킨케어(토너·세럼)를 제조합니다. MoCRA 등록을 완료했고 미국의 뷰티 유통사나 브랜드사를 찾고 있습니다."
           />
         </Field>
 
