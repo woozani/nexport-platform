@@ -51,6 +51,7 @@ function Shell() {
   const view = useStore((s) => s.view)
   const setView = useStore((s) => s.setView)
   const user = useStore((s) => s.user)
+  const credits = useStore((s) => s.credits)
   const composeBuyerId = useStore((s) => s.composeBuyerId)
   const composeBuyer = useStore((s) => s.buyers.find((b) => b.id === s.composeBuyerId))
   const isFollowup = !!composeBuyer && composeBuyer.status !== 'none' && !composeBuyer.repliedAt && daysSince(composeBuyer.sentAt) >= FOLLOWUP_DAYS
@@ -78,8 +79,13 @@ function Shell() {
         <div className="sidebar-user" style={{ padding: '12px 8px', borderTop: '1px solid var(--border)', fontSize: 12 }}>
           <div style={{ fontWeight: 800 }}>{user?.managerName}</div>
           <div style={{ color: 'var(--t3)', marginTop: 2 }}>{user?.company}</div>
-          <div style={{ marginTop: 6, display: 'inline-block', padding: '2px 8px', borderRadius: 6, background: 'var(--blue-dim)', color: 'var(--blue)', fontWeight: 800, fontSize: 11 }}>
-            {user?.plan} 플랜
+          <div style={{ marginTop: 6, display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+            <span style={{ padding: '2px 8px', borderRadius: 6, background: 'var(--blue-dim)', color: 'var(--blue)', fontWeight: 800, fontSize: 11 }}>
+              Founding Member
+            </span>
+            <span style={{ padding: '2px 8px', borderRadius: 6, background: 'var(--bg-2)', color: 'var(--t2)', fontWeight: 700, fontSize: 11 }}>
+              크레딧 {credits}
+            </span>
           </div>
         </div>
       </aside>

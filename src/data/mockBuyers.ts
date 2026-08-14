@@ -2,12 +2,39 @@ import { Buyer } from '../types'
 
 const daysAgo = (n: number) => new Date(Date.now() - n * 864e5).toISOString()
 
+// ── 태그 스키마 기본값 (dev_spec policy 2 — HS 6자리 품목 태그 + 요구 인증) ──
+// 실서비스는 정제 파이프라인(LLM 배치)이 생성. 데모는 섹터별 대표 태그로 시뮬레이션.
+const SECTOR_TAGS: Record<string, { hs: string[]; certs: string[] }> = {
+  수처리: { hs: ['8421.21 (물 여과·청정기기)', '8421.99 (여과기 부품)'], certs: ['NSF/ANSI 61', 'ISO 9001'] },
+  의료기기: { hs: ['9018.90 (의료기기 부품)', '9019.20 (치료용 호흡기기)'], certs: ['FDA 510(k)', 'ISO 13485', 'CE MDR'] },
+  자동차부품: { hs: ['8708.99 (차량 부품)', '8708.30 (제동장치)'], certs: ['IATF 16949', 'PPAP'] },
+}
+
+type RawBuyer = Omit<Buyer, 'hsTags' | 'requiredCerts' | 'importHistory' | 'matchScore'> & {
+  matchScore?: number
+  importHistory?: boolean
+}
+
+// 매칭 점수: 등급·트래킹 상태 기반 데모값 (실서비스는 임베딩 유사도 + 태그 일치)
+const scoreOf = (b: RawBuyer): number => {
+  const base = { GOLD: 88, SILVER: 78, BRONZE: 68, COLD: 40, DEAD: 10 }[b.grade]
+  return b.matchScore ?? base + ((b.id.charCodeAt(2) * 7) % 9)
+}
+
+const enrich = (b: RawBuyer): Buyer => ({
+  ...b,
+  hsTags: SECTOR_TAGS[b.industry]?.hs ?? [],
+  requiredCerts: SECTOR_TAGS[b.industry]?.certs ?? [],
+  importHistory: b.importHistory ?? (b.grade === 'GOLD' || b.grade === 'SILVER'),
+  matchScore: scoreOf(b),
+})
+
 // 25건 mock — 수처리/의료기기/자동차부품 인증 게이트 산업 위주
 // 등급 분포: GOLD 4 / SILVER 5 / BRONZE 9 / COLD 4 / DEAD 3
 // COLD/DEAD는 관리자 관점 데이터 — UI(추천 풀)에는 절대 노출되지 않음
-export const MOCK_BUYERS: Buyer[] = [
+const RAW: RawBuyer[] = [
   // ── GOLD (회신 이력 보유) ──
-  { id: 'b01', maskedName: 'Aqua*** Inc.', summary: '캘리포니아 소재 산업용 수처리 설비 유통사입니다.', region: '미국 · 캘리포니아', industry: '수처리', employees: '50~200명', matchReason: '수처리 키워드 유사도 + NSF 인증 수입 이력', grade: 'GOLD', status: 'replied', sentAt: daysAgo(9), openedAt: daysAgo(8), attachOpenedAt: daysAgo(7), repliedAt: daysAgo(6), bounces: 0, offPlatform: false, matchCount: 1, replyBody: `Hi,\n\nThanks for reaching out — your catalog looks interesting. We are currently reviewing suppliers for our industrial filtration line for next quarter.\n\nCould you share your MOQ, lead time to the West Coast, and NSF certification documents?\n\nBest,\nProcurement Team\nAqua*** Inc.` },
+  { id: 'b01', maskedName: 'Aqua*** Inc.', summary: '캘리포니아 소재 산업용 수처리 설비 유통사입니다.', region: '미국 · 캘리포니아', industry: '수처리', employees: '50~200명', matchReason: '수처리 키워드 유사도 + NSF 인증 수입 이력', grade: 'GOLD', status: 'replied', sentAt: daysAgo(9), openedAt: daysAgo(8), attachOpenedAt: daysAgo(7), repliedAt: daysAgo(6), bounces: 0, offPlatform: false, matchCount: 1, contact: { company: 'AquaPure Industrial Inc.', person: 'Michael Torres', title: 'Procurement Manager', email: 'm.torres@aquapure-ind.com', phone: '+1 (562) 555-0184', website: 'aquapure-ind.com' }, replyBody: `Hi,\n\nThanks for reaching out — your catalog looks interesting. We are currently reviewing suppliers for our industrial filtration line for next quarter.\n\nCould you share your MOQ, lead time to the West Coast, and NSF certification documents?\n\nBest,\nProcurement Team\nAqua*** Inc.` },
   { id: 'b02', maskedName: 'Med*** Supply Co.', summary: '중서부 병원 체인에 의료 소모품을 공급하는 전문 디스트리뷰터입니다.', region: '미국 · 일리노이', industry: '의료기기', employees: '200~500명', matchReason: 'FDA 등록 수입업체 + 의료 소모품 카테고리 일치', grade: 'GOLD', status: 'none', bounces: 0, offPlatform: false, matchCount: 2 },
   { id: 'b03', maskedName: 'Pur*** Water Systems', summary: '상업용 정수 시스템을 설계·시공하는 텍사스 엔지니어링 업체입니다.', region: '미국 · 텍사스', industry: '수처리', employees: '50~200명', matchReason: '정수 필터 OEM 소싱 수요 시그널', grade: 'GOLD', status: 'attach_opened', sentAt: daysAgo(5), openedAt: daysAgo(4), attachOpenedAt: daysAgo(3), bounces: 0, offPlatform: true, matchCount: 1 },
   { id: 'b04', maskedName: 'Auto*** Parts Group', summary: '북미 애프터마켓에 자동차 부품을 유통하는 미시간 소재 그룹사입니다.', region: '미국 · 미시간', industry: '자동차부품', employees: '500명 이상', matchReason: 'IATF 16949 공급사 소싱 이력 + 카테고리 일치', grade: 'GOLD', status: 'none', bounces: 0, offPlatform: false, matchCount: 1 },
@@ -37,3 +64,5 @@ export const MOCK_BUYERS: Buyer[] = [
   { id: 'b24', maskedName: 'Sun*** Supplies', summary: '반송 2회 누적 — 이메일 무효 폐기.', region: '미국 · 뉴멕시코', industry: '의료기기', employees: '10~50명', matchReason: '-', grade: 'DEAD', status: 'none', bounces: 2, offPlatform: false, matchCount: 2 },
   { id: 'b25', maskedName: 'Old*** Waterworks', summary: '5회 매칭 전부 무반응 — 폐기.', region: '미국 · 미주리', industry: '수처리', employees: '50~200명', matchReason: '-', grade: 'DEAD', status: 'none', bounces: 0, offPlatform: false, matchCount: 5 },
 ]
+
+export const MOCK_BUYERS: Buyer[] = RAW.map(enrich)

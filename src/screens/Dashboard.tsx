@@ -9,7 +9,7 @@ export function Dashboard() {
   const user = useStore((s) => s.user)
   const setView = useStore((s) => s.setView)
   const openCompose = useStore((s) => s.openCompose)
-  const quota = PLAN_QUOTA[user?.plan ?? 'Standard']
+  const quota = PLAN_QUOTA[user?.plan ?? 'Founding']
   const unsent = rec.filter((b) => b.status === 'none')
 
   return (
