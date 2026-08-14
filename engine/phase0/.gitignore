@@ -1,0 +1,5 @@
+# 하드 제약 #4: 연락처·원본 데이터 커밋 금지 (스크립트·템플릿·리포트만 커밋)
+raw/*
+!raw/TEMPLATE_bol_extract.csv
+out/*
+*.cache.json
