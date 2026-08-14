@@ -2,8 +2,8 @@ import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 import { useShallow } from 'zustand/react/shallow'
 import {
-  Buyer, CompanyProfile, DealStage, ExcludeReason, Grade, ReportInput, Stage, UserAccount, View,
-  PLAN_QUOTA, PREVIEW_REFRESH_LIMIT, REFILL_LIMIT,
+  Buyer, CompanyProfile, DealStage, ExcludeReason, Grade, ReportInput, RevealLogEntry, Stage, UserAccount, View,
+  PLAN_CONFIG, PLAN_QUOTA, PREVIEW_REFRESH_LIMIT, REFILL_LIMIT,
 } from './types'
 import { MOCK_BUYERS } from './data/mockBuyers'
 
@@ -44,6 +44,10 @@ interface AppState {
   replyViewBuyerId: string | null
   report: ReportInput
   toast: string | null
+  // ── 크레딧 시스템 (dev_spec policy 1-2, 4) ──
+  credits: number
+  revealedIds: string[] // 연락처 해제된 바이어
+  revealLog: RevealLogEntry[] // 열람 이벤트 로그 — append-only (policy 1-3)
 
   signup: (u: Omit<UserAccount, 'plan'>) => void
   saveProfile: (p: CompanyProfile) => void
@@ -59,6 +63,7 @@ interface AppState {
   updateProfile: (p: Partial<CompanyProfile>) => void
   openReply: (buyerId: string | null) => void
   setDealStage: (buyerId: string, stage: DealStage) => void
+  unmaskBuyer: (buyerId: string) => void
   resetDemo: () => void
 }
 
@@ -79,16 +84,19 @@ const initialState = {
     memo: '',
   },
   toast: null,
+  credits: PLAN_CONFIG.Founding.monthlyCredits,
+  revealedIds: [] as string[],
+  revealLog: [] as RevealLogEntry[],
 }
 
 export const useStore = create<AppState>()(persist((set, get) => ({
   ...initialState,
 
-  signup: (u) => set({ user: { ...u, plan: 'Standard' }, stage: 'profile' }),
+  signup: (u) => set({ user: { ...u, plan: 'Founding' }, stage: 'profile' }),
 
   saveProfile: (p) => {
     const { buyers, user } = get()
-    const quota = PLAN_QUOTA[user?.plan ?? 'Standard']
+    const quota = PLAN_QUOTA[user?.plan ?? 'Founding']
     const pool = sortForRecommend(buyers.filter((b) => RECOMMENDABLE.includes(b.grade)))
     set({ profile: p, stage: 'hook', recommendedIds: pool.slice(0, quota).map((b) => b.id) })
   },
@@ -155,6 +163,27 @@ export const useStore = create<AppState>()(persist((set, get) => ({
           ? '🎉 계약 단계로 업데이트되었습니다. 성사 수수료 프로세스 안내 메일이 발송됩니다. (mock)'
           : '거래 단계가 업데이트되었습니다. 해당 바이어의 매칭이 유지됩니다.',
     })),
+  // 연락처 언마스킹 — "응답 확인된 바이어에 한해 크레딧 1개 차감" (dev_spec policy 4)
+  unmaskBuyer: (buyerId) => {
+    const st = get()
+    const buyer = st.buyers.find((b) => b.id === buyerId)
+    if (!buyer || st.revealedIds.includes(buyerId)) return
+    if (!buyer.repliedAt) {
+      set({ toast: '연락처 열람은 응답이 확인된 바이어만 가능합니다.' })
+      return
+    }
+    if (st.credits <= 0) {
+      set({ toast: '크레딧이 부족합니다. 추가 크레딧을 구매해주세요. (mock)' })
+      return
+    }
+    set({
+      credits: st.credits - 1,
+      revealedIds: [...st.revealedIds, buyerId],
+      // append-only — 기존 항목은 절대 수정·삭제하지 않는다 (과금의 계약적 근거)
+      revealLog: [...st.revealLog, { buyerId, maskedName: buyer.maskedName, ts: new Date().toISOString(), creditsSpent: 1 }],
+      toast: `연락처가 열람되었습니다. (크레딧 1 차감 — 잔여 ${st.credits - 1})`,
+    })
+  },
   resetDemo: () => {
     set({ ...initialState, buyers: MOCK_BUYERS })
     try { localStorage.removeItem('nexport-v02-demo') } catch { /* noop */ }

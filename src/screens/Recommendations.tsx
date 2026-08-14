@@ -11,7 +11,7 @@ export function Recommendations() {
   const openCompose = useStore((s) => s.openCompose)
   const excludeBuyer = useStore((s) => s.excludeBuyer)
   const [excludeTarget, setExcludeTarget] = useState<Buyer | null>(null)
-  const quota = PLAN_QUOTA[user?.plan ?? 'Standard']
+  const quota = PLAN_QUOTA[user?.plan ?? 'Founding']
 
   return (
     <div>
@@ -22,7 +22,8 @@ export function Recommendations() {
         </span>
       </div>
       <p style={{ fontSize: 12, color: 'var(--t3)', marginBottom: 16 }}>
-        프로필 서술 기반으로 AI가 선별한 바이어입니다. 바이어 1명은 회원님께 독점 매칭됩니다. 연락처는 노출되지 않으며 발송은 플랫폼 안에서 이뤄집니다.
+        프로필 서술 기반으로 AI가 선별한 바이어입니다. 바이어 1명은 회원님께 독점 매칭됩니다.
+        발송은 플랫폼 안에서 이뤄지고, <b>연락처는 바이어가 응답한 뒤 크레딧으로 열람</b>합니다.
       </p>
 
       {rec.length === 0 && (
@@ -47,10 +48,17 @@ export function Recommendations() {
               </div>
             </div>
             <div style={{ fontSize: 13, color: 'var(--t1)', lineHeight: 1.5 }}>{b.summary}</div>
+            {/* 마스킹 상태 공개 필드 — dev_spec policy 4 masked_state */}
             <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
               <Pill>📍 {b.region}</Pill>
               <Pill>{b.industry}</Pill>
               <Pill>직원 {b.employees}</Pill>
+              {b.importHistory && <Pill color="var(--green)">수입 이력 有</Pill>}
+              <Pill color="var(--blue)">매칭 {b.matchScore}점</Pill>
+            </div>
+            <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+              {b.hsTags.map((t) => <Pill key={t}>🏷 {t}</Pill>)}
+              {b.requiredCerts.map((c) => <Pill key={c} color="var(--amber)">📜 {c}</Pill>)}
             </div>
             <div style={{ fontSize: 12, color: 'var(--t2)', background: 'var(--blue-dim)', borderRadius: 8, padding: '8px 10px' }}>
               <b style={{ color: 'var(--blue)' }}>매칭 근거</b> · {b.matchReason}

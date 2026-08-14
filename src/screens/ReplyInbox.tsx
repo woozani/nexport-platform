@@ -9,6 +9,9 @@ export function ReplyModal() {
   const buyer = useStore((s) => s.buyers.find((b) => b.id === s.replyViewBuyerId))
   const openReply = useStore((s) => s.openReply)
   const setDealStage = useStore((s) => s.setDealStage)
+  const unmaskBuyer = useStore((s) => s.unmaskBuyer)
+  const credits = useStore((s) => s.credits)
+  const revealed = useStore((s) => !!s.replyViewBuyerId && s.revealedIds.includes(s.replyViewBuyerId))
   if (!buyerId || !buyer) return null
 
   const stage: DealStage = buyer.dealStage ?? 'none'
@@ -32,6 +35,29 @@ export function ReplyModal() {
       <p style={{ fontSize: 11, color: 'var(--t3)', marginBottom: 18 }}>
         * MVP는 회신 열람까지 지원합니다. 답장·스레드 대화는 후순위 기능입니다.
       </p>
+
+      {/* 연락처 열람 — "메일 발송 → 응답 시 열람" 구조 (dev_spec policy 1·4) */}
+      <div style={{ borderTop: '1px solid var(--border)', paddingTop: 14, marginBottom: 4 }}>
+        <div style={{ fontSize: 13, fontWeight: 800, marginBottom: 8 }}>🔓 바이어 연락처</div>
+        {revealed && buyer.contact ? (
+          <div className="fade-up" style={{ background: '#ecfdf5', border: '1px solid var(--green)', borderRadius: 10, padding: 14, fontSize: 13, lineHeight: 1.8 }}>
+            <b>{buyer.contact.company}</b><br />
+            {buyer.contact.person} · {buyer.contact.title}<br />
+            ✉ {buyer.contact.email} · ☎ {buyer.contact.phone}<br />
+            🌐 {buyer.contact.website}
+          </div>
+        ) : (
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, background: 'var(--bg-2)', borderRadius: 10, padding: '12px 14px' }}>
+            <div style={{ flex: 1, fontSize: 12, color: 'var(--t2)' }}>
+              회사명·담당자·이메일·전화·웹사이트는 마스킹되어 있습니다.<br />
+              <span style={{ color: 'var(--t3)', fontSize: 11 }}>응답이 확인된 바이어이므로 열람 가능 · 열람 기록이 남습니다</span>
+            </div>
+            <button className="btn btn-primary" style={{ fontSize: 12, whiteSpace: 'nowrap' }} onClick={() => unmaskBuyer(buyer.id)}>
+              연락처 열람 (크레딧 1 · 잔여 {credits})
+            </button>
+          </div>
+        )}
+      </div>
 
       {/* 거래 단계 업데이트 — 수수료 프로세스 연결 */}
       <div style={{ borderTop: '1px solid var(--border)', paddingTop: 14 }}>
