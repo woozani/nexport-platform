@@ -1,0 +1,176 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  NEXPORT 전략 세션 핸드오프 (2026-08-14)
+  source: Claude.ai 대화 세션 (수익모델 토론 ~ D1 착수 계획)
+  usage: Claude Code 작업 컨텍스트. docs/strategy/ 또는 docs/specs/ 에 배치.
+  관련 파일: nexport-dev-policy-260814-no1-4.xml (1부 스펙, 기존 커밋)
+-->
+<nexport_session_handoff version="1.0" date="2026-08-14" lang="ko">
+
+  <!-- ================================================== -->
+  <section id="confirmed_decisions" title="확정 결정 사항">
+
+    <decision id="D1" topic="수익 모델" status="confirmed">
+      <summary>지속형 커미션(5%) 폐기. 1회성 "매칭 성사비"로 대체.</summary>
+      <rationale>
+        고객은 첫 딜 성사 이후 지속 커미션 지불 유인이 없음 (Jay 확인).
+        무역은 거래(계약·결제·선적)가 플랫폼 밖에서 발생하므로 지속 커미션 강제 불가.
+        벤치마크: Faire(첫 주문만 과금, 재주문 0%), 헤드헌팅(성사 시 1회), Alibaba.com(커미션 포기, 멤버십 전환).
+        커미션 작동 조건 = 플랫폼이 돈의 흐름을 장악할 것 — NEXPORT는 미충족.
+      </rationale>
+      <structure>크레딧(선불) + 매칭 성사비(성사 시 1회) + BEP 이후 구독 전환</structure>
+      <open_issue gate="G1">성사비 형태 미확정: ①1회 정액 ②1회 정률 ③기간부 정률+포워더 제휴 전제 ④하이브리드(1회 정액 + 셰퍼딩 서비스 별매). Claude 권고 = ④. 정률 채택 시 관세사·포워더 제휴(금액 가시성)가 전제조건.</open_issue>
+    </decision>
+
+    <decision id="D2" topic="성사비 집행 3중 스택" status="confirmed">
+      <layer order="1" name="선불 확정 수익">언마스킹 크레딧 = 떼일 수 없는 선불 + 열람 이벤트 로그가 소개 사실의 전자 기록(계약적 근거)</layer>
+      <layer order="2" name="계약">tail 조항(열람 후 18개월 내 첫 거래에 성사비 발생, 약관에만 기재) + 성사 기준은 "첫 PO 발행" 권고(BOL 대사 가능한 유일 기준점)</layer>
+      <layer order="3" name="집행">
+        BOL 모니터링(미국향 해상 수입기록은 공공데이터 — 억제력) +
+        미납 시 플랫폼 액세스 차단(반복게임: ICP는 지속적 바이어 파이프라인 필요) +
+        성사 지원 서비스 번들(지불 동기 전환)
+      </layer>
+      <limitation>BOL은 미국향 해상만 커버(항공·EU 미포함, 기밀처리·포워더 consignee 시 가림). 레이어 간 상호 보완으로 설계됨.</limitation>
+    </decision>
+
+    <decision id="D3" topic="용어 체계 (Terminology)" status="confirmed">
+      <principle>기술/내부 용어의 고객 노출 금지. 영어 비유의 직역 금지(backbone→중심축 등). 위협 프레임 금지 — 혜택 청구 프레임으로 전환. 처벌 장치는 약관 후면에만.</principle>
+      <term internal="자진 신고 할인" customer_facing="첫 수출 지원 신청" note="신청 시 매칭 성사비 우대 요율 + 첫 수출 실행 지원 패키지"/>
+      <term internal="성공 보수 / 커미션" customer_facing="매칭 성사비" note="'커미션' 대면 사용 금지"/>
+      <term internal="언마스킹" customer_facing="바이어 정보 열람"/>
+      <term internal="크레딧" customer_facing="크레딧" note="유지 확정"/>
+      <term internal="BOL 모니터링/탐지" customer_facing="수출 동향 리포트" note="탐지 기능의 제품화 — 고객에게 유용한 기능이자 조용한 억제력"/>
+      <term internal="progressive reveal" customer_facing="(노출 안 함)" note="내부 설계 용어"/>
+      <action>이 용어표를 독립 파일로 docs/strategy/에 커밋하여 전 세션 공유 SSOT로 관리할 것</action>
+    </decision>
+
+    <decision id="D4" topic="데이터 소스 아키텍처" status="direction_agreed" gate="G2">
+      <summary>데이터 스택 역전: 발굴과 컨택의 소스 분리.</summary>
+      <discovery source="미국 세관 수입기록(BOL)" tools="ImportYeti(무료)/Panjiva/ImportGenius(유료 API)">
+        "어떤 미국 기업이 해당 HS코드를 한국/경쟁국에서 실제 수입하는가" — 기업 단위 공공기록, 개인정보 0%.
+        Apollo 키워드 대비 상위 호환(실수입 증거 기반). 콜드메일 첫 줄 카피로도 활용("귀사가 최근 유사 품목을 수입하신 것을 확인").
+      </discovery>
+      <contact source="이메일 조회 벤더(Apollo, Hunter, Prospeo 등)" mode="매칭 확정 회사에 한해 건별 실시간 조회">
+        <rule>벌크 CSV 다운로드·DB 대량 적재 금지 (ToS 재배포 리스크 = P0, 계정 정지는 즉시 발생 + 데이터 부패로 반송률 상승 → 발송 도메인 평판 훼손)</rule>
+        <rule>멀티 벤더 어댑터 구조 필수 — 동일 인터페이스에 벤더 2~3개, 단일 벤더 종속 금지</rule>
+        <rule>재판매 허용 라이선스 보유 벤더 확인이 변호사 검토 1순위 질문</rule>
+        <rule>캐싱 절충: 조회 결과는 보존기한(예: 90일) 부여 건별 캐시 허용 — "벌크 적재"가 아닌 "이용 이력 보관" 프레임</rule>
+      </contact>
+      <legal_shield>발송은 NEXPORT 명의 대행(고객에게 벤더 데이터 미노출) → 고객이 보는 연락처는 바이어가 회신하며 스스로 제공한 정보 = 재판매 이슈 구조적 소멸</legal_shield>
+      <pending>Jay 최종 채택 확인 시 nexport-dev-policy XML v1.1 개정 + D1 정정 노트 필요 (1부 회신의 No.2 소스 열이 Apollo 중심으로 기재되어 있음)</pending>
+    </decision>
+
+    <decision id="D5" topic="열람(언마스킹) 트리거" status="confirmed">
+      <rule>바이어 응답 확인 시에만 크레딧 차감으로 열람 (하드 룰, 1부 회신 기준)</rule>
+      <todo>실시간 벤더 조회 실패 케이스(매치 없음/이메일 무효)의 크레딧 보상 로직 스펙 필요</todo>
+      <todo>자동응답(Out-of-Office) 필터링 — Auto-Submitted 헤더·제목 패턴으로 "응답"에서 제외. 과금 정합성의 최전선.</todo>
+    </decision>
+  </section>
+
+  <!-- ================================================== -->
+  <section id="dev_feedback_part2" title="개발사 회신 2부 (No.5~8) 설계 방향">
+    <architecture_principle>
+      단일 참여 이벤트 스트림(sent → delivered/bounced → opened* → clicked* → replied → feedback_submitted → deal_registered)을
+      source of truth로 두고, 등급(No.5)·보고서(No.7)·관리자(No.8)는 전부 이 스트림 위의 뷰로 구현.
+      (* = 저신뢰 이벤트 플래그)
+    </architecture_principle>
+    <item no="5" title="상위권 로직">
+      글로벌 랭킹 개념 폐기. 점수 = 매칭 적합도(태그·임베딩, 검색 시점 계산) × 데이터 등급(검증 신호로만 갱신) − 피로도 페널티(최근 노출량).
+      참여 신호는 해당 태그 맥락 안에서만 등급 반영(비연관 카테고리 노출 방지 = 개발사 우려의 직접 해법).
+      등급 전이: 응답→상승, 반송→DEAD, N회 무반응→COLD. "읽음"은 등급 미반영(Apple MPP·보안 스캐너 오탐으로 신호 오염).
+      바이어당 월 노출 상한 + 재접촉 쿨다운은 하드코딩(스팸 신고 → 공유 도메인 평판 → 전체 고객 도달률 붕괴 방지).
+    </item>
+    <item no="6" title="이메일 트래킹">
+      픽셀(리소스 삽입) 채택하되 픽셀 데이터로 과금·랭킹 금지(참고 지표로 강등).
+      핵심은 인바운드 응답 감지 파이프라인(회신 웹훅 + 자동응답 필터).
+      발송 인프라 전제: 전용 발송 도메인(회사 도메인과 분리), SPF/DKIM/DMARC, 워밍업, 원클릭 수신거부, 스팸률 0.3% 미만, CAN-SPAM(실주소·옵트아웃).
+    </item>
+    <item no="7" title="내부 보고서">
+      "일정 기간" = 단일 상수가 아닌 시퀀스 스케줄: 발송→+3일 팔로업→+7일 마지막 터치, 14일/3터치 종료 무반응 시 COLD, 90일 쿨다운 후 재매칭 풀 복귀(동일 제조사-바이어 쌍 제외). 수치는 설정값으로 분리.
+      보고서 목적 재정의: ①무료 파운딩 멤버 리텐션 장치("일하고 있다는 증거") ②오프플랫폼 결과 수집 입구.
+      피드백 = 구조화 선택지(응답/미팅/샘플/거절/성사) + 선택적 자유 서술. "성사" 선택지 = 첫 수출 지원 신청의 진입점.
+      내용 = 퍼널 집계(발송→도달→응답) + 카테고리별 벤치마크("귀사 4.2% vs 평균 2.8%"). 읽음률은 참고치.
+      주기 = 월간 큐레이션 사이클 정렬.
+    </item>
+    <item no="8" title="관리자 페이지">
+      "없으면 개발 안 함" 옵션 없음 — 플라이휠 조종석.
+      필수·사후 복원 불가: 매칭 시점 이벤트 로깅(추천 사유 스냅샷: 태그 중첩·유사도·등급·점수 구성) → 매칭 알고리즘 v2 학습 데이터.
+      v1 모듈 4개: ①태그 검수 큐 ②발송 헬스 대시보드(도메인 평판·반송·스팸신고) ③크레딧/열람 로그 뷰어 ④등급 분포+피로도 현황.
+    </item>
+    <delivery_note>2부는 별도 메일 대신 D1 킥오프 자료로 통합 제안됨 (Jay 확정 대기)</delivery_note>
+  </section>
+
+  <!-- ================================================== -->
+  <section id="compliance" title="컴플라이언스 프레임워크">
+    <risk id="P0" name="데이터 소스 계약(벤더 ToS)" severity="치명" speed="즉시" note="최우선. 해법 = D4의 어댑터+라이선스+대행 구조"/>
+    <risk id="P1" name="개인정보 3법(PIPA/GDPR/미국 주법)" severity="높음" speed="느림" note="B2B 콜드 아웃리치는 정당한 이익으로 방어 가능 — 조건은 문서화"/>
+    <risk id="P2" name="국가별 발송 규칙" severity="중간" note="미국=opt-out(관대), 독일·오스트리아=B2B도 opt-in → 수신자 소재지 기반 라우팅 테이블로 원천 회피. 1순위 회랑=미국이라 전략과 정렬"/>
+    <risk id="P3" name="무역 특화(제재·전략물자)" severity="높음" frequency="낮음" note="매칭 파이프라인에 게이트 2개: 전략물자 HS코드 플래그(보류+전문기관 안내), 미국 Consolidated Screening List 무료 API 자동 조회"/>
+    <defense_layers>
+      <layer order="1" name="제품 설계" status="70% 완료">응답 게이트 열람, 발송 대행, bulk export 금지, 기업 단위 응답 그래프 — 기결정 스펙에 법적 기능 의미 부여</layer>
+      <layer order="2" name="문서·운영" eta="2주">처리방침 v1(국외 수집 명시), LIA 1부, GDPR Art.14 고지 푸터, 옵트아웃 24h SLA, 등급별 보존기한(DEAD 12개월 파기), 변호사 검토 1회(100~200만원, 바우처 활용 검토)</layer>
+      <layer order="3" name="소싱·스크리닝">D4 벤더 구조 + P3 게이트 2개</layer>
+    </defense_layers>
+    <privacy_timing_model>리스크는 4개의 순간에 발생: ①수집(건별 최소화) ②발송(국가 라우팅) ③제공(응답 게이트) ④보존(등급별 기한). ①③④는 제품 설계로 기해결, ②만 신규 작업.</privacy_timing_model>
+  </section>
+
+  <!-- ================================================== -->
+  <section id="strategy_v1_critique" title="생존전략 v1.0 → v1.1 수정 지시">
+    <context>NEXPORT_생존전략_v1.md는 타 세션 산출물 — 본 세션 확정 사항과 충돌 3건, 내부 모순 2건 존재. Jay가 정합성 테스트로 확인함.</context>
+    <fix id="F1">§1/§5.2/§7의 "5% 커미션·12개월 매출연동" → D1 결정(매칭 성사비)으로 교체. 단 §7.2의 "딜 셰퍼딩" 통찰은 별매 서비스로 살릴 것(게이트 G1의 ④안)</fix>
+    <fix id="F2">§7.1 "증빙 제출 시 커미션 할인·감사권·위약벌" 전면 노출 → D3 용어 체계로 스윕(첫 수출 지원 신청 프레임, 처벌 장치는 약관 후면)</fix>
+    <fix id="F3">§2 데이터 스택 역전 채택 시(게이트 G2) 1부 XML 스펙 v1.1 개정 + D1 정정 노트 — 태그 스키마 소스 열 변경</fix>
+    <fix id="F4">내부 모순 해소: "개인정보 처리 시점" 이원화 명시 — 발송용 내부 처리(캠페인 확정 시) ≠ 고객 제공(응답 후 크레딧 차감 시)</fix>
+    <fix id="F5">바우처 L2 수치에 보수 케이스 병기(하도급 마진 분할·후불 정산·부정수급 규제) + L2 없이 성립하는 BEP 백업 산식</fix>
+    <fix id="F6">창업자 대역폭 제약 명시: L1 컨설팅 주간 시간 캡 + Bennote 템플릿화를 필수 전제로 격상. "D1 심화 계약" 범위는 프론트로 한정(데이터 파이프라인 내재화 원칙과 충돌 방지)</fix>
+    <fix id="F7">회랑 선정 표에 5번째 축 "관세/통상 안정성" 추가. 현황: 한국 자동차·부품 대미 관세 25%→15% 인하 확정(2025.11 소급). 단 미국 301조 추가 관세(강제노동 12.5% 등)로 15% 상한 유동적 — 분기 리뷰 항목화. 멕시코 USMCA 무관세는 상수 리스크.</fix>
+    <fix id="F8">킬 크라이테리아에 최소 표본 조건 추가(예: 누적 발송 300건 이상 후 답장률 판정) — 10사×월 5~10건으로는 2% vs 5% 통계적 구분 불가</fix>
+    <fix id="F9">BOL 이중 용도 통합: 발굴(§2) + 성사 탐지(D2 집행 스택) — 동일 파이프라인이 정산 인프라 겸용</fix>
+    <fix id="F10">§12 체크리스트의 "Founding Member 계약서: 5%/12개월" 항목은 게이트 G1 확정 전 실행 보류 마킹</fix>
+  </section>
+
+  <!-- ================================================== -->
+  <section id="d1_engagement" title="디원솔루션 착수 계획 (다음 주)">
+    <contract_scope>UI/UX + PRD 문서 제작 (백엔드 미포함). PRD 이중 목적: ①향후 백엔드 설계도 ②하반기 정책사업 제출물(UI/UX+PRD로 정책자금 신청)</contract_scope>
+    <principle>제품 결정은 프로벤타가 공급, D1은 구조화·설계 담당. PRD 저작권/IP는 프로벤타 귀속 — 계약서 또는 킥오프 회의록에 명시(Bunkershot IP 리스크 재발 방지)</principle>
+    <kickoff_package>
+      <item order="1">결정 사항 인벤토리 — 확정(No.1~4+용어표) vs 미정(수치·성사 정의) 구분 1장</item>
+      <item order="2">2부 회신(No.5~8) — 킥오프 자료로 통합</item>
+      <item order="3">데이터 아키텍처 v1.1 + API 경계 선언 — "엔진은 프로벤타 내재, D1은 이 API를 그린다"</item>
+      <item order="4">PRD 목차 초안 — 정책사업 제출물 겸용 구조(사업 개요·시장·기능 명세·화면 정의·로드맵)</item>
+    </kickoff_package>
+    <parallel_track>D1이 UI/UX·PRD 작업하는 6~8주 = 프로벤타 엔진 검증 스프린트 기간. PRD 마감 전 실측 숫자(리드당 비용·이메일 적중률) 주입 → "실측 기반 PRD"로 정책사업 서류 격상</parallel_track>
+  </section>
+
+  <!-- ================================================== -->
+  <section id="engine_build_plan" title="엔진 내재 구축 계획 (Jay + Claude Code)">
+    <boundary>엔진(수집·정제·매칭·발송연동·이벤트 스트림) = 내재화 / UI = D1 / 발송 인프라 = 관리형 서비스(Resend·SES 등, 직접 구축 금지)</boundary>
+    <phase order="0" name="검증 스프린트" duration="2주">
+      비치헤드 HS코드 1개 → ImportYeti 수동 추출 → 수집·정제 스크립트 → 정규화 회사 테이블 → 20개사만 벤더 1곳 API 조회. 발송 없음.
+      측정: 포워더 노이즈 비율 / 이메일 적중률 / 검증 바이어 1건당 비용.
+    </phase>
+    <phase order="1" name="데이터 엔진" duration="2~3주">수집 자동화, 회사명 정규화(LLM 배치)+검수 큐(CSV/시트로 시작), HS·인증 태그 스키마, 임베딩 매칭 v1(pgvector), 멀티 벤더 어댑터 2개</phase>
+    <phase order="2" name="발송·이벤트" duration="1~2주">관리형 발송 연동, 전용 도메인 SPF/DKIM/DMARC + 워밍업(캘린더 4~6주, Phase 2 시작일에 도메인 구매·백그라운드 진행), 웹훅→이벤트 스트림, 자동응답 필터 v1</phase>
+    <phase order="3" name="운영 도구 + D1 인터페이스" duration="1주">크레딧 원장·열람 로그(append-only), 관리자 조회 스크립트, D1용 API 계약서</phase>
+    <estimate total_duration="6~8주 (버퍼 포함 8주)" claude_credit="Max 20x 구독 내 소화(주 15~20h ≈ 주간 한도 1/2~2/3, 추가 결제 0), 대량 배치는 야간·주말 분산" cash="월 10~25만원 시작(발송 1~3 + DB 0~3 + 벤더 5~15 + 도메인), 유료 세관 API 추가 시 월 30~45만원. 8주 총 현금 30~80만원"/>
+    <pitfall>회사명 정제가 최대 난관(표기 변형 통합, 포워더 consignee 필터) — No.2의 LLM 배치+검수 큐 파이프라인으로 해결(기존 스펙 재사용)</pitfall>
+  </section>
+
+  <!-- ================================================== -->
+  <section id="decision_gates" title="미결 게이트 (Jay 결정 대기)">
+    <gate id="G1" question="매칭 성사비 형태" options="①1회 정액 ②1회 정률 ③기간부 정률(포워더 제휴 전제) ④하이브리드: 1회 정액+셰퍼딩 별매" claude_recommendation="④" blocks="Founding Member 계약서, 2부 No.7 성사 선택지, PRD 수익 모델 섹션"/>
+    <gate id="G2" question="데이터 스택 역전 최종 채택" options="채택 / 유보" claude_recommendation="채택" blocks="XML 스펙 v1.1, D1 정정 노트, PRD 데이터 아키텍처 섹션"/>
+    <deadline>D1 킥오프(다음 주) 전 확정 필수 — PRD가 수익 모델과 데이터 구조를 고정하는 문서이기 때문</deadline>
+  </section>
+
+  <!-- ================================================== -->
+  <section id="immediate_actions" title="즉시 액션 큐">
+    <action priority="1">게이트 G1·G2 확정 (Jay)</action>
+    <action priority="2">D1 킥오프 패키지 4종 제작 (Claude, 게이트 확정 후 착수)</action>
+    <action priority="3">Phase 0 1주차 작업 지시서 → docs/specs/ (Claude Code 실행용)</action>
+    <action priority="4">용어표 독립 파일 커밋 (docs/strategy/terminology.md 또는 .xml)</action>
+    <action priority="5">생존전략 v1.1 리라이트 (F1~F10 반영)</action>
+    <action priority="6">전용 발송 도메인 구매 + 워밍업 개시 (캘린더 리드타임 확보)</action>
+  </section>
+
+</nexport_session_handoff>
